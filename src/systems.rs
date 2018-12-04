@@ -3,6 +3,8 @@ use amethyst::{
     core::Transform,
     ecs::prelude::*,
     input::InputHandler,
+    renderer::{SpriteRender, SpriteSheetHandle},
+    shrev::{EventChannel, ReaderId},
 };
 
 use components::*;
@@ -11,25 +13,110 @@ pub struct PlayerSystem;
 impl<'s> System<'s> for PlayerSystem {
     type SystemData = (
         Read<'s, InputHandler<String, String>>,
-        ReadStorage<'s, Player>,
-        WriteStorage<'s, Rigidbody>,
+        Write<'s, EventChannel<GenEvent>>,
+        (
+            WriteStorage<'s, Player>,
+            ReadStorage<'s, Transform>,
+            WriteStorage<'s, Rigidbody>,
+        ),
     );
 
-    fn run(&mut self, (input, players, mut rigidbodies): Self::SystemData) {
-        for (player, rigidbody) in (&players, &mut rigidbodies).join() {
-            let input_x = input.axis_value("move_x").unwrap_or(0.0) as f32;
-            let input_y = input.axis_value("move_y").unwrap_or(0.0) as f32;
-            rigidbody.acceleration = Vector2::new(input_x, input_y) * player.speed;
+    fn run(&mut self, (input, mut gen_event, storages): Self::SystemData) {
+        let (mut players, transforms, mut rigidbodies) = storages;
+        for (player, transform, rigidbody) in (&mut players, &transforms, &mut rigidbodies).join() {
+            let move_x = input.axis_value("move_x").unwrap_or(0.0) as f32;
+            let move_y = input.axis_value("move_y").unwrap_or(0.0) as f32;
+            rigidbody.acceleration = Vector2::new(move_x, move_y) * player.speed;
+            let aim_x = input.axis_value("aim_x").unwrap_or(0.0) as f32;
+            let aim_y = input.axis_value("aim_y").unwrap_or(0.0) as f32;
+            let shot = input.action_is_down("shot").unwrap();
+            if player.trigger_timer > 0 {
+                player.trigger_timer -= 1;
+            }
+            if shot && player.trigger_timer == 0 {
+                gen_event.single_write(GenEvent::Bullet {
+                    pos: transform.translation.truncate(),
+                    vel: Vector2::new(aim_x, aim_y) * 4.0,
+                });
+                player.trigger_timer = 10;
+            }
+        }
+    }
+}
+
+pub enum GenEvent {
+    Bullet {
+        pos: Vector2<f32>,
+        vel: Vector2<f32>,
+    },
+}
+pub struct GeneratorSystem {
+    reader: Option<ReaderId<GenEvent>>,
+}
+impl GeneratorSystem {
+    pub fn new() -> GeneratorSystem {
+        GeneratorSystem { reader: None }
+    }
+}
+impl<'s> System<'s> for GeneratorSystem {
+    type SystemData = (
+        Read<'s, EventChannel<GenEvent>>,
+        Option<Read<'s, SpriteSheetHandle>>,
+        Entities<'s>,
+        (
+            WriteStorage<'s, Transform>,
+            WriteStorage<'s, Rigidbody>,
+            WriteStorage<'s, RectCollider<Bullet>>,
+            WriteStorage<'s, SpriteRender>,
+        ),
+    );
+
+    fn setup(&mut self, res: &mut Resources) {
+        Self::SystemData::setup(res);
+        self.reader = Some(res.fetch_mut::<EventChannel<GenEvent>>().register_reader());
+    }
+
+    fn run(&mut self, (gen_event, sheet, entities, storages): Self::SystemData) {
+        let sheet = sheet.unwrap();
+        let (mut transforms, mut rigidbodies, mut colliders, mut render) = storages;
+        for event in gen_event.read(self.reader.as_mut().unwrap()) {
+            match event {
+                GenEvent::Bullet { pos, vel } => {
+                    entities
+                        .build_entity()
+                        .with(RectCollider::new(4.0, 4.0), &mut colliders)
+                        .with(
+                            Transform {
+                                translation: pos.extend(0.0),
+                                ..Default::default()
+                            },
+                            &mut transforms,
+                        ).with(
+                            Rigidbody {
+                                velocity: *vel,
+                                drag: 0.0,
+                                bounciness: 1.0,
+                                ..Default::default()
+                            },
+                            &mut rigidbodies,
+                        ).with(
+                            SpriteRender {
+                                sprite_sheet: sheet.clone(),
+                                sprite_number: 5,
+                                flip_horizontal: false,
+                                flip_vertical: false,
+                            },
+                            &mut render,
+                        ).build();
+                }
+            }
         }
     }
 }
 
 pub struct RigidbodySystem;
 impl<'s> System<'s> for RigidbodySystem {
-    type SystemData = (
-        WriteStorage<'s, Transform>,
-        WriteStorage<'s, Rigidbody>,
-    );
+    type SystemData = (WriteStorage<'s, Transform>, WriteStorage<'s, Rigidbody>);
 
     fn run(&mut self, (mut transforms, mut rigidbodies): Self::SystemData) {
         for (transform, rigidbody) in (&mut transforms, &mut rigidbodies).join() {
@@ -114,7 +201,9 @@ where
             if let Some(rigidbody) = rigidbodies.get_mut(entity) {
                 if !a.collision.is_zero() {
                     let normal = a.collision.normalize();
-                    rigidbody.velocity -= rigidbody.velocity.dot(normal) * normal;
+                    let bounciness = rigidbody.bounciness;
+                    rigidbody.velocity -=
+                        rigidbody.velocity.dot(normal) * normal * (1.0 + bounciness);
                     transform.translation += a.collision.extend(0.0);
                 }
             }
@@ -123,7 +212,9 @@ where
             if let Some(rigidbody) = rigidbodies.get_mut(entity) {
                 if !b.collision.is_zero() {
                     let normal = b.collision.normalize();
-                    rigidbody.velocity -= rigidbody.velocity.dot(normal) * normal;
+                    let bounciness = rigidbody.bounciness;
+                    rigidbody.velocity -=
+                        rigidbody.velocity.dot(normal) * normal * (1.0 + bounciness);
                     transform.translation += b.collision.extend(0.0);
                 }
             }

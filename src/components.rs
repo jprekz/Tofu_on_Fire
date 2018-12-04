@@ -6,16 +6,21 @@ use amethyst::{
 #[derive(Component, Debug)]
 pub struct Player {
     pub speed: f32,
+    pub trigger_timer: u32,
 }
 
 #[derive(Component, Debug)]
 pub struct Wall;
 
 #[derive(Component, Debug)]
+pub struct Bullet;
+
+#[derive(Component, Debug)]
 pub struct Rigidbody {
     pub velocity: Vector2<f32>,
     pub acceleration: Vector2<f32>,
     pub drag: f32,
+    pub bounciness: f32,
 }
 impl Default for Rigidbody {
     fn default() -> Rigidbody {
@@ -23,6 +28,7 @@ impl Default for Rigidbody {
             velocity: Vector2::zero(),
             acceleration: Vector2::zero(),
             drag: 0.0,
+            bounciness: 0.0,
         }
     }
 }

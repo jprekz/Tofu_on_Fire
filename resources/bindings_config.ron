@@ -2,6 +2,10 @@
   axes: {
     "move_x": Emulated(pos: Key(D), neg: Key(A)),
     "move_y": Emulated(pos: Key(S), neg: Key(W)),
+    "aim_x": Emulated(pos: Key(Right), neg: Key(Left)),
+    "aim_y": Emulated(pos: Key(Down), neg: Key(Up)),
   },
-  actions: {},
+  actions: {
+    "shot": [Key(Space)],
+  },
 )

@@ -27,13 +27,16 @@ impl<'a, 'b> SimpleState<'a, 'b> for Game {
             Trans::None
         }
     }
+
     fn on_start(&mut self, data: StateData<GameData>) {
         let world = data.world;
         let sprite_sheet_handle = load_sprite_sheet(world);
 
         initialise_camera(world);
         initialise_player(world, sprite_sheet_handle.clone());
-        initialise_map(world, sprite_sheet_handle);
+        initialise_map(world, sprite_sheet_handle.clone());
+
+        world.add_resource(sprite_sheet_handle);
     }
 }
 
@@ -100,8 +103,10 @@ fn initialise_player(world: &mut World, sprite_sheet: SpriteSheetHandle) {
     world
         .create_entity()
         .with(sprite_render)
-        .with(Player { speed: 2.0 })
-        .with(RectCollider::<Player>::new(16.0, 16.0))
+        .with(Player {
+            speed: 2.0,
+            trigger_timer: 0,
+        }).with(RectCollider::<Player>::new(16.0, 16.0))
         .with(transform)
         .with(Rigidbody {
             drag: 0.5,

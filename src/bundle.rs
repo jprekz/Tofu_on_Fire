@@ -3,8 +3,8 @@ use amethyst::{
     ecs::prelude::DispatcherBuilder,
 };
 
-use systems::*;
 use components::*;
+use systems::*;
 
 #[derive(Default)]
 pub struct GameBundle;
@@ -12,10 +12,23 @@ pub struct GameBundle;
 impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
     fn build(self, builder: &mut DispatcherBuilder<'a, 'b>) -> Result<()> {
         builder.add(PlayerSystem, "player_system", &["input_system"]);
+        builder.add(
+            GeneratorSystem::new(),
+            "generator_system",
+            &["player_system"],
+        );
         builder.add_barrier();
         builder.add(RigidbodySystem, "rigidbody_system", &[]);
-        builder.add_barrier();
-        builder.add(CollisionSystem::<Player, Wall>::new(), "collision_system", &[]);
+        builder.add(
+            CollisionSystem::<Player, Wall>::new(),
+            "pw_collision_system",
+            &["rigidbody_system"],
+        );
+        builder.add(
+            CollisionSystem::<Bullet, Wall>::new(),
+            "bw_collision_system",
+            &["rigidbody_system"],
+        );
         Ok(())
     }
 }
