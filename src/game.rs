@@ -2,11 +2,13 @@ use amethyst::{
     assets::{AssetStorage, Loader},
     core::cgmath::*,
     core::transform::Transform,
+    input::is_key_down,
     prelude::*,
     renderer::{
         MaterialTextureSet, PngFormat, SpriteRender, SpriteSheet, SpriteSheetFormat,
         SpriteSheetHandle, Texture, TextureMetadata,
     },
+    winit::VirtualKeyCode,
 };
 use components::*;
 use config::*;
@@ -14,6 +16,17 @@ use config::*;
 pub struct Game;
 
 impl<'a, 'b> SimpleState<'a, 'b> for Game {
+    fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans<'a, 'b> {
+        if let StateEvent::Window(event) = event {
+            if is_key_down(&event, VirtualKeyCode::Escape) {
+                Trans::Quit
+            } else {
+                Trans::None
+            }
+        } else {
+            Trans::None
+        }
+    }
     fn on_start(&mut self, data: StateData<GameData>) {
         let world = data.world;
         let sprite_sheet_handle = load_sprite_sheet(world);
@@ -90,8 +103,10 @@ fn initialise_player(world: &mut World, sprite_sheet: SpriteSheetHandle) {
         .with(Player { speed: 2.0 })
         .with(RectCollider::<Player>::new(16.0, 16.0))
         .with(transform)
-        .with(Rigidbody { drag: 0.5, ..Default::default() })
-        .build();
+        .with(Rigidbody {
+            drag: 0.5,
+            ..Default::default()
+        }).build();
 }
 
 fn initialise_map(world: &mut World, sprite_sheet: SpriteSheetHandle) {
