@@ -7,7 +7,7 @@ use amethyst::{
     shrev::{EventChannel, ReaderId},
 };
 
-use components::*;
+use crate::components::*;
 
 pub struct PlayerSystem;
 impl<'s> System<'s> for PlayerSystem {
@@ -91,7 +91,8 @@ impl<'s> System<'s> for GeneratorSystem {
                                 ..Default::default()
                             },
                             &mut transforms,
-                        ).with(
+                        )
+                        .with(
                             Rigidbody {
                                 velocity: *vel,
                                 drag: 0.0,
@@ -99,7 +100,8 @@ impl<'s> System<'s> for GeneratorSystem {
                                 ..Default::default()
                             },
                             &mut rigidbodies,
-                        ).with(
+                        )
+                        .with(
                             SpriteRender {
                                 sprite_sheet: sheet.clone(),
                                 sprite_number: 5,
@@ -107,7 +109,8 @@ impl<'s> System<'s> for GeneratorSystem {
                                 flip_vertical: false,
                             },
                             &mut render,
-                        ).build();
+                        )
+                        .build();
                 }
             }
         }

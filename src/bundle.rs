@@ -3,8 +3,8 @@ use amethyst::{
     ecs::prelude::DispatcherBuilder,
 };
 
-use components::*;
-use systems::*;
+use crate::components::*;
+use crate::systems::*;
 
 #[derive(Default)]
 pub struct GameBundle;

@@ -1,7 +1,5 @@
-extern crate amethyst;
 #[macro_use]
 extern crate specs_derive;
-extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 

@@ -2,6 +2,7 @@
 name = "rust_sqwar"
 version = "0.1.0"
 authors = ["rekz"]
+edition = "2018"
 
 [dependencies]
 amethyst = "0.9.0"

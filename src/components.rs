@@ -1,7 +1,4 @@
-use amethyst::{
-    core::cgmath::*,
-    ecs::prelude::*,
-};
+use amethyst::{core::cgmath::*, ecs::prelude::*};
 
 #[derive(Component, Debug)]
 pub struct Player {

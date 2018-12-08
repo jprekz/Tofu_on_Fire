@@ -10,13 +10,18 @@ use amethyst::{
     },
     winit::VirtualKeyCode,
 };
-use components::*;
-use config::*;
+
+use crate::components::*;
+use crate::config::*;
 
 pub struct Game;
 
 impl<'a, 'b> SimpleState<'a, 'b> for Game {
-    fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans<'a, 'b> {
+    fn handle_event(
+        &mut self,
+        _: StateData<'_, GameData<'_, '_>>,
+        event: StateEvent,
+    ) -> SimpleTrans<'a, 'b> {
         if let StateEvent::Window(event) = event {
             if is_key_down(&event, VirtualKeyCode::Escape) {
                 Trans::Quit
@@ -28,7 +33,7 @@ impl<'a, 'b> SimpleState<'a, 'b> for Game {
         }
     }
 
-    fn on_start(&mut self, data: StateData<GameData>) {
+    fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         let sprite_sheet_handle = load_sprite_sheet(world);
 
@@ -78,7 +83,8 @@ fn initialise_camera(world: &mut World) {
         .create_entity()
         .with(Camera::from(Projection::orthographic(
             0.0, 640.0, 0.0, 480.0,
-        ))).with(transform)
+        )))
+        .with(transform)
         .build();
 }
 
@@ -106,12 +112,14 @@ fn initialise_player(world: &mut World, sprite_sheet: SpriteSheetHandle) {
         .with(Player {
             speed: 2.0,
             trigger_timer: 0,
-        }).with(RectCollider::<Player>::new(16.0, 16.0))
+        })
+        .with(RectCollider::<Player>::new(16.0, 16.0))
         .with(transform)
         .with(Rigidbody {
             drag: 0.5,
             ..Default::default()
-        }).build();
+        })
+        .build();
 }
 
 fn initialise_map(world: &mut World, sprite_sheet: SpriteSheetHandle) {
