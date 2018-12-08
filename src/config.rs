@@ -1,3 +1,5 @@
+use serde_derive::{Deserialize, Serialize};
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct MapConfig {
     pub size: (u32, u32),

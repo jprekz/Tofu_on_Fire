@@ -1,8 +1,3 @@
-#[macro_use]
-extern crate specs_derive;
-#[macro_use]
-extern crate serde_derive;
-
 use amethyst::{
     core::transform::TransformBundle,
     input::InputBundle,
