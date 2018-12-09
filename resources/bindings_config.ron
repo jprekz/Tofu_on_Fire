@@ -6,6 +6,6 @@
     "aim_y": Emulated(pos: Key(Down), neg: Key(Up)),
   },
   actions: {
-    "shot": [Key(Space)],
+    "shot": [[Key(Space)]],
   },
 )

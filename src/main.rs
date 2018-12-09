@@ -2,7 +2,7 @@ use amethyst::{
     core::transform::TransformBundle,
     input::InputBundle,
     prelude::*,
-    renderer::{ColorMask, DisplayConfig, DrawSprite, Pipeline, RenderBundle, Stage, ALPHA},
+    renderer::{ColorMask, DisplayConfig, DrawFlat2D, Pipeline, RenderBundle, Stage, ALPHA},
     utils::application_root_dir,
 };
 
@@ -23,7 +23,7 @@ fn main() -> amethyst::Result<()> {
         let pipe = Pipeline::build().with_stage(
             Stage::with_backbuffer()
                 .clear_target([0.00196, 0.23726, 0.21765, 1.0], 1.0)
-                .with_pass(DrawSprite::new().with_transparency(ColorMask::all(), ALPHA, None)),
+                .with_pass(DrawFlat2D::new().with_transparency(ColorMask::all(), ALPHA, None)),
         );
         RenderBundle::new(pipe, Some(config)).with_sprite_sheet_processor()
     };

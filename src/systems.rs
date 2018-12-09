@@ -1,5 +1,5 @@
 use amethyst::{
-    core::cgmath::*,
+    core::nalgebra::*,
     core::Transform,
     ecs::prelude::*,
     input::InputHandler,
@@ -35,7 +35,7 @@ impl<'s> System<'s> for PlayerSystem {
             }
             if shot && player.trigger_timer == 0 {
                 gen_event.single_write(GenEvent::Bullet {
-                    pos: transform.translation.truncate(),
+                    pos: transform.translation().xy().into(),
                     vel: Vector2::new(aim_x, aim_y) * 4.0,
                 });
                 player.trigger_timer = 10;
@@ -82,16 +82,13 @@ impl<'s> System<'s> for GeneratorSystem {
         for event in gen_event.read(self.reader.as_mut().unwrap()) {
             match event {
                 GenEvent::Bullet { pos, vel } => {
+                    let mut transform = Transform::default();
+                    transform.set_position(pos.to_homogeneous());
+
                     entities
                         .build_entity()
                         .with(RectCollider::new(4.0, 4.0), &mut colliders)
-                        .with(
-                            Transform {
-                                translation: pos.extend(0.0),
-                                ..Default::default()
-                            },
-                            &mut transforms,
-                        )
+                        .with(transform, &mut transforms)
                         .with(
                             Rigidbody {
                                 velocity: *vel,
@@ -105,8 +102,6 @@ impl<'s> System<'s> for GeneratorSystem {
                             SpriteRender {
                                 sprite_sheet: sheet.clone(),
                                 sprite_number: 5,
-                                flip_horizontal: false,
-                                flip_vertical: false,
                             },
                             &mut render,
                         )
@@ -124,7 +119,7 @@ impl<'s> System<'s> for RigidbodySystem {
     fn run(&mut self, (mut transforms, mut rigidbodies): Self::SystemData) {
         for (transform, rigidbody) in (&mut transforms, &mut rigidbodies).join() {
             rigidbody.velocity += rigidbody.acceleration;
-            transform.translation += rigidbody.velocity.extend(0.0);
+            transform.move_global(rigidbody.velocity.to_homogeneous());
             rigidbody.velocity -= rigidbody.velocity * rigidbody.drag;
         }
     }
@@ -166,17 +161,17 @@ where
 
     fn run(&mut self, (entities, mut a, mut b, mut transforms, mut rigidbodies): Self::SystemData) {
         for a in (&mut a).join() {
-            a.collision = Vector2::<f32>::zero();
+            a.collision = Vector2::zeros();
         }
         for b in (&mut b).join() {
-            b.collision = Vector2::<f32>::zero();
+            b.collision = Vector2::zeros();
         }
         for (a, a_transform) in (&mut a, &transforms).join() {
             let a_size = Vector2::new(a.width, a.height);
-            let a_pos = a_transform.translation.truncate();
+            let a_pos: Vector2<f32> = a_transform.translation().xy().into();
             for (b, b_transform) in (&mut b, &transforms).join() {
                 let b_size = Vector2::new(b.width, b.height);
-                let b_pos = b_transform.translation.truncate();
+                let b_pos: Vector2<f32> = b_transform.translation().xy().into();
                 let sub = b_pos - a_pos;
                 let sinking = (a_size / 2.0 + b_size / 2.0) - sub.map(f32::abs);
                 if sinking.x > 0.0 && sinking.y > 0.0 {
@@ -202,23 +197,23 @@ where
         }
         for (entity, a, transform) in (&entities, &mut a, &mut transforms).join() {
             if let Some(rigidbody) = rigidbodies.get_mut(entity) {
-                if !a.collision.is_zero() {
+                if a.collision != Vector2::zeros() {
                     let normal = a.collision.normalize();
                     let bounciness = rigidbody.bounciness;
                     rigidbody.velocity -=
-                        rigidbody.velocity.dot(normal) * normal * (1.0 + bounciness);
-                    transform.translation += a.collision.extend(0.0);
+                        rigidbody.velocity.dot(&normal) * normal * (1.0 + bounciness);
+                    transform.move_global(a.collision.to_homogeneous());
                 }
             }
         }
         for (entity, b, transform) in (&entities, &mut b, &mut transforms).join() {
             if let Some(rigidbody) = rigidbodies.get_mut(entity) {
-                if !b.collision.is_zero() {
+                if b.collision != Vector2::zeros() {
                     let normal = b.collision.normalize();
                     let bounciness = rigidbody.bounciness;
                     rigidbody.velocity -=
-                        rigidbody.velocity.dot(normal) * normal * (1.0 + bounciness);
-                    transform.translation += b.collision.extend(0.0);
+                        rigidbody.velocity.dot(&normal) * normal * (1.0 + bounciness);
+                    transform.move_global(b.collision.to_homogeneous());
                 }
             }
         }

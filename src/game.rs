@@ -1,12 +1,12 @@
 use amethyst::{
     assets::{AssetStorage, Loader},
-    core::cgmath::*,
+    core::nalgebra::*,
     core::transform::Transform,
     input::is_key_down,
     prelude::*,
     renderer::{
-        MaterialTextureSet, PngFormat, SpriteRender, SpriteSheet, SpriteSheetFormat,
-        SpriteSheetHandle, Texture, TextureMetadata,
+        PngFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle, Texture,
+        TextureMetadata,
     },
     winit::VirtualKeyCode,
 };
@@ -16,12 +16,12 @@ use crate::config::*;
 
 pub struct Game;
 
-impl<'a, 'b> SimpleState<'a, 'b> for Game {
+impl SimpleState for Game {
     fn handle_event(
         &mut self,
         _: StateData<'_, GameData<'_, '_>>,
         event: StateEvent,
-    ) -> SimpleTrans<'a, 'b> {
+    ) -> SimpleTrans {
         if let StateEvent::Window(event) = event {
             if is_key_down(&event, VirtualKeyCode::Escape) {
                 Trans::Quit
@@ -57,15 +57,12 @@ fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
             &texture_storage,
         )
     };
-    let texture_id = 0;
-    let mut material_texture_set = world.write_resource::<MaterialTextureSet>();
-    material_texture_set.insert(texture_id, texture_handle);
     let loader = world.read_resource::<Loader>();
     let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
     loader.load(
         "texture/spritesheet.ron",
         SpriteSheetFormat,
-        texture_id,
+        texture_handle,
         (),
         &sprite_sheet_store,
     )
@@ -74,15 +71,13 @@ fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
 fn initialise_camera(world: &mut World) {
     use amethyst::renderer::{Camera, Projection};
 
-    let transform = Transform {
-        translation: Vector3::new(0.0, 0.0, 1.0),
-        ..Default::default()
-    };
+    let mut transform = Transform::default();
+    transform.set_position(Vector3::new(0.0, 0.0, 1.0));
 
     world
         .create_entity()
         .with(Camera::from(Projection::orthographic(
-            0.0, 640.0, 0.0, 480.0,
+            0.0, 640.0, 480.0, 0.0, // Y axis reversed
         )))
         .with(transform)
         .build();
@@ -94,16 +89,12 @@ fn initialise_player(world: &mut World, sprite_sheet: SpriteSheetHandle) {
         config.spawn1
     };
 
-    let transform = Transform {
-        translation: Vector3::new(spawn1.0, spawn1.1, 0.0),
-        ..Default::default()
-    };
+    let mut transform = Transform::default();
+    transform.set_position(Vector3::new(spawn1.0, spawn1.1, 0.0));
 
     let sprite_render = SpriteRender {
         sprite_sheet: sprite_sheet.clone(),
         sprite_number: 0,
-        flip_horizontal: false,
-        flip_vertical: false,
     };
 
     world
@@ -129,17 +120,13 @@ fn initialise_map(world: &mut World, sprite_sheet: SpriteSheetHandle) {
     };
 
     let mut new_wall = |width: f32, height: f32, x: f32, y: f32| {
-        let transform = Transform {
-            translation: Vector3::new(x, y, 0.0),
-            scale: Vector3::new(width / 32.0, height / 32.0, 1.0),
-            ..Default::default()
-        };
+        let mut transform = Transform::default();
+        transform.set_position(Vector3::new(x, y, 0.0));
+        transform.set_scale(width / 32.0, height / 32.0, 1.0);
 
         let sprite_render = SpriteRender {
             sprite_sheet: sprite_sheet.clone(),
             sprite_number: 2,
-            flip_horizontal: false,
-            flip_vertical: false,
         };
 
         world

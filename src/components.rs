@@ -1,4 +1,4 @@
-use amethyst::{core::cgmath::*, ecs::prelude::*};
+use amethyst::{core::nalgebra::*, ecs::prelude::*};
 use specs_derive::Component;
 
 #[derive(Component, Debug)]
@@ -23,8 +23,8 @@ pub struct Rigidbody {
 impl Default for Rigidbody {
     fn default() -> Rigidbody {
         Rigidbody {
-            velocity: Vector2::zero(),
-            acceleration: Vector2::zero(),
+            velocity: Vector2::zeros(),
+            acceleration: Vector2::zeros(),
             drag: 0.0,
             bounciness: 0.0,
         }
@@ -50,7 +50,7 @@ where
         RectCollider {
             width: width,
             height: height,
-            collision: Vector2::<f32>::zero(),
+            collision: Vector2::zeros(),
             phantom: PhantomData,
         }
     }
