@@ -4,8 +4,12 @@
     "move_y": Emulated(pos: Key(S), neg: Key(W)),
     "aim_x": Emulated(pos: Key(Right), neg: Key(Left)),
     "aim_y": Emulated(pos: Key(Down), neg: Key(Up)),
+    "left_x": Controller(controller_id: 0, axis: LeftX, invert: false, dead_zone: 0.0),
+    "left_y": Controller(controller_id: 0, axis: LeftY, invert: false, dead_zone: 0.0),
+    "right_x": Controller(controller_id: 0, axis: RightX, invert: false, dead_zone: 0.0),
+    "right_y": Controller(controller_id: 0, axis: RightY, invert: false, dead_zone: 0.0),
   },
   actions: {
-    "shot": [[Key(Space)]],
+    "shot": [[Key(Space)], [Controller(0, RightShoulder)]],
   },
 )

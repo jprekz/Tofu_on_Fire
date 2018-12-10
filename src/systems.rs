@@ -24,11 +24,23 @@ impl<'s> System<'s> for PlayerSystem {
     fn run(&mut self, (input, mut gen_event, storages): Self::SystemData) {
         let (mut players, transforms, mut rigidbodies) = storages;
         for (player, transform, rigidbody) in (&mut players, &transforms, &mut rigidbodies).join() {
-            let move_x = input.axis_value("move_x").unwrap_or(0.0) as f32;
-            let move_y = input.axis_value("move_y").unwrap_or(0.0) as f32;
+            let mut move_x = input.axis_value("move_x").unwrap_or(0.0) as f32;
+            let mut move_y = input.axis_value("move_y").unwrap_or(0.0) as f32;
+            move_x += input.axis_value("left_x").unwrap_or(0.0) as f32;
+            move_y += input.axis_value("left_y").unwrap_or(0.0) as f32;
+            let move_hyp = move_x.hypot(move_y).min(1.0);
+            let move_rad = move_y.atan2(move_x);
+            let move_x = move_rad.cos() * move_hyp;
+            let move_y = move_rad.sin() * move_hyp;
             rigidbody.acceleration = Vector2::new(move_x, move_y) * player.speed;
-            let aim_x = input.axis_value("aim_x").unwrap_or(0.0) as f32;
-            let aim_y = input.axis_value("aim_y").unwrap_or(0.0) as f32;
+            let mut aim_x = input.axis_value("aim_x").unwrap_or(0.0) as f32;
+            let mut aim_y = input.axis_value("aim_y").unwrap_or(0.0) as f32;
+            aim_x += input.axis_value("right_x").unwrap_or(0.0) as f32;
+            aim_y += input.axis_value("right_y").unwrap_or(0.0) as f32;
+            let aim_hyp = aim_x.hypot(aim_y).min(1.0);
+            let aim_rad = aim_y.atan2(aim_x);
+            let aim_x = aim_rad.cos() * aim_hyp;
+            let aim_y = aim_rad.sin() * aim_hyp;
             let shot = input.action_is_down("shot").unwrap();
             if player.trigger_timer > 0 {
                 player.trigger_timer -= 1;
