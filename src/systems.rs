@@ -37,7 +37,7 @@ impl<'s> System<'s> for PlayerSystem {
             let mut aim_y = input.axis_value("aim_y").unwrap_or(0.0) as f32;
             aim_x += input.axis_value("right_x").unwrap_or(0.0) as f32;
             aim_y += input.axis_value("right_y").unwrap_or(0.0) as f32;
-            let aim_hyp = aim_x.hypot(aim_y).min(1.0);
+            let aim_hyp = aim_x.hypot(aim_y).min(1.0).max(0.1);
             let aim_rad = aim_y.atan2(aim_x);
             let aim_x = aim_rad.cos() * aim_hyp;
             let aim_y = aim_rad.sin() * aim_hyp;
@@ -80,6 +80,7 @@ impl<'s> System<'s> for GeneratorSystem {
             WriteStorage<'s, Rigidbody>,
             WriteStorage<'s, RectCollider<Bullet>>,
             WriteStorage<'s, SpriteRender>,
+            WriteStorage<'s, Bullet>,
         ),
     );
 
@@ -90,7 +91,7 @@ impl<'s> System<'s> for GeneratorSystem {
 
     fn run(&mut self, (gen_event, sheet, entities, storages): Self::SystemData) {
         let sheet = sheet.unwrap();
-        let (mut transforms, mut rigidbodies, mut colliders, mut render) = storages;
+        let (mut transforms, mut rigidbodies, mut colliders, mut render, mut bullets) = storages;
         for event in gen_event.read(self.reader.as_mut().unwrap()) {
             match event {
                 GenEvent::Bullet { pos, vel } => {
@@ -100,12 +101,13 @@ impl<'s> System<'s> for GeneratorSystem {
                     entities
                         .build_entity()
                         .with(RectCollider::new(4.0, 4.0), &mut colliders)
+                        .with(Bullet::new(120, 3), &mut bullets)
                         .with(transform, &mut transforms)
                         .with(
                             Rigidbody {
                                 velocity: *vel,
-                                drag: 0.0,
-                                bounciness: 1.0,
+                                drag: 0.005,
+                                bounciness: 0.8,
                                 ..Default::default()
                             },
                             &mut rigidbodies,
@@ -118,6 +120,32 @@ impl<'s> System<'s> for GeneratorSystem {
                             &mut render,
                         )
                         .build();
+                }
+            }
+        }
+    }
+}
+
+pub struct BulletSystem;
+impl<'s> System<'s> for BulletSystem {
+    type SystemData = (
+        Entities<'s>,
+        WriteStorage<'s, Bullet>,
+        ReadStorage<'s, RectCollider<Bullet>>,
+    );
+
+     fn run(&mut self, (entities, mut bullets, colliders): Self::SystemData) {
+        for (entity, bullet, collider) in (&entities, &mut bullets, &colliders).join() {
+            if bullet.timer_limit != 0 {
+                bullet.timer_count += 1;
+                if bullet.timer_count > bullet.timer_limit {
+                    entities.delete(entity).unwrap();
+                }
+            }
+            if collider.collision != Vector2::new(0.0, 0.0) {
+                bullet.reflect_count += 1;
+                if bullet.reflect_count > bullet.reflect_limit {
+                    entities.delete(entity).unwrap();
                 }
             }
         }

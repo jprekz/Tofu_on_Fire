@@ -12,6 +12,7 @@ pub struct GameBundle;
 impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
     fn build(self, builder: &mut DispatcherBuilder<'a, 'b>) -> Result<()> {
         builder.add(PlayerSystem, "player_system", &["input_system"]);
+        builder.add(BulletSystem, "bullet_system", &[]);
         builder.add(
             GeneratorSystem::new(),
             "generator_system",

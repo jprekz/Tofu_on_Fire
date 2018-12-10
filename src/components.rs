@@ -11,7 +11,22 @@ pub struct Player {
 pub struct Wall;
 
 #[derive(Component, Debug)]
-pub struct Bullet;
+pub struct Bullet {
+    pub timer_limit: u32,
+    pub timer_count: u32,
+    pub reflect_limit: u32,
+    pub reflect_count: u32,
+}
+impl Bullet {
+    pub fn new(timer_limit: u32, reflect_limit: u32) -> Bullet {
+        Bullet {
+            timer_limit,
+            timer_count: 0,
+            reflect_limit,
+            reflect_count: 0,
+        }
+    }
+}
 
 #[derive(Component, Debug)]
 pub struct Rigidbody {
