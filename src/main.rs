@@ -40,8 +40,8 @@ fn main() -> amethyst::Result<()> {
 
     let game_data = GameDataBuilder::default()
         .with_bundle(render_bundle)?
-        .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
+        .with_bundle(TransformBundle::new())?
         .with_bundle(bundle::GameBundle::default())?;
 
     let mut game = Application::build("./", game::Game)?
