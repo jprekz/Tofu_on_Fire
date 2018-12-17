@@ -38,6 +38,7 @@ impl Bullet {
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
+#[serde(default)]
 pub struct Rigidbody {
     pub velocity: Vector2<f32>,
     pub acceleration: Vector2<f32>,
