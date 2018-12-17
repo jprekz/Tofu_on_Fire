@@ -25,12 +25,12 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
         builder.add_barrier();
         builder.add(RigidbodySystem, "rigidbody_system", &[]);
         builder.add(
-            CollisionSystem::<Player, Wall>::new(),
+            CollisionSystem::<Player, Wall>::default(),
             "pw_collision_system",
             &["rigidbody_system"],
         );
         builder.add(
-            CollisionSystem::<Bullet, Wall>::new(),
+            CollisionSystem::<Bullet, Wall>::default(),
             "bw_collision_system",
             &["rigidbody_system"],
         );

@@ -170,8 +170,8 @@ pub struct CollisionSystem<A, B> {
     a: PhantomData<A>,
     b: PhantomData<B>,
 }
-impl<A, B> CollisionSystem<A, B> {
-    pub fn new() -> CollisionSystem<A, B> {
+impl<A, B> Default for CollisionSystem<A, B> {
+    fn default() -> CollisionSystem<A, B> {
         CollisionSystem {
             a: PhantomData,
             b: PhantomData,
