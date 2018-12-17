@@ -166,19 +166,11 @@ impl<'s> System<'s> for RigidbodySystem {
 }
 
 use std::marker::PhantomData;
-pub struct CollisionSystem<A, B>
-where
-    A: Clone + Send + Sync + 'static,
-    B: Clone + Send + Sync + 'static,
-{
+pub struct CollisionSystem<A, B> {
     a: PhantomData<A>,
     b: PhantomData<B>,
 }
-impl<A, B> CollisionSystem<A, B>
-where
-    A: Clone + Send + Sync + 'static,
-    B: Clone + Send + Sync + 'static,
-{
+impl<A, B> CollisionSystem<A, B> {
     pub fn new() -> CollisionSystem<A, B> {
         CollisionSystem {
             a: PhantomData,
