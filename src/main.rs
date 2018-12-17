@@ -8,7 +8,7 @@ use amethyst::{
 
 mod bundle;
 mod components;
-mod config;
+mod prefab;
 mod game;
 mod systems;
 
@@ -33,20 +33,13 @@ fn main() -> amethyst::Result<()> {
         InputBundle::<String, String>::new().with_bindings_from_file(path)?
     };
 
-    let map_config = {
-        let path = format!("{}/resources/map1.ron", app_root);
-        config::MapConfig::load(path)
-    };
-
     let game_data = GameDataBuilder::default()
         .with_bundle(render_bundle)?
         .with_bundle(input_bundle)?
         .with_bundle(TransformBundle::new())?
         .with_bundle(bundle::GameBundle::default())?;
 
-    let mut game = Application::build("./", game::Game)?
-        .with_resource(map_config)
-        .build(game_data)?;
+    let mut game = Application::new("./", game::Game, game_data)?;
 
     game.run();
 

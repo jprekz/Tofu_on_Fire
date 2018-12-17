@@ -1,0 +1,21 @@
+#![enable(implicit_some)]
+Prefab (
+    entities: [
+        (
+            data: (
+                transform: (
+                    translation: (36.0, 36.0, 0.0),
+                ),
+                rigidbody: (
+                    velocity: [0.0, 0.0],
+                    acceleration: [0.0, 0.0],
+                    drag: 0.5,
+                    bounciness: 0.0,
+                ),
+                sprite: (sprite_number: 0),
+                player: (speed: 2.0),
+                collider_player: (width: 16.0, height: 16.0),
+            ),
+        ),
+    ],
+)

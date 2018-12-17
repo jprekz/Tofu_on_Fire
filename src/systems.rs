@@ -168,16 +168,16 @@ impl<'s> System<'s> for RigidbodySystem {
 use std::marker::PhantomData;
 pub struct CollisionSystem<A, B>
 where
-    A: Send + Sync + 'static,
-    B: Send + Sync + 'static,
+    A: Clone + Send + Sync + 'static,
+    B: Clone + Send + Sync + 'static,
 {
     a: PhantomData<A>,
     b: PhantomData<B>,
 }
 impl<A, B> CollisionSystem<A, B>
 where
-    A: Send + Sync + 'static,
-    B: Send + Sync + 'static,
+    A: Clone + Send + Sync + 'static,
+    B: Clone + Send + Sync + 'static,
 {
     pub fn new() -> CollisionSystem<A, B> {
         CollisionSystem {
@@ -188,8 +188,8 @@ where
 }
 impl<'s, A, B> System<'s> for CollisionSystem<A, B>
 where
-    A: Send + Sync + 'static,
-    B: Send + Sync + 'static,
+    A: Clone + Send + Sync + 'static,
+    B: Clone + Send + Sync + 'static,
 {
     type SystemData = (
         Entities<'s>,

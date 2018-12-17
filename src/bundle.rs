@@ -1,16 +1,20 @@
 use amethyst::{
     core::bundle::{Result, SystemBundle},
     ecs::prelude::DispatcherBuilder,
+    assets::PrefabLoaderSystem,
 };
 
 use crate::components::*;
 use crate::systems::*;
+use crate::prefab::*;
 
 #[derive(Default)]
 pub struct GameBundle;
 
 impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
     fn build(self, builder: &mut DispatcherBuilder<'a, 'b>) -> Result<()> {
+        builder.add(PrefabLoaderSystem::<MyPrefabData>::default(), "", &[]);
+        builder.add(PrefabLoaderSystem::<MapTilePrefab>::default(), "", &[]);
         builder.add(PlayerSystem, "player_system", &["input_system"]);
         builder.add(BulletSystem, "bullet_system", &[]);
         builder.add(

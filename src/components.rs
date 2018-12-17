@@ -1,16 +1,24 @@
-use amethyst::{core::nalgebra::*, ecs::prelude::*};
+use amethyst::{
+    assets::{PrefabData, PrefabError},
+    core::nalgebra::*,
+    derive::PrefabData,
+    ecs::prelude::*,
+};
+use serde_derive::{Deserialize, Serialize};
 use specs_derive::Component;
 
-#[derive(Component, Debug)]
+#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[prefab(Component)]
 pub struct Player {
     pub speed: f32,
+    #[serde(default = "zero")]
     pub trigger_timer: u32,
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, Clone, Debug)]
 pub struct Wall;
 
-#[derive(Component, Debug)]
+#[derive(Component, Clone, Debug)]
 pub struct Bullet {
     pub timer_limit: u32,
     pub timer_count: u32,
@@ -28,7 +36,8 @@ impl Bullet {
     }
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[prefab(Component)]
 pub struct Rigidbody {
     pub velocity: Vector2<f32>,
     pub acceleration: Vector2<f32>,
@@ -46,27 +55,29 @@ impl Default for Rigidbody {
     }
 }
 
-use std::marker::PhantomData;
-#[derive(Component, Debug)]
+#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[prefab(Component)]
 pub struct RectCollider<T>
 where
-    T: Send + Sync + 'static,
+    T: Clone + Send + Sync + 'static,
 {
     pub width: f32,
     pub height: f32,
+    #[serde(default = "Vector2::zeros")]
     pub collision: Vector2<f32>,
-    phantom: PhantomData<T>,
+    #[serde(default)]
+    phantom: std::marker::PhantomData<T>,
 }
 impl<T> RectCollider<T>
 where
-    T: Send + Sync + 'static,
+    T: Clone + Send + Sync + 'static,
 {
     pub fn new(width: f32, height: f32) -> RectCollider<T> {
         RectCollider {
             width: width,
             height: height,
             collision: Vector2::zeros(),
-            phantom: PhantomData,
+            phantom: std::marker::PhantomData,
         }
     }
 }
