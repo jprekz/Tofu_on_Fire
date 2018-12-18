@@ -97,7 +97,7 @@ impl<'s> System<'s> for EnemySystem {
         ),
     );
 
-     fn run(&mut self, (mut gen_event, storages): Self::SystemData) {
+    fn run(&mut self, (mut gen_event, storages): Self::SystemData) {
         let (mut enemies, players, transforms, mut rigidbodies) = storages;
         let mut target = Vector2::zeros();
         for (_player, transform) in (&players, &transforms).join() {
@@ -204,7 +204,7 @@ impl<'s> System<'s> for BulletSystem {
         ReadStorage<'s, RectCollider<Bullet>>,
     );
 
-     fn run(&mut self, (entities, mut bullets, colliders): Self::SystemData) {
+    fn run(&mut self, (entities, mut bullets, colliders): Self::SystemData) {
         for (entity, bullet, collider) in (&entities, &mut bullets, &colliders).join() {
             if bullet.timer_limit != 0 {
                 bullet.timer_count += 1;
@@ -229,7 +229,12 @@ impl<'s> System<'s> for RigidbodySystem {
     fn run(&mut self, (mut transforms, mut rigidbodies): Self::SystemData) {
         for (transform, rigidbody) in (&mut transforms, &mut rigidbodies).join() {
             rigidbody.velocity += rigidbody.acceleration;
-            transform.move_global(rigidbody.velocity.map(|x| x.max(-3.0).min(3.0)).to_homogeneous());
+            transform.move_global(
+                rigidbody
+                    .velocity
+                    .map(|x| x.max(-3.0).min(3.0))
+                    .to_homogeneous(),
+            );
             rigidbody.velocity -= rigidbody.velocity * rigidbody.drag;
         }
     }
