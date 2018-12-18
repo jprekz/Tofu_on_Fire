@@ -18,6 +18,7 @@ pub struct MyPrefabData {
     collider_player: Option<RectCollider<Player>>,
     collider_wall: Option<RectCollider<Wall>>,
     player: Option<Player>,
+    enemy: Option<Enemy>,
 }
 
 #[derive(Clone, Deserialize, Serialize)]

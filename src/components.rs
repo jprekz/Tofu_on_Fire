@@ -15,6 +15,14 @@ pub struct Player {
     pub trigger_timer: u32,
 }
 
+#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[prefab(Component)]
+pub struct Enemy {
+    pub speed: f32,
+    #[serde(default = "zero")]
+    pub trigger_timer: u32,
+}
+
 #[derive(Component, Clone, Debug)]
 pub struct Wall;
 

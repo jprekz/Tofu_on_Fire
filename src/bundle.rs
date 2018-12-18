@@ -16,6 +16,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
         builder.add(PrefabLoaderSystem::<MyPrefabData>::default(), "", &[]);
         builder.add(PrefabLoaderSystem::<MapTilePrefab>::default(), "", &[]);
         builder.add(PlayerSystem, "player_system", &["input_system"]);
+        builder.add(EnemySystem, "enemy_system", &[]);
         builder.add(BulletSystem, "bullet_system", &[]);
         builder.add(
             GeneratorSystem::new(),

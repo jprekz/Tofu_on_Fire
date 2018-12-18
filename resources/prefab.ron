@@ -10,5 +10,14 @@ Prefab (
                 collider_player: (width: 16.0, height: 16.0),
             ),
         ),
+        (
+            data: (
+                transform: (translation: (360.0, 360.0, 0.0)),
+                rigidbody: (drag: 0.5),
+                sprite: (sprite_number: 0),
+                enemy: (speed: 2.0),
+                collider_player: (width: 16.0, height: 16.0),
+            ),
+        ),
     ],
 )
