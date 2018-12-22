@@ -41,6 +41,12 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
             "bw_collision_system",
             &["rigidbody_system"],
         );
+        builder.add(
+            CollisionSystem::<Player, Bullet>::default()
+                .with_filter_function(|a, b| a.team != b.team),
+            "pb_collision_system",
+            &["rigidbody_system"],
+        );
         Ok(())
     }
 }

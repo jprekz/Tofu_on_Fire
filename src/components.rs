@@ -10,6 +10,7 @@ use specs_derive::Component;
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
 pub struct Player {
+    pub team: u32,
     pub speed: f32,
 
     #[serde(skip, default = "Vector2::zeros")]
@@ -36,6 +37,7 @@ pub struct Wall;
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
 pub struct Bullet {
+    pub team: u32,
     pub timer_limit: u32,
     pub reflect_limit: u32,
 
@@ -45,8 +47,9 @@ pub struct Bullet {
     pub reflect_count: u32,
 }
 impl Bullet {
-    pub fn new(timer_limit: u32, reflect_limit: u32) -> Bullet {
+    pub fn new(team: u32, timer_limit: u32, reflect_limit: u32) -> Bullet {
         Bullet {
+            team,
             timer_limit,
             reflect_limit,
             timer_count: 0,
