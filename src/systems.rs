@@ -3,11 +3,11 @@ use amethyst::{
     core::Transform,
     ecs::prelude::*,
     input::InputHandler,
-    renderer::{SpriteRender, SpriteSheetHandle},
     shrev::{EventChannel, ReaderId},
 };
 
 use crate::components::*;
+use crate::prefab::*;
 
 trait Vector2Ext<N> {
     fn to_polar(&self) -> (N, N);
@@ -41,7 +41,7 @@ pub struct PlayerSystem;
 impl<'s> System<'s> for PlayerSystem {
     type SystemData = (
         Read<'s, InputHandler<String, String>>,
-        Write<'s, EventChannel<GenEvent>>,
+        Write<'s, EventChannel<MyPrefabData>>,
         (
             WriteStorage<'s, Player>,
             ReadStorage<'s, Transform>,
@@ -49,7 +49,7 @@ impl<'s> System<'s> for PlayerSystem {
         ),
     );
 
-    fn run(&mut self, (input, mut gen_event, storages): Self::SystemData) {
+    fn run(&mut self, (input, mut prefab_data_loader, storages): Self::SystemData) {
         let (mut players, transforms, mut rigidbodies) = storages;
         for (player, transform, rigidbody) in (&mut players, &transforms, &mut rigidbodies).join() {
             let move_vec = input.axis_xy_value("move_x", "move_y").unwrap();
@@ -74,9 +74,18 @@ impl<'s> System<'s> for PlayerSystem {
             }
             if shot && player.trigger_timer == 0 {
                 let bullet_vel = if aim_r < 0.1 { move_vec } else { aim_vec };
-                gen_event.single_write(GenEvent::Bullet {
-                    pos: transform.translation().xy().into(),
-                    vel: bullet_vel * 4.0,
+                prefab_data_loader.single_write(MyPrefabData {
+                    transform: Some(transform.clone()),
+                    rigidbody: Some(Rigidbody {
+                        velocity: bullet_vel * 4.0,
+                        drag: 0.005,
+                        bounciness: 0.8,
+                        ..Default::default()
+                    }),
+                    sprite: Some(SpriteRenderPrefab { sprite_number: 5 }),
+                    collider_bullet: Some(RectCollider::new(4.0, 4.0)),
+                    bullet: Some(Bullet::new(120, 3)),
+                    ..Default::default()
                 });
                 player.trigger_timer = 10;
                 rigidbody.acceleration = -bullet_vel * 500.0;
@@ -88,7 +97,7 @@ impl<'s> System<'s> for PlayerSystem {
 pub struct EnemySystem;
 impl<'s> System<'s> for EnemySystem {
     type SystemData = (
-        Write<'s, EventChannel<GenEvent>>,
+        Write<'s, EventChannel<MyPrefabData>>,
         (
             WriteStorage<'s, Enemy>,
             ReadStorage<'s, Player>,
@@ -97,7 +106,7 @@ impl<'s> System<'s> for EnemySystem {
         ),
     );
 
-    fn run(&mut self, (mut gen_event, storages): Self::SystemData) {
+    fn run(&mut self, (mut prefab_data_loader, storages): Self::SystemData) {
         let (mut enemies, players, transforms, mut rigidbodies) = storages;
         let mut target = Vector2::zeros();
         for (_player, transform) in (&players, &transforms).join() {
@@ -115,82 +124,21 @@ impl<'s> System<'s> for EnemySystem {
             }
             if enemy.trigger_timer == 0 {
                 let bullet_vel = move_vec;
-                gen_event.single_write(GenEvent::Bullet {
-                    pos: transform.translation().xy().into(),
-                    vel: bullet_vel * 4.0,
+                prefab_data_loader.single_write(MyPrefabData {
+                    transform: Some(transform.clone()),
+                    rigidbody: Some(Rigidbody {
+                        velocity: bullet_vel * 4.0,
+                        drag: 0.005,
+                        bounciness: 0.8,
+                        ..Default::default()
+                    }),
+                    sprite: Some(SpriteRenderPrefab { sprite_number: 5 }),
+                    collider_bullet: Some(RectCollider::new(4.0, 4.0)),
+                    bullet: Some(Bullet::new(120, 3)),
+                    ..Default::default()
                 });
                 enemy.trigger_timer = 10;
                 rigidbody.acceleration = -bullet_vel * 500.0;
-            }
-        }
-    }
-}
-
-pub enum GenEvent {
-    Bullet {
-        pos: Vector2<f32>,
-        vel: Vector2<f32>,
-    },
-}
-pub struct GeneratorSystem {
-    reader: Option<ReaderId<GenEvent>>,
-}
-impl GeneratorSystem {
-    pub fn new() -> GeneratorSystem {
-        GeneratorSystem { reader: None }
-    }
-}
-impl<'s> System<'s> for GeneratorSystem {
-    type SystemData = (
-        Read<'s, EventChannel<GenEvent>>,
-        Option<Read<'s, SpriteSheetHandle>>,
-        Entities<'s>,
-        (
-            WriteStorage<'s, Transform>,
-            WriteStorage<'s, Rigidbody>,
-            WriteStorage<'s, RectCollider<Bullet>>,
-            WriteStorage<'s, SpriteRender>,
-            WriteStorage<'s, Bullet>,
-        ),
-    );
-
-    fn setup(&mut self, res: &mut Resources) {
-        Self::SystemData::setup(res);
-        self.reader = Some(res.fetch_mut::<EventChannel<GenEvent>>().register_reader());
-    }
-
-    fn run(&mut self, (gen_event, sheet, entities, storages): Self::SystemData) {
-        let sheet = sheet.unwrap();
-        let (mut transforms, mut rigidbodies, mut colliders, mut render, mut bullets) = storages;
-        for event in gen_event.read(self.reader.as_mut().unwrap()) {
-            match event {
-                GenEvent::Bullet { pos, vel } => {
-                    let mut transform = Transform::default();
-                    transform.set_position(pos.to_homogeneous());
-
-                    entities
-                        .build_entity()
-                        .with(RectCollider::new(4.0, 4.0), &mut colliders)
-                        .with(Bullet::new(120, 3), &mut bullets)
-                        .with(transform, &mut transforms)
-                        .with(
-                            Rigidbody {
-                                velocity: *vel,
-                                drag: 0.005,
-                                bounciness: 0.8,
-                                ..Default::default()
-                            },
-                            &mut rigidbodies,
-                        )
-                        .with(
-                            SpriteRender {
-                                sprite_sheet: sheet.clone(),
-                                sprite_number: 5,
-                            },
-                            &mut render,
-                        )
-                        .build();
-                }
             }
         }
     }
@@ -323,6 +271,31 @@ where
                     transform.move_global(b.collision.to_homogeneous());
                 }
             }
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct PrefabDataLoaderSystem<T: 'static> {
+    reader: Option<ReaderId<T>>,
+}
+impl<'s, T> System<'s> for PrefabDataLoaderSystem<T>
+where
+    T: amethyst::assets::PrefabData<'s> + Clone + Send + Sync + 'static,
+{
+    type SystemData = (Entities<'s>, Read<'s, EventChannel<T>>, T::SystemData);
+
+    fn setup(&mut self, res: &mut Resources) {
+        Self::SystemData::setup(res);
+        self.reader = Some(res.fetch_mut::<EventChannel<T>>().register_reader());
+    }
+
+    fn run(&mut self, (entities, channel, mut prefab_system_data): Self::SystemData) {
+        for prefab_data in channel.read(self.reader.as_mut().unwrap()) {
+            let entity = entities.create();
+            prefab_data
+                .add_to_entity(entity, &mut prefab_system_data, &[entity])
+                .expect("Unable to add prefab system data to entity");
         }
     }
 }

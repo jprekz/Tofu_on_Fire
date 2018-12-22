@@ -10,20 +10,22 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::components::*;
 
-#[derive(PrefabData, Deserialize, Serialize)]
+#[derive(PrefabData, Deserialize, Serialize, Clone, Default)]
 pub struct MyPrefabData {
-    transform: Option<Transform>,
-    rigidbody: Option<Rigidbody>,
-    sprite: Option<SpriteRenderPrefab>,
-    collider_player: Option<RectCollider<Player>>,
-    collider_wall: Option<RectCollider<Wall>>,
-    player: Option<Player>,
-    enemy: Option<Enemy>,
+    pub transform: Option<Transform>,
+    pub rigidbody: Option<Rigidbody>,
+    pub sprite: Option<SpriteRenderPrefab>,
+    pub collider_player: Option<RectCollider<Player>>,
+    pub collider_wall: Option<RectCollider<Wall>>,
+    pub collider_bullet: Option<RectCollider<Bullet>>,
+    pub player: Option<Player>,
+    pub enemy: Option<Enemy>,
+    pub bullet: Option<Bullet>,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct SpriteRenderPrefab {
-    sprite_number: usize,
+    pub sprite_number: usize,
 }
 impl<'a> PrefabData<'a> for SpriteRenderPrefab {
     type SystemData = (

@@ -26,7 +26,8 @@ pub struct Enemy {
 #[derive(Component, Clone, Debug)]
 pub struct Wall;
 
-#[derive(Component, Clone, Debug)]
+#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[prefab(Component)]
 pub struct Bullet {
     pub timer_limit: u32,
     pub timer_count: u32,
