@@ -12,18 +12,23 @@ use specs_derive::Component;
 pub struct Player {
     pub speed: f32,
 
+    #[serde(skip, default = "Vector2::zeros")]
+    pub input_move: Vector2<f32>,
+    #[serde(skip, default = "Vector2::zeros")]
+    pub input_aim: Vector2<f32>,
+    #[serde(skip, default)]
+    pub input_shot: bool,
     #[serde(skip, default = "zero")]
     pub trigger_timer: u32,
 }
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
-pub struct Enemy {
-    pub speed: f32,
+pub struct Playable;
 
-    #[serde(skip, default = "zero")]
-    pub trigger_timer: u32,
-}
+#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[prefab(Component)]
+pub struct AI;
 
 #[derive(Component, Clone, Debug)]
 pub struct Wall;

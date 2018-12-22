@@ -37,10 +37,67 @@ where
     }
 }
 
+pub struct PlayableSystem;
+impl<'s> System<'s> for PlayableSystem {
+    type SystemData = (
+        Read<'s, InputHandler<String, String>>,
+        ReadStorage<'s, Playable>,
+        WriteStorage<'s, Player>,
+    );
+
+    fn run(&mut self, (input, playables, mut players): Self::SystemData) {
+        let move_vec = input.axis_xy_value("move_x", "move_y").unwrap();
+        let left_vec = input.axis_xy_value("left_x", "left_y").unwrap();
+        let move_vec = move_vec + left_vec;
+        let (move_r, move_theta) = move_vec.to_polar();
+        let move_vec = Vector2::from_polar(move_r.min(1.0), move_theta);
+        let move_vec = move_vec.map(|v| v as f32);
+
+        let aim_vec = input.axis_xy_value("aim_x", "aim_y").unwrap();
+        let right_vec = input.axis_xy_value("right_x", "right_y").unwrap();
+        let aim_vec = aim_vec + right_vec;
+        let (aim_r, aim_theta) = aim_vec.to_polar();
+        let aim_vec = Vector2::from_polar(aim_r.min(1.0), aim_theta);
+        let aim_vec = aim_vec.map(|v| v as f32);
+
+        let shot = input.action_is_down("shot").unwrap();
+
+        for (_, player) in (&playables, &mut players).join() {
+            player.input_move = move_vec;
+            player.input_aim = aim_vec;
+            player.input_shot = shot;
+        }
+    }
+}
+
+pub struct AISystem;
+impl<'s> System<'s> for AISystem {
+    type SystemData = (
+        ReadStorage<'s, AI>,
+        ReadStorage<'s, Playable>,
+        WriteStorage<'s, Player>,
+        ReadStorage<'s, Transform>,
+    );
+
+    fn run(&mut self, (ai, playables, mut players, transforms): Self::SystemData) {
+        let mut target = Vector2::zeros();
+        for (_, transform) in (&playables, &transforms).join() {
+            target = transform.translation().xy();
+        }
+
+        for (_, player, transform) in (&ai, &mut players, &transforms).join() {
+            let pos = transform.translation().xy();
+            let move_vec = (target - pos).normalize();
+
+            player.input_move = move_vec;
+            player.input_shot = true;
+        }
+    }
+}
+
 pub struct PlayerSystem;
 impl<'s> System<'s> for PlayerSystem {
     type SystemData = (
-        Read<'s, InputHandler<String, String>>,
         Write<'s, EventChannel<MyPrefabData>>,
         (
             WriteStorage<'s, Player>,
@@ -49,25 +106,15 @@ impl<'s> System<'s> for PlayerSystem {
         ),
     );
 
-    fn run(&mut self, (input, mut prefab_data_loader, storages): Self::SystemData) {
+    fn run(&mut self, (mut prefab_data_loader, storages): Self::SystemData) {
         let (mut players, transforms, mut rigidbodies) = storages;
         for (player, transform, rigidbody) in (&mut players, &transforms, &mut rigidbodies).join() {
-            let move_vec = input.axis_xy_value("move_x", "move_y").unwrap();
-            let left_vec = input.axis_xy_value("left_x", "left_y").unwrap();
-            let move_vec = move_vec + left_vec;
-            let (move_r, move_theta) = move_vec.to_polar();
-            let move_vec = Vector2::from_polar(move_r.min(1.0), move_theta);
-            let move_vec = move_vec.map(|v| v as f32);
+            let move_vec = player.input_move;
+            let aim_vec = player.input_aim;
+            let aim_r = aim_vec.x.hypot(aim_vec.y);
+            let shot = player.input_shot;
+
             rigidbody.acceleration = move_vec * player.speed;
-
-            let aim_vec = input.axis_xy_value("aim_x", "aim_y").unwrap();
-            let right_vec = input.axis_xy_value("right_x", "right_y").unwrap();
-            let aim_vec = aim_vec + right_vec;
-            let (aim_r, aim_theta) = aim_vec.to_polar();
-            let aim_vec = Vector2::from_polar(aim_r.min(1.0), aim_theta);
-            let aim_vec = aim_vec.map(|v| v as f32);
-
-            let shot = input.action_is_down("shot").unwrap();
 
             if player.trigger_timer > 0 {
                 player.trigger_timer -= 1;
@@ -88,56 +135,6 @@ impl<'s> System<'s> for PlayerSystem {
                     ..Default::default()
                 });
                 player.trigger_timer = 10;
-                rigidbody.acceleration = -bullet_vel * 500.0;
-            }
-        }
-    }
-}
-
-pub struct EnemySystem;
-impl<'s> System<'s> for EnemySystem {
-    type SystemData = (
-        Write<'s, EventChannel<MyPrefabData>>,
-        (
-            WriteStorage<'s, Enemy>,
-            ReadStorage<'s, Player>,
-            ReadStorage<'s, Transform>,
-            WriteStorage<'s, Rigidbody>,
-        ),
-    );
-
-    fn run(&mut self, (mut prefab_data_loader, storages): Self::SystemData) {
-        let (mut enemies, players, transforms, mut rigidbodies) = storages;
-        let mut target = Vector2::zeros();
-        for (_player, transform) in (&players, &transforms).join() {
-            target = transform.translation().xy();
-        }
-
-        for (enemy, transform, rigidbody) in (&mut enemies, &transforms, &mut rigidbodies).join() {
-            let pos = transform.translation().xy();
-            let move_vec = (target - pos).normalize();
-
-            rigidbody.acceleration = move_vec * enemy.speed;
-
-            if enemy.trigger_timer > 0 {
-                enemy.trigger_timer -= 1;
-            }
-            if enemy.trigger_timer == 0 {
-                let bullet_vel = move_vec;
-                prefab_data_loader.single_write(MyPrefabData {
-                    transform: Some(transform.clone()),
-                    rigidbody: Some(Rigidbody {
-                        velocity: bullet_vel * 4.0,
-                        drag: 0.005,
-                        bounciness: 0.8,
-                        ..Default::default()
-                    }),
-                    sprite: Some(SpriteRenderPrefab { sprite_number: 5 }),
-                    collider_bullet: Some(RectCollider::new(4.0, 4.0)),
-                    bullet: Some(Bullet::new(120, 3)),
-                    ..Default::default()
-                });
-                enemy.trigger_timer = 10;
                 rigidbody.acceleration = -bullet_vel * 500.0;
             }
         }

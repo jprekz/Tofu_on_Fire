@@ -19,7 +19,8 @@ pub struct MyPrefabData {
     pub collider_wall: Option<RectCollider<Wall>>,
     pub collider_bullet: Option<RectCollider<Bullet>>,
     pub player: Option<Player>,
-    pub enemy: Option<Enemy>,
+    pub playable: Option<Playable>,
+    pub ai: Option<AI>,
     pub bullet: Option<Bullet>,
 }
 
