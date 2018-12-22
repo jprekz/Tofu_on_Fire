@@ -125,11 +125,11 @@ impl<'s> System<'s> for PlayerSystem {
                     transform: Some(transform.clone()),
                     rigidbody: Some(Rigidbody {
                         velocity: bullet_vel * 4.0,
-                        drag: 0.005,
                         bounciness: 0.8,
+                        auto_rotate: true,
                         ..Default::default()
                     }),
-                    sprite: Some(SpriteRenderPrefab { sprite_number: 5 }),
+                    sprite: Some(SpriteRenderPrefab { sprite_number: 4 }),
                     collider_bullet: Some(RectCollider::new(4.0, 4.0)),
                     bullet: Some(Bullet::new(120, 3)),
                     ..Default::default()
@@ -181,6 +181,10 @@ impl<'s> System<'s> for RigidbodySystem {
                     .to_homogeneous(),
             );
             rigidbody.velocity -= rigidbody.velocity * rigidbody.drag;
+            if rigidbody.auto_rotate {
+                let (_, rad) = rigidbody.velocity.to_polar();
+                transform.set_rotation_euler(0.0, 0.0, rad);
+            }
         }
     }
 }

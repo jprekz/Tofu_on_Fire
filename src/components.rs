@@ -63,6 +63,7 @@ pub struct Rigidbody {
     pub acceleration: Vector2<f32>,
     pub drag: f32,
     pub bounciness: f32,
+    pub auto_rotate: bool,
 }
 impl Default for Rigidbody {
     fn default() -> Rigidbody {
@@ -71,6 +72,7 @@ impl Default for Rigidbody {
             acceleration: Vector2::zeros(),
             drag: 0.0,
             bounciness: 0.0,
+            auto_rotate: false,
         }
     }
 }
