@@ -10,7 +10,7 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::components::*;
 
-#[derive(PrefabData, Deserialize, Serialize, Clone, Default)]
+#[derive(PrefabData, Deserialize, Serialize, Default)]
 pub struct MyPrefabData {
     pub transform: Option<Transform>,
     pub rigidbody: Option<Rigidbody>,

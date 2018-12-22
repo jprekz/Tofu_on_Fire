@@ -281,7 +281,7 @@ pub struct PrefabDataLoaderSystem<T: 'static> {
 }
 impl<'s, T> System<'s> for PrefabDataLoaderSystem<T>
 where
-    T: amethyst::assets::PrefabData<'s> + Clone + Send + Sync + 'static,
+    T: amethyst::assets::PrefabData<'s> + Send + Sync + 'static,
 {
     type SystemData = (Entities<'s>, Read<'s, EventChannel<T>>, T::SystemData);
 

@@ -11,7 +11,8 @@ use specs_derive::Component;
 #[prefab(Component)]
 pub struct Player {
     pub speed: f32,
-    #[serde(default = "zero")]
+
+    #[serde(skip, default = "zero")]
     pub trigger_timer: u32,
 }
 
@@ -19,7 +20,8 @@ pub struct Player {
 #[prefab(Component)]
 pub struct Enemy {
     pub speed: f32,
-    #[serde(default = "zero")]
+
+    #[serde(skip, default = "zero")]
     pub trigger_timer: u32,
 }
 
@@ -30,16 +32,19 @@ pub struct Wall;
 #[prefab(Component)]
 pub struct Bullet {
     pub timer_limit: u32,
-    pub timer_count: u32,
     pub reflect_limit: u32,
+
+    #[serde(skip, default = "zero")]
+    pub timer_count: u32,
+    #[serde(skip, default = "zero")]
     pub reflect_count: u32,
 }
 impl Bullet {
     pub fn new(timer_limit: u32, reflect_limit: u32) -> Bullet {
         Bullet {
             timer_limit,
-            timer_count: 0,
             reflect_limit,
+            timer_count: 0,
             reflect_count: 0,
         }
     }
@@ -73,9 +78,10 @@ where
 {
     pub width: f32,
     pub height: f32,
-    #[serde(default = "Vector2::zeros")]
+
+    #[serde(skip, default = "Vector2::zeros")]
     pub collision: Vector2<f32>,
-    #[serde(default)]
+    #[serde(skip)]
     phantom: std::marker::PhantomData<T>,
 }
 impl<T> RectCollider<T>
