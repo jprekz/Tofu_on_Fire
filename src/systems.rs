@@ -127,7 +127,7 @@ impl<'s> System<'s> for PlayerSystem {
                     }),
                     sprite: Some(SpriteRenderPrefab { sprite_number: 4 }),
                     collider: Some(RectCollider::new("Bullet", 4.0, 4.0)),
-                    bullet: Some(Bullet::new(player.team, 120, 3)),
+                    bullet: Some(Bullet::new(player.team, 120, 2)),
                     ..Default::default()
                 });
                 player.trigger_timer = 10;

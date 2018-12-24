@@ -21,7 +21,17 @@ Prefab (
         ),
         (
             data: (
-                transform: (translation: (360.0, 360.0, 0.0)),
+                transform: (translation: (480.0, 400.0, 0.0)),
+                rigidbody: (drag: 0.5),
+                sprite: (sprite_number: 1),
+                player: (team: 1, speed: 2.0),
+                ai: (),
+                collider: (tag: "Player", width: 16.0, height: 16.0),
+            ),
+        ),
+        (
+            data: (
+                transform: (translation: (500.0, 36.0, 0.0)),
                 rigidbody: (drag: 0.5),
                 sprite: (sprite_number: 1),
                 player: (team: 1, speed: 2.0),
