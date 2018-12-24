@@ -21,6 +21,10 @@ pub struct Player {
     pub input_shot: bool,
     #[serde(skip, default = "zero")]
     pub trigger_timer: u32,
+    #[serde(skip, default = "zero")]
+    pub damage: u32,
+    #[serde(skip, default = "Vector2::zeros")]
+    pub knock_back: Vector2<f32>,
 }
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
@@ -41,6 +45,10 @@ pub struct Bullet {
     pub timer_limit: u32,
     pub reflect_limit: u32,
 
+    #[serde(skip)]
+    pub on_collision_wall: bool,
+    #[serde(skip)]
+    pub on_collision_player: bool,
     #[serde(skip, default = "zero")]
     pub timer_count: u32,
     #[serde(skip, default = "zero")]
@@ -52,6 +60,8 @@ impl Bullet {
             team,
             timer_limit,
             reflect_limit,
+            on_collision_wall: false,
+            on_collision_player: false,
             timer_count: 0,
             reflect_count: 0,
         }

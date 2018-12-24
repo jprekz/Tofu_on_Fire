@@ -37,13 +37,19 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
             &["rigidbody_system"],
         );
         builder.add(
-            CollisionSystem::<Bullet, Wall>::default(),
+            CollisionSystem::<Bullet, Wall>::default()
+                .on_collision(|a, _, _| a.on_collision_wall = true),
             "bw_collision_system",
             &["rigidbody_system"],
         );
         builder.add(
             CollisionSystem::<Player, Bullet>::default()
-                .with_filter_function(|a, b| a.team != b.team),
+                .with_filter(|a, b| a.team != b.team)
+                .on_collision(|a, b, v| {
+                    a.damage += 10;
+                    a.knock_back = v;
+                    b.on_collision_player = true;
+                }),
             "pb_collision_system",
             &["rigidbody_system"],
         );

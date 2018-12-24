@@ -125,31 +125,36 @@ impl<'s> System<'s> for PlayerSystem {
                 player.trigger_timer = 10;
                 rigidbody.acceleration = -bullet_vel * 500.0;
             }
+            if player.knock_back != Vector2::zeros() {
+                rigidbody.acceleration = player.knock_back * 500.0;
+                player.damage = 0;
+                player.knock_back = Vector2::zeros();
+            }
         }
     }
 }
 
 pub struct BulletSystem;
 impl<'s> System<'s> for BulletSystem {
-    type SystemData = (
-        Entities<'s>,
-        WriteStorage<'s, Bullet>,
-        ReadStorage<'s, RectCollider<Bullet>>,
-    );
+    type SystemData = (Entities<'s>, WriteStorage<'s, Bullet>);
 
-    fn run(&mut self, (entities, mut bullets, colliders): Self::SystemData) {
-        for (entity, bullet, collider) in (&entities, &mut bullets, &colliders).join() {
+    fn run(&mut self, (entities, mut bullets): Self::SystemData) {
+        for (entity, bullet) in (&entities, &mut bullets).join() {
             if bullet.timer_limit != 0 {
                 bullet.timer_count += 1;
                 if bullet.timer_count > bullet.timer_limit {
                     entities.delete(entity).unwrap();
                 }
             }
-            if collider.collision != Vector2::new(0.0, 0.0) {
+            if bullet.on_collision_wall {
                 bullet.reflect_count += 1;
                 if bullet.reflect_count > bullet.reflect_limit {
                     entities.delete(entity).unwrap();
                 }
+                bullet.on_collision_wall = false;
+            }
+            if bullet.on_collision_player {
+                entities.delete(entity).unwrap();
             }
         }
     }
@@ -181,14 +186,18 @@ impl<'s> System<'s> for RigidbodySystem {
 // TODO: Re-implement the system with Collision Matrix
 pub struct CollisionSystem<A, B> {
     filter_function: Box<Fn(&mut A, &mut B) -> bool + Send>,
+    on_collision_function: Box<Fn(&mut A, &mut B, Vector2<f32>) + Send>,
 }
 impl<A, B> CollisionSystem<A, B> {
-    pub fn with_filter_function<F>(self, f: F) -> Self
-    where
-        F: Fn(&mut A, &mut B) -> bool + Send + 'static,
-    {
+    pub fn with_filter(self, f: impl Fn(&mut A, &mut B) -> bool + Send + 'static) -> Self {
         Self {
             filter_function: Box::new(f),
+            ..self
+        }
+    }
+    pub fn on_collision(self, f: impl Fn(&mut A, &mut B, Vector2<f32>) + Send + 'static) -> Self {
+        Self {
+            on_collision_function: Box::new(f),
             ..self
         }
     }
@@ -197,6 +206,7 @@ impl<A, B> Default for CollisionSystem<A, B> {
     fn default() -> CollisionSystem<A, B> {
         CollisionSystem {
             filter_function: Box::new(|_, _| true),
+            on_collision_function: Box::new(|_, _, _| {}),
         }
     }
 }
@@ -262,6 +272,9 @@ where
                             collider_a.collision.y = sinking.y;
                             collider_b.collision.y = -sinking.y;
                         }
+                    }
+                    if let (Some(a), Some(b)) = (a.get_mut(ent_a), b.get_mut(ent_b)) {
+                        (self.on_collision_function)(a, b, collider_a.collision);
                     }
                 }
             }
