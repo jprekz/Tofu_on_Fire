@@ -7,9 +7,10 @@ use amethyst::{
 };
 
 mod bundle;
+mod collision;
 mod components;
-mod prefab;
 mod game;
+mod prefab;
 mod systems;
 
 fn main() -> amethyst::Result<()> {

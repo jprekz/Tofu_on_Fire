@@ -7,6 +7,8 @@ use amethyst::{
 use serde_derive::{Deserialize, Serialize};
 use specs_derive::Component;
 
+pub use crate::collision::RectCollider;
+
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
 pub struct Player {
@@ -45,10 +47,6 @@ pub struct Bullet {
     pub timer_limit: u32,
     pub reflect_limit: u32,
 
-    #[serde(skip)]
-    pub on_collision_wall: bool,
-    #[serde(skip)]
-    pub on_collision_player: bool,
     #[serde(skip, default = "zero")]
     pub timer_count: u32,
     #[serde(skip, default = "zero")]
@@ -60,8 +58,6 @@ impl Bullet {
             team,
             timer_limit,
             reflect_limit,
-            on_collision_wall: false,
-            on_collision_player: false,
             timer_count: 0,
             reflect_count: 0,
         }
@@ -86,34 +82,6 @@ impl Default for Rigidbody {
             drag: 0.0,
             bounciness: 0.0,
             auto_rotate: false,
-        }
-    }
-}
-
-#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
-#[prefab(Component)]
-pub struct RectCollider<T>
-where
-    T: Clone + Send + Sync + 'static,
-{
-    pub width: f32,
-    pub height: f32,
-
-    #[serde(skip, default = "Vector2::zeros")]
-    pub collision: Vector2<f32>,
-    #[serde(skip)]
-    phantom: std::marker::PhantomData<T>,
-}
-impl<T> RectCollider<T>
-where
-    T: Clone + Send + Sync + 'static,
-{
-    pub fn new(width: f32, height: f32) -> RectCollider<T> {
-        RectCollider {
-            width: width,
-            height: height,
-            collision: Vector2::zeros(),
-            phantom: std::marker::PhantomData,
         }
     }
 }

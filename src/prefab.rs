@@ -1,10 +1,10 @@
 use amethyst::{
     assets::{PrefabData, PrefabError, ProgressCounter},
+    core::nalgebra::*,
     core::Transform,
     derive::PrefabData,
     ecs::prelude::*,
     renderer::{SpriteRender, SpriteSheetHandle},
-    core::nalgebra::*,
 };
 use serde_derive::{Deserialize, Serialize};
 
@@ -15,9 +15,7 @@ pub struct MyPrefabData {
     pub transform: Option<Transform>,
     pub rigidbody: Option<Rigidbody>,
     pub sprite: Option<SpriteRenderPrefab>,
-    pub collider_player: Option<RectCollider<Player>>,
-    pub collider_wall: Option<RectCollider<Wall>>,
-    pub collider_bullet: Option<RectCollider<Bullet>>,
+    pub collider: Option<RectCollider>,
     pub player: Option<Player>,
     pub playable: Option<Playable>,
     pub ai: Option<AI>,
@@ -59,7 +57,7 @@ impl<'a> PrefabData<'a> for MapTilePrefab {
         Option<Read<'a, SpriteSheetHandle>>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, SpriteRender>,
-        WriteStorage<'a, RectCollider<Wall>>,
+        WriteStorage<'a, RectCollider>,
     );
     type Result = ();
 
@@ -85,7 +83,7 @@ impl<'a> PrefabData<'a> for MapTilePrefab {
         };
         renders.insert(entity, sprite_render)?;
 
-        let collider = RectCollider::new(width, height);
+        let collider = RectCollider::new("Wall", width, height);
         colliders.insert(entity, collider).map(|_| ())
     }
 }

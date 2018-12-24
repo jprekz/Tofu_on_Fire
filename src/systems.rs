@@ -9,6 +9,8 @@ use amethyst::{
 use crate::components::*;
 use crate::prefab::*;
 
+pub use crate::collision::CollisionSystem;
+
 trait Vector2Ext<N> {
     fn to_polar(&self) -> (N, N);
     fn from_polar(r: N, theta: N) -> Self;
@@ -75,7 +77,12 @@ impl<'s> System<'s> for AISystem {
 
         for (_, player, transform) in (&ai, &mut players, &transforms).join() {
             let pos = transform.translation().xy();
-            let move_vec = (target - pos).normalize();
+            let dist = target - pos;
+            let move_vec = if dist != Vector2::zeros() {
+                dist.normalize()
+            } else {
+                Vector2::zeros()
+            };
 
             player.input_move = move_vec;
             player.input_shot = true;
@@ -118,7 +125,7 @@ impl<'s> System<'s> for PlayerSystem {
                         ..Default::default()
                     }),
                     sprite: Some(SpriteRenderPrefab { sprite_number: 4 }),
-                    collider_bullet: Some(RectCollider::new(4.0, 4.0)),
+                    collider: Some(RectCollider::new("Bullet", 4.0, 4.0)),
                     bullet: Some(Bullet::new(player.team, 120, 3)),
                     ..Default::default()
                 });
@@ -136,25 +143,37 @@ impl<'s> System<'s> for PlayerSystem {
 
 pub struct BulletSystem;
 impl<'s> System<'s> for BulletSystem {
-    type SystemData = (Entities<'s>, WriteStorage<'s, Bullet>);
+    type SystemData = (
+        Entities<'s>,
+        WriteStorage<'s, Bullet>,
+        ReadStorage<'s, RectCollider>,
+        ReadStorage<'s, Player>,
+    );
 
-    fn run(&mut self, (entities, mut bullets): Self::SystemData) {
-        for (entity, bullet) in (&entities, &mut bullets).join() {
+    fn run(&mut self, (entities, mut bullets, colliders, players): Self::SystemData) {
+        for (entity, bullet, collider) in (&entities, &mut bullets, &colliders).join() {
             if bullet.timer_limit != 0 {
                 bullet.timer_count += 1;
                 if bullet.timer_count > bullet.timer_limit {
                     entities.delete(entity).unwrap();
                 }
             }
-            if bullet.on_collision_wall {
-                bullet.reflect_count += 1;
-                if bullet.reflect_count > bullet.reflect_limit {
-                    entities.delete(entity).unwrap();
+
+            for &collided in &collider.collided {
+                match colliders.get(collided).unwrap().tag.as_str() {
+                    "Wall" => {
+                        bullet.reflect_count += 1;
+                        if bullet.reflect_count > bullet.reflect_limit {
+                            entities.delete(entity).unwrap();
+                        }
+                    }
+                    "Player" => {
+                        if players.get(collided).unwrap().team != bullet.team {
+                            entities.delete(entity).unwrap();
+                        }
+                    }
+                    _ => {}
                 }
-                bullet.on_collision_wall = false;
-            }
-            if bullet.on_collision_player {
-                entities.delete(entity).unwrap();
             }
         }
     }
@@ -177,130 +196,6 @@ impl<'s> System<'s> for RigidbodySystem {
             if rigidbody.auto_rotate {
                 let (_, rad) = rigidbody.velocity.to_polar();
                 transform.set_rotation_euler(0.0, 0.0, rad);
-            }
-        }
-    }
-}
-
-// There are some problems
-// TODO: Re-implement the system with Collision Matrix
-pub struct CollisionSystem<A, B> {
-    filter_function: Box<Fn(&mut A, &mut B) -> bool + Send>,
-    on_collision_function: Box<Fn(&mut A, &mut B, Vector2<f32>) + Send>,
-}
-impl<A, B> CollisionSystem<A, B> {
-    pub fn with_filter(self, f: impl Fn(&mut A, &mut B) -> bool + Send + 'static) -> Self {
-        Self {
-            filter_function: Box::new(f),
-            ..self
-        }
-    }
-    pub fn on_collision(self, f: impl Fn(&mut A, &mut B, Vector2<f32>) + Send + 'static) -> Self {
-        Self {
-            on_collision_function: Box::new(f),
-            ..self
-        }
-    }
-}
-impl<A, B> Default for CollisionSystem<A, B> {
-    fn default() -> CollisionSystem<A, B> {
-        CollisionSystem {
-            filter_function: Box::new(|_, _| true),
-            on_collision_function: Box::new(|_, _, _| {}),
-        }
-    }
-}
-impl<'s, A, B> System<'s> for CollisionSystem<A, B>
-where
-    A: Component + Clone + Send + Sync + 'static,
-    B: Component + Clone + Send + Sync + 'static,
-{
-    type SystemData = (
-        Entities<'s>,
-        WriteStorage<'s, A>,
-        WriteStorage<'s, B>,
-        WriteStorage<'s, RectCollider<A>>,
-        WriteStorage<'s, RectCollider<B>>,
-        WriteStorage<'s, Transform>,
-        WriteStorage<'s, Rigidbody>,
-    );
-
-    fn run(&mut self, system_data: Self::SystemData) {
-        let (
-            entities,
-            mut a,
-            mut b,
-            mut collider_a,
-            mut collider_b,
-            mut transforms,
-            mut rigidbodies,
-        ) = system_data;
-        for collider_a in (&mut collider_a).join() {
-            collider_a.collision = Vector2::zeros();
-        }
-        for collider_b in (&mut collider_b).join() {
-            collider_b.collision = Vector2::zeros();
-        }
-        for (ent_a, collider_a, transform_a) in (&entities, &mut collider_a, &transforms).join() {
-            let a_size = Vector2::new(collider_a.width, collider_a.height);
-            let a_pos: Vector2<f32> = transform_a.translation().xy().into();
-            for (ent_b, collider_b, transform_b) in (&entities, &mut collider_b, &transforms).join()
-            {
-                let b_size = Vector2::new(collider_b.width, collider_b.height);
-                let b_pos: Vector2<f32> = transform_b.translation().xy().into();
-                let sub = b_pos - a_pos;
-                let sinking = (a_size / 2.0 + b_size / 2.0) - sub.map(f32::abs);
-                if sinking.x > 0.0 && sinking.y > 0.0 {
-                    if let (Some(a), Some(b)) = (a.get_mut(ent_a), b.get_mut(ent_b)) {
-                        if !(self.filter_function)(a, b) {
-                            continue;
-                        }
-                    }
-                    if sinking.x < sinking.y {
-                        if sub.x > 0.0 {
-                            collider_a.collision.x = -sinking.x;
-                            collider_b.collision.x = sinking.x;
-                        } else {
-                            collider_a.collision.x = sinking.x;
-                            collider_b.collision.x = -sinking.x;
-                        }
-                    } else {
-                        if sub.y > 0.0 {
-                            collider_a.collision.y = -sinking.y;
-                            collider_b.collision.y = sinking.y;
-                        } else {
-                            collider_a.collision.y = sinking.y;
-                            collider_b.collision.y = -sinking.y;
-                        }
-                    }
-                    if let (Some(a), Some(b)) = (a.get_mut(ent_a), b.get_mut(ent_b)) {
-                        (self.on_collision_function)(a, b, collider_a.collision);
-                    }
-                }
-            }
-        }
-        for (entity, collider_a, transform) in (&entities, &mut collider_a, &mut transforms).join()
-        {
-            if let Some(rigidbody) = rigidbodies.get_mut(entity) {
-                if collider_a.collision != Vector2::zeros() {
-                    let normal = collider_a.collision.normalize();
-                    let bounciness = rigidbody.bounciness;
-                    rigidbody.velocity -=
-                        rigidbody.velocity.dot(&normal) * normal * (1.0 + bounciness);
-                    transform.move_global(collider_a.collision.to_homogeneous());
-                }
-            }
-        }
-        for (entity, collider_b, transform) in (&entities, &mut collider_b, &mut transforms).join()
-        {
-            if let Some(rigidbody) = rigidbodies.get_mut(entity) {
-                if collider_b.collision != Vector2::zeros() {
-                    let normal = collider_b.collision.normalize();
-                    let bounciness = rigidbody.bounciness;
-                    rigidbody.velocity -=
-                        rigidbody.velocity.dot(&normal) * normal * (1.0 + bounciness);
-                    transform.move_global(collider_b.collision.to_homogeneous());
-                }
             }
         }
     }

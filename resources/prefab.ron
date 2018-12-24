@@ -8,7 +8,7 @@ Prefab (
                 sprite: (sprite_number: 0),
                 player: (team: 0, speed: 2.0),
                 playable: (),
-                collider_player: (width: 16.0, height: 16.0),
+                collider: (tag: "Player", width: 16.0, height: 16.0),
             ),
         ),
         (
@@ -18,7 +18,7 @@ Prefab (
                 sprite: (sprite_number: 1),
                 player: (team: 1, speed: 2.0),
                 ai: (),
-                collider_player: (width: 16.0, height: 16.0),
+                collider: (tag: "Player", width: 16.0, height: 16.0),
             ),
         ),
     ],

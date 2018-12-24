@@ -4,7 +4,6 @@ use amethyst::{
     ecs::prelude::DispatcherBuilder,
 };
 
-use crate::components::*;
 use crate::prefab::*;
 use crate::systems::*;
 
@@ -32,25 +31,12 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
 
         builder.add(RigidbodySystem, "rigidbody_system", &[]);
         builder.add(
-            CollisionSystem::<Player, Wall>::default(),
-            "pw_collision_system",
-            &["rigidbody_system"],
-        );
-        builder.add(
-            CollisionSystem::<Bullet, Wall>::default()
-                .on_collision(|a, _, _| a.on_collision_wall = true),
-            "bw_collision_system",
-            &["rigidbody_system"],
-        );
-        builder.add(
-            CollisionSystem::<Player, Bullet>::default()
-                .with_filter(|a, b| a.team != b.team)
-                .on_collision(|a, b, v| {
-                    a.damage += 10;
-                    a.knock_back = v;
-                    b.on_collision_player = true;
-                }),
-            "pb_collision_system",
+            CollisionSystem::default()
+                .collide("Player", "Wall")
+                .collide("Bullet", "Wall")
+                .trigger("Bullet", "Wall")
+                .trigger("Player", "Bullet"),
+            "collision_system",
             &["rigidbody_system"],
         );
         Ok(())
