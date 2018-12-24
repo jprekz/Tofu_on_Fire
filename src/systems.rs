@@ -1,5 +1,6 @@
 use amethyst::{
     core::nalgebra::*,
+    core::transform::components::Parent,
     core::Transform,
     ecs::prelude::*,
     input::InputHandler,
@@ -137,6 +138,27 @@ impl<'s> System<'s> for PlayerSystem {
                 player.damage = 0;
                 player.knock_back = Vector2::zeros();
             }
+        }
+    }
+}
+
+pub struct ReticleSystem;
+impl<'s> System<'s> for ReticleSystem {
+    type SystemData = (
+        ReadStorage<'s, Reticle>,
+        ReadStorage<'s, Parent>,
+        WriteStorage<'s, Transform>,
+        ReadStorage<'s, Player>,
+    );
+
+    fn run(&mut self, (reticles, parents, mut transforms, players): Self::SystemData) {
+        for (_, parent, transform) in (&reticles, &parents, &mut transforms).join() {
+            let player = players.get(parent.entity).unwrap();
+            let move_vec = player.input_move;
+            let aim_vec = player.input_aim;
+            let aim_r = aim_vec.x.hypot(aim_vec.y);
+            let v = if aim_r < 0.1 { move_vec } else { aim_vec };
+            transform.set_position(v.to_homogeneous() * 100.0);
         }
     }
 }

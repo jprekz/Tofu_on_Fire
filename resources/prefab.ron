@@ -12,6 +12,14 @@ Prefab (
             ),
         ),
         (
+            parent: 0,
+            data: (
+                transform: (translation: (36.0, 36.0, 0.0)),
+                sprite: (sprite_number: 3),
+                reticle: (),
+            ),
+        ),
+        (
             data: (
                 transform: (translation: (360.0, 360.0, 0.0)),
                 rigidbody: (drag: 0.5),

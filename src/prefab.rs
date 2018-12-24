@@ -20,6 +20,7 @@ pub struct MyPrefabData {
     pub playable: Option<Playable>,
     pub ai: Option<AI>,
     pub bullet: Option<Bullet>,
+    pub reticle: Option<Reticle>,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
