@@ -3,7 +3,7 @@ use amethyst::{
     input::InputBundle,
     prelude::*,
     renderer::*,
-    utils::application_root_dir,
+    utils::{application_root_dir, fps_counter::FPSCounterBundle},
 };
 
 mod bundle;
@@ -42,6 +42,7 @@ fn main() -> amethyst::Result<()> {
     };
 
     let game_data = GameDataBuilder::default()
+        .with_bundle(FPSCounterBundle)?
         .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
         .with_bundle(bundle::GameBundle::default())?

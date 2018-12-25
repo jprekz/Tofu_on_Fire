@@ -6,6 +6,7 @@ use amethyst::{
     prelude::*,
     renderer::*,
     winit::VirtualKeyCode,
+    utils::fps_counter::FPSCounter,
 };
 
 use crate::prefab::*;
@@ -28,6 +29,11 @@ impl SimpleState for Game {
         } else {
             Trans::None
         }
+    }
+
+    fn fixed_update(&mut self, data: StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        println!("{}", data.world.read_resource::<FPSCounter>().frame_fps());
+        Trans::None
     }
 
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
