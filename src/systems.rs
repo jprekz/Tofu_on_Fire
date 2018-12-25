@@ -9,6 +9,7 @@ use amethyst::{
 
 use crate::components::*;
 use crate::prefab::*;
+use crate::weapon::*;
 
 pub use crate::collision::CollisionSystem;
 
@@ -107,6 +108,7 @@ pub struct PlayerSystem;
 impl<'s> System<'s> for PlayerSystem {
     type SystemData = (
         Write<'s, EventChannel<MyPrefabData>>,
+        Read<'s, WeaponList>,
         ReadStorage<'s, Bullet>,
         (
             WriteStorage<'s, Player>,
@@ -116,17 +118,19 @@ impl<'s> System<'s> for PlayerSystem {
         ),
     );
 
-    fn run(&mut self, (mut prefab_data_loader, bullets, storages): Self::SystemData) {
+    fn run(&mut self, (mut prefab_data_loader, weapon_list, bullets, storages): Self::SystemData) {
         let (mut players, transforms, mut rigidbodies, colliders) = storages;
         for (player, transform, rigidbody, collider) in
             (&mut players, &transforms, &mut rigidbodies, &colliders).join()
         {
+            let weapon = &weapon_list.list[player.weapon];
+
             let move_vec = player.input_move;
             let aim_vec = player.input_aim;
             let aim_r = aim_vec.x.hypot(aim_vec.y);
             let shot = player.input_shot;
 
-            rigidbody.acceleration = move_vec * player.speed;
+            rigidbody.acceleration = move_vec * weapon.move_speed;
 
             if player.trigger_timer > 0 {
                 player.trigger_timer -= 1;
@@ -136,18 +140,29 @@ impl<'s> System<'s> for PlayerSystem {
                 prefab_data_loader.single_write(MyPrefabData {
                     transform: Some(transform.clone()),
                     rigidbody: Some(Rigidbody {
-                        velocity: bullet_vel * 4.0,
-                        bounciness: 0.8,
+                        velocity: bullet_vel * weapon.bullet_speed,
+                        drag: weapon.bullet_drag,
+                        bounciness: weapon.bullet_bounciness,
                         auto_rotate: true,
                         ..Default::default()
                     }),
-                    sprite: Some(SpriteRenderPrefab { sprite_number: 4 }),
-                    collider: Some(RectCollider::new("Bullet", 4.0, 4.0)),
-                    bullet: Some(Bullet::new(player.team, 120, 2)),
+                    sprite: Some(SpriteRenderPrefab {
+                        sprite_number: weapon.bullet_sprite,
+                    }),
+                    collider: Some(RectCollider::new(
+                        "Bullet",
+                        weapon.bullet_collider.0,
+                        weapon.bullet_collider.1,
+                    )),
+                    bullet: Some(Bullet::new(
+                        player.team,
+                        weapon.bullet_timer_limit,
+                        weapon.bullet_reflect_limit,
+                    )),
                     ..Default::default()
                 });
-                player.trigger_timer = 18;
-                rigidbody.acceleration = -bullet_vel * 20.0;
+                player.trigger_timer = weapon.rate;
+                rigidbody.acceleration = -bullet_vel * weapon.recoil;
             }
 
             for &collided in &collider.collided {

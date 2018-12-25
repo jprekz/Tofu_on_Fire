@@ -13,7 +13,7 @@ pub use crate::collision::RectCollider;
 #[prefab(Component)]
 pub struct Player {
     pub team: u32,
-    pub speed: f32,
+    pub weapon: usize,
 
     #[serde(skip, default = "Vector2::zeros")]
     pub input_move: Vector2<f32>,

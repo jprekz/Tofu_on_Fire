@@ -12,6 +12,7 @@ mod components;
 mod game;
 mod prefab;
 mod systems;
+mod weapon;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());

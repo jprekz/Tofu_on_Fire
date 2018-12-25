@@ -1,5 +1,6 @@
 use amethyst::{
     assets::{AssetStorage, Loader, PrefabLoader, RonFormat},
+    config::Config,
     core::nalgebra::*,
     core::transform::Transform,
     input::is_key_down,
@@ -11,6 +12,7 @@ use amethyst::{
 };
 
 use crate::prefab::*;
+use crate::weapon::*;
 
 pub struct Game;
 
@@ -38,6 +40,9 @@ impl SimpleState for Game {
         initialise_camera(world);
 
         world.add_resource(sprite_sheet_handle);
+
+        let weapon_list = WeaponList::load("resources/weapon_list.ron");
+        world.add_resource(weapon_list);
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
             loader.load("resources/prefab.ron", RonFormat, (), ())

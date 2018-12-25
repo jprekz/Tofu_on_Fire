@@ -1,0 +1,16 @@
+WeaponList (
+    list: [
+        (
+            move_speed: 1.0,
+            rate: 18,
+            recoil: 20.0,
+            bullet_sprite: 4,
+            bullet_speed: 4.0,
+            bullet_drag: 0.0,
+            bullet_bounciness: 0.8,
+            bullet_collider: (4.0, 4.0),
+            bullet_timer_limit: 120,
+            bullet_reflect_limit: 2,
+        ),
+    ]
+)
