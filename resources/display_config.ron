@@ -1,6 +1,6 @@
 (
   title: "rust_sqwar",
-  dimensions: Some((640, 480)),
+  dimensions: Some((1280, 960)),
   max_dimensions: None,
   min_dimensions: None,
   fullscreen: false,

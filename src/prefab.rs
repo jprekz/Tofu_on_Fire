@@ -60,6 +60,7 @@ impl<'a> PrefabData<'a> for MapTilePrefab {
         Option<Read<'a, SpriteSheetHandle>>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, SpriteRender>,
+        WriteStorage<'a, Transparent>,
         WriteStorage<'a, RectCollider>,
     );
     type Result = ();
@@ -67,7 +68,7 @@ impl<'a> PrefabData<'a> for MapTilePrefab {
     fn add_to_entity(
         &self,
         entity: Entity,
-        (sheet, transforms, renders, colliders): &mut Self::SystemData,
+        (sheet, transforms, renders, transparents, colliders): &mut Self::SystemData,
         _: &[Entity],
     ) -> Result<(), PrefabError> {
         let width = self.size.0 as f32 * 32.0;
@@ -85,6 +86,8 @@ impl<'a> PrefabData<'a> for MapTilePrefab {
             sprite_number: 2,
         };
         renders.insert(entity, sprite_render)?;
+
+        transparents.insert(entity, Transparent)?;
 
         let collider = RectCollider::new("Wall", width, height);
         colliders.insert(entity, collider).map(|_| ())
