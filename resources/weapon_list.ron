@@ -3,7 +3,7 @@ WeaponList (
         (
             move_speed: 1.0,
             rate: 18,
-            recoil: 20.0,
+            recoil: 15.0,
             bullet_sprite: 4,
             bullet_spread: 0.05,
             bullet_speed: 3.0,
@@ -11,7 +11,7 @@ WeaponList (
             bullet_bounciness: 0.8,
             bullet_friction: 0.0,
             bullet_collider: (4.0, 4.0),
-            bullet_timer_limit: 120,
+            bullet_timer_limit: 150,
             bullet_reflect_limit: 2,
         ),
         (
