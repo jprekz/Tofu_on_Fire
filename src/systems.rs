@@ -95,16 +95,20 @@ pub struct PlayerSystem;
 impl<'s> System<'s> for PlayerSystem {
     type SystemData = (
         Write<'s, EventChannel<MyPrefabData>>,
+        ReadStorage<'s, Bullet>,
         (
             WriteStorage<'s, Player>,
             ReadStorage<'s, Transform>,
             WriteStorage<'s, Rigidbody>,
+            ReadStorage<'s, RectCollider>,
         ),
     );
 
-    fn run(&mut self, (mut prefab_data_loader, storages): Self::SystemData) {
-        let (mut players, transforms, mut rigidbodies) = storages;
-        for (player, transform, rigidbody) in (&mut players, &transforms, &mut rigidbodies).join() {
+    fn run(&mut self, (mut prefab_data_loader, bullets, storages): Self::SystemData) {
+        let (mut players, transforms, mut rigidbodies, colliders) = storages;
+        for (player, transform, rigidbody, collider) in
+            (&mut players, &transforms, &mut rigidbodies, &colliders).join()
+        {
             let move_vec = player.input_move;
             let aim_vec = player.input_aim;
             let aim_r = aim_vec.x.hypot(aim_vec.y);
@@ -131,12 +135,19 @@ impl<'s> System<'s> for PlayerSystem {
                     ..Default::default()
                 });
                 player.trigger_timer = 10;
-                rigidbody.acceleration = -bullet_vel * 500.0;
+                rigidbody.acceleration = -bullet_vel * 20.0;
             }
-            if player.knock_back != Vector2::zeros() {
-                rigidbody.acceleration = player.knock_back * 500.0;
-                player.damage = 0;
-                player.knock_back = Vector2::zeros();
+
+            for &collided in &collider.collided {
+                match colliders.get(collided).unwrap().tag.as_str() {
+                    "Bullet" if bullets.get(collided).unwrap().team != player.team => {
+                        let b_pos = transforms.get(collided).unwrap().translation().xy();
+                        let p_pos = transform.translation().xy();
+                        let dist = p_pos - b_pos;
+                        rigidbody.acceleration = dist.normalize() * 500.0;
+                    }
+                    _ => {}
+                }
             }
         }
     }
@@ -211,7 +222,7 @@ impl<'s> System<'s> for RigidbodySystem {
             transform.move_global(
                 rigidbody
                     .velocity
-                    .map(|x| x.max(-3.0).min(3.0))
+                    .map(|x| x.max(-5.0).min(5.0))
                     .to_homogeneous(),
             );
             rigidbody.velocity -= rigidbody.velocity * rigidbody.drag;

@@ -23,10 +23,6 @@ pub struct Player {
     pub input_shot: bool,
     #[serde(skip, default = "zero")]
     pub trigger_timer: u32,
-    #[serde(skip, default = "zero")]
-    pub damage: u32,
-    #[serde(skip, default = "Vector2::zeros")]
-    pub knock_back: Vector2<f32>,
 }
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
