@@ -1,13 +1,10 @@
 use amethyst::{
     assets::{AssetStorage, Loader, PrefabLoader, RonFormat},
-    config::Config,
     core::nalgebra::*,
     core::transform::Transform,
     input::is_key_down,
     prelude::*,
-    renderer::{
-        PngFormat, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle, Texture, TextureMetadata,
-    },
+    renderer::*,
     winit::VirtualKeyCode,
 };
 

@@ -80,7 +80,7 @@ pub struct Rigidbody {
     pub acceleration: Vector2<f32>,
     pub drag: f32,
     pub bounciness: f32,
-    pub friction : f32,
+    pub friction: f32,
     pub auto_rotate: bool,
 }
 impl Default for Rigidbody {
