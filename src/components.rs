@@ -31,7 +31,10 @@ pub struct Playable;
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
-pub struct AI;
+pub struct AI {
+    #[serde(skip)]
+    pub target: Option<Entity>,
+}
 
 #[derive(Component, Clone, Debug)]
 pub struct Wall;

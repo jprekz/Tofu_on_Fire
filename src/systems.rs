@@ -64,29 +64,41 @@ impl<'s> System<'s> for PlayableSystem {
 pub struct AISystem;
 impl<'s> System<'s> for AISystem {
     type SystemData = (
-        ReadStorage<'s, AI>,
-        ReadStorage<'s, Playable>,
+        Entities<'s>,
+        WriteStorage<'s, AI>,
         WriteStorage<'s, Player>,
         ReadStorage<'s, Transform>,
     );
 
-    fn run(&mut self, (ai, playables, mut players, transforms): Self::SystemData) {
-        let mut target = Vector2::zeros();
-        for (_, transform) in (&playables, &transforms).join() {
-            target = transform.translation().xy();
-        }
+    fn run(&mut self, (entities, mut ai, mut players, transforms): Self::SystemData) {
+        use rand::prelude::*;
 
-        for (_, player, transform) in (&ai, &mut players, &transforms).join() {
-            let pos = transform.translation().xy();
-            let dist = target - pos;
-            let move_vec = if dist != Vector2::zeros() {
-                dist.normalize()
-            } else {
-                Vector2::zeros()
-            };
+        for (entity, ai, transform) in (&entities, &mut ai, &transforms).join() {
+            let mut rng = thread_rng();
+            if ai.target.is_none() || rng.gen_bool(0.01) {
+                let my_team = players.get(entity).unwrap().team;
+                ai.target = (&entities, &players)
+                    .join()
+                    .filter(|(_, target)| target.team != my_team)
+                    .collect::<Vec<_>>()
+                    .choose(&mut rng)
+                    .map(|(entity, _)| *entity);
+            }
 
-            player.input_move = move_vec;
-            player.input_shot = true;
+            if let Some(target) = ai.target {
+                let my_pos = transform.translation().xy();
+                let target_pos = transforms.get(target).unwrap().translation().xy();
+                let dist = target_pos - my_pos;
+                let move_vec = if dist != Vector2::zeros() {
+                    dist.normalize()
+                } else {
+                    Vector2::zeros()
+                };
+
+                let player = players.get_mut(entity).unwrap();
+                player.input_move = move_vec;
+                player.input_shot = true;
+            }
         }
     }
 }
