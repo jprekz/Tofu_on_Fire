@@ -146,7 +146,7 @@ impl<'s> System<'s> for PlayerSystem {
                     bullet: Some(Bullet::new(player.team, 120, 2)),
                     ..Default::default()
                 });
-                player.trigger_timer = 10;
+                player.trigger_timer = 18;
                 rigidbody.acceleration = -bullet_vel * 20.0;
             }
 
