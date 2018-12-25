@@ -2,7 +2,7 @@ use amethyst::{
     core::transform::TransformBundle,
     input::InputBundle,
     prelude::*,
-    renderer::{ColorMask, DisplayConfig, DrawFlat2D, Pipeline, RenderBundle, Stage, ALPHA},
+    renderer::*,
     utils::application_root_dir,
 };
 
@@ -25,9 +25,15 @@ fn main() -> amethyst::Result<()> {
         let pipe = Pipeline::build().with_stage(
             Stage::with_backbuffer()
                 .clear_target([0.0, 0.0, 0.0, 1.0], 1.0)
-                .with_pass(DrawFlat2D::new().with_transparency(ColorMask::all(), ALPHA, None)),
+                .with_pass(DrawFlat2D::new().with_transparency(
+                    ColorMask::all(),
+                    ALPHA,
+                    Some(DepthMode::LessEqualWrite),
+                )),
         );
-        RenderBundle::new(pipe, Some(config)).with_sprite_sheet_processor()
+        RenderBundle::new(pipe, Some(config))
+            .with_sprite_sheet_processor()
+            .with_sprite_visibility_sorting(&[])
     };
 
     let input_bundle = {
@@ -36,10 +42,10 @@ fn main() -> amethyst::Result<()> {
     };
 
     let game_data = GameDataBuilder::default()
-        .with_bundle(render_bundle)?
-        .with_bundle(input_bundle)?
         .with_bundle(TransformBundle::new())?
-        .with_bundle(bundle::GameBundle::default())?;
+        .with_bundle(input_bundle)?
+        .with_bundle(bundle::GameBundle::default())?
+        .with_bundle(render_bundle)?;
 
     let mut game = Application::new("./", game::Game, game_data)?;
 

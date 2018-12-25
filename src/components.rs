@@ -19,15 +19,20 @@ pub struct Player {
     pub input_move: Vector2<f32>,
     #[serde(skip, default = "Vector2::zeros")]
     pub input_aim: Vector2<f32>,
-    #[serde(skip, default)]
+    #[serde(skip)]
     pub input_shot: bool,
+    #[serde(skip)]
+    pub input_change: bool,
     #[serde(skip, default = "zero")]
     pub trigger_timer: u32,
 }
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
-pub struct Playable;
+pub struct Playable {
+    #[serde(skip)]
+    pub input_change_hold: bool,
+}
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
@@ -75,6 +80,7 @@ pub struct Rigidbody {
     pub acceleration: Vector2<f32>,
     pub drag: f32,
     pub bounciness: f32,
+    pub friction : f32,
     pub auto_rotate: bool,
 }
 impl Default for Rigidbody {
@@ -84,6 +90,7 @@ impl Default for Rigidbody {
             acceleration: Vector2::zeros(),
             drag: 0.0,
             bounciness: 0.0,
+            friction: 0.0,
             auto_rotate: false,
         }
     }

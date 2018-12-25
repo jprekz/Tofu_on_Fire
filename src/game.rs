@@ -83,7 +83,7 @@ fn initialise_camera(world: &mut World) {
     use amethyst::renderer::{Camera, Projection};
 
     let mut transform = Transform::default();
-    transform.set_position(Vector3::new(0.0, 0.0, 1.0));
+    transform.set_position(Vector3::new(0.0, 0.0, 100.0));
 
     world
         .create_entity()

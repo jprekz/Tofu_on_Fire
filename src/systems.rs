@@ -6,6 +6,7 @@ use amethyst::{
     input::InputHandler,
     shrev::{EventChannel, ReaderId},
 };
+use rand::{distributions::*, prelude::*};
 
 use crate::components::*;
 use crate::prefab::*;
@@ -30,11 +31,11 @@ pub struct PlayableSystem;
 impl<'s> System<'s> for PlayableSystem {
     type SystemData = (
         Read<'s, InputHandler<String, String>>,
-        ReadStorage<'s, Playable>,
+        WriteStorage<'s, Playable>,
         WriteStorage<'s, Player>,
     );
 
-    fn run(&mut self, (input, playables, mut players): Self::SystemData) {
+    fn run(&mut self, (input, mut playables, mut players): Self::SystemData) {
         let axis_xy_value =
             |x: &str, y: &str| Some(Vector2::new(input.axis_value(x)?, input.axis_value(y)?));
 
@@ -53,11 +54,14 @@ impl<'s> System<'s> for PlayableSystem {
         let aim_vec = aim_vec.map(|v| v as f32);
 
         let shot = input.action_is_down("shot").unwrap();
+        let change = input.action_is_down("change").unwrap();
 
-        for (_, player) in (&playables, &mut players).join() {
+        for (playable, player) in (&mut playables, &mut players).join() {
             player.input_move = move_vec;
             player.input_aim = aim_vec;
             player.input_shot = shot;
+            player.input_change = change && !playable.input_change_hold;
+            playable.input_change_hold = change;
         }
     }
 }
@@ -72,8 +76,6 @@ impl<'s> System<'s> for AISystem {
     );
 
     fn run(&mut self, (entities, mut ai, mut players, transforms): Self::SystemData) {
-        use rand::prelude::*;
-
         for (entity, ai, transform) in (&entities, &mut ai, &transforms).join() {
             let mut rng = thread_rng();
             if ai.target.is_none() || rng.gen_bool(0.01) {
@@ -123,26 +125,43 @@ impl<'s> System<'s> for PlayerSystem {
         for (player, transform, rigidbody, collider) in
             (&mut players, &transforms, &mut rigidbodies, &colliders).join()
         {
-            let weapon = &weapon_list.list[player.weapon];
+            let weapon = &weapon_list[player.weapon];
 
             let move_vec = player.input_move;
             let aim_vec = player.input_aim;
             let aim_r = aim_vec.x.hypot(aim_vec.y);
             let shot = player.input_shot;
+            let change = player.input_change;
 
             rigidbody.acceleration = move_vec * weapon.move_speed;
+
+            if change {
+                player.weapon += 1;
+                if player.weapon >= weapon_list.len() {
+                    player.weapon = 0;
+                }
+            }
 
             if player.trigger_timer > 0 {
                 player.trigger_timer -= 1;
             }
             if shot && player.trigger_timer == 0 {
                 let bullet_vel = if aim_r < 0.1 { move_vec } else { aim_vec };
+                let (r, theta) = bullet_vel.to_polar();
+                let spread = Uniform::new_inclusive(-weapon.bullet_spread, weapon.bullet_spread)
+                    .sample(&mut thread_rng());
+                let bullet_vel = Vector2::from_polar(r, theta + spread);
+
+                let mut bullet_transform = transform.clone();
+                bullet_transform.set_z(-1.0);
+
                 prefab_data_loader.single_write(MyPrefabData {
-                    transform: Some(transform.clone()),
+                    transform: Some(bullet_transform),
                     rigidbody: Some(Rigidbody {
                         velocity: bullet_vel * weapon.bullet_speed,
                         drag: weapon.bullet_drag,
                         bounciness: weapon.bullet_bounciness,
+                        friction: weapon.bullet_friction,
                         auto_rotate: true,
                         ..Default::default()
                     }),
@@ -162,7 +181,7 @@ impl<'s> System<'s> for PlayerSystem {
                     ..Default::default()
                 });
                 player.trigger_timer = weapon.rate;
-                rigidbody.acceleration = -bullet_vel * weapon.recoil;
+                rigidbody.acceleration -= bullet_vel * weapon.recoil;
             }
 
             for &collided in &collider.collided {
@@ -195,8 +214,9 @@ impl<'s> System<'s> for ReticleSystem {
             let move_vec = player.input_move;
             let aim_vec = player.input_aim;
             let aim_r = aim_vec.x.hypot(aim_vec.y);
-            let v = if aim_r < 0.1 { move_vec } else { aim_vec };
-            transform.set_position(v.to_homogeneous() * 100.0);
+            let v = if aim_r < 0.1 { move_vec } else { aim_vec } * 100.0;
+            transform.set_x(v.x);
+            transform.set_y(v.y);
         }
     }
 }

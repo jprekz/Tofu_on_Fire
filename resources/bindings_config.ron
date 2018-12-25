@@ -11,5 +11,6 @@
   },
   actions: {
     "shot": [[Key(Space)], [Controller(0, RightShoulder)]],
+    "change": [[Key(Q)], [Controller(0, LeftShoulder)]],
   },
 )

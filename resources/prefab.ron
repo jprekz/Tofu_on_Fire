@@ -1,6 +1,7 @@
 #![enable(implicit_some)]
 Prefab (
     entities: [
+        // player
         (
             data: (
                 transform: (translation: (36.0, 36.0, 0.0)),
@@ -14,7 +15,7 @@ Prefab (
         (
             parent: 0,
             data: (
-                transform: (translation: (36.0, 36.0, 0.0)),
+                transform: (translation: (36.0, 36.0, 1.0)),
                 sprite: (sprite_number: 3),
                 reticle: (),
             ),
@@ -29,9 +30,11 @@ Prefab (
                 collider: (tag: "Player", width: 16.0, height: 16.0),
             ),
         ),
+
+        // enemies
         (
             data: (
-                transform: (translation: (500.0, 36.0, 0.0)),
+                transform: (translation: (500.0, 400.0, 0.0)),
                 rigidbody: (drag: 0.5),
                 sprite: (sprite_number: 1),
                 player: (team: 1, weapon: 0),
@@ -41,10 +44,20 @@ Prefab (
         ),
         (
             data: (
-                transform: (translation: (480.0, 400.0, 0.0)),
+                transform: (translation: (500.0, 400.0, 0.0)),
                 rigidbody: (drag: 0.5),
                 sprite: (sprite_number: 1),
-                player: (team: 1, weapon: 0),
+                player: (team: 1, weapon: 1),
+                ai: (),
+                collider: (tag: "Player", width: 16.0, height: 16.0),
+            ),
+        ),
+        (
+            data: (
+                transform: (translation: (500.0, 400.0, 0.0)),
+                rigidbody: (drag: 0.5),
+                sprite: (sprite_number: 1),
+                player: (team: 1, weapon: 2),
                 ai: (),
                 collider: (tag: "Player", width: 16.0, height: 16.0),
             ),

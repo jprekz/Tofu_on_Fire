@@ -1,42 +1,55 @@
 (
-    spritesheet_width: 132,
+    spritesheet_width: 136,
     spritesheet_height: 32,
     sprites: [
+        // player1
         (
             x: 0,
             y: 0,
             width: 16,
             height: 16,
         ),
+        // player2
         (
             x: 16,
             y: 0,
             width: 16,
             height: 16,
         ),
+        // wall
         (
             x: 32,
             y: 0,
             width: 32,
             height: 32,
         ),
+        // reticle
         (
             x: 64,
             y: 0,
             width: 32,
             height: 32,
         ),
+        // bullet1
         (
             x: 96,
             y: 0,
             width: 16,
             height: 8,
         ),
+        // bullet2
         (
             x: 112,
             y: 0,
             width: 16,
             height: 16,
+        ),
+        // bullet3
+        (
+            x: 128,
+            y: 0,
+            width: 8,
+            height: 4,
         ),
     ],
 )

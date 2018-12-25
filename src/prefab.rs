@@ -4,7 +4,7 @@ use amethyst::{
     core::Transform,
     derive::PrefabData,
     ecs::prelude::*,
-    renderer::{SpriteRender, SpriteSheetHandle},
+    renderer::{SpriteRender, SpriteSheetHandle, Transparent},
 };
 use serde_derive::{Deserialize, Serialize};
 
@@ -31,20 +31,22 @@ impl<'a> PrefabData<'a> for SpriteRenderPrefab {
     type SystemData = (
         Option<Read<'a, SpriteSheetHandle>>,
         WriteStorage<'a, SpriteRender>,
+        WriteStorage<'a, Transparent>,
     );
     type Result = ();
 
     fn add_to_entity(
         &self,
         entity: Entity,
-        (sheet, render): &mut Self::SystemData,
+        (sheet, renders, transparents): &mut Self::SystemData,
         _: &[Entity],
     ) -> Result<(), PrefabError> {
+        transparents.insert(entity, Transparent)?;
         let sprite_render = SpriteRender {
             sprite_sheet: sheet.as_mut().unwrap().clone(),
             sprite_number: self.sprite_number,
         };
-        render.insert(entity, sprite_render).map(|_| ())
+        renders.insert(entity, sprite_render).map(|_| ())
     }
 }
 

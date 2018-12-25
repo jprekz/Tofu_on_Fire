@@ -28,11 +28,8 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
             "collision_system",
             &["rigidbody_system"],
         );
-
-        builder.add_barrier();
-
         builder.add(PlayableSystem, "playable_system", &["input_system"]);
-        builder.add(AISystem, "ai_system", &[]);
+        builder.add(AISystem, "ai_system", &["collision_system"]);
         builder.add(
             PlayerSystem,
             "player_system",
@@ -40,6 +37,8 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
         );
         builder.add(ReticleSystem, "reticle_system", &["player_system"]);
         builder.add(BulletSystem, "bullet_system", &["player_system"]);
+
+        builder.add_barrier();
 
         Ok(())
     }

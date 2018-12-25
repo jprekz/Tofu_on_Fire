@@ -134,7 +134,9 @@ impl<'s> System<'s> for CollisionSystem {
             if collider.collision != Vector2::zeros() {
                 let normal = collider.collision.normalize();
                 let bounciness = rigidbody.bounciness;
+                let friction = rigidbody.friction;
                 rigidbody.velocity -= rigidbody.velocity.dot(&normal) * normal * (1.0 + bounciness);
+                rigidbody.velocity *= 1.0 - friction;
                 transform.move_global(collider.collision.to_homogeneous());
             }
         }
