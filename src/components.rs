@@ -41,10 +41,8 @@ pub struct AI {
     pub target: Option<Entity>,
 }
 
-#[derive(Component, Clone, Debug)]
-pub struct Wall;
-
-#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[derive(Component, PrefabData, Deserialize, Serialize, Default, Clone, Debug)]
+#[storage(NullStorage)]
 #[prefab(Component)]
 pub struct Reticle;
 
@@ -73,6 +71,7 @@ impl Bullet {
 }
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[storage(VecStorage)]
 #[prefab(Component)]
 #[serde(default)]
 pub struct Rigidbody {
