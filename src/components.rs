@@ -52,6 +52,9 @@ pub struct Bullet {
     pub team: u32,
     pub timer_limit: u32,
     pub reflect_limit: u32,
+    pub knockback: f32,
+    pub slowing: f32,
+    pub pierce: bool,
 
     #[serde(skip, default = "zero")]
     pub timer_count: u32,
@@ -59,11 +62,21 @@ pub struct Bullet {
     pub reflect_count: u32,
 }
 impl Bullet {
-    pub fn new(team: u32, timer_limit: u32, reflect_limit: u32) -> Bullet {
+    pub fn new(
+        team: u32,
+        timer_limit: u32,
+        reflect_limit: u32,
+        knockback: f32,
+        slowing: f32,
+        pierce: bool,
+    ) -> Bullet {
         Bullet {
             team,
             timer_limit,
             reflect_limit,
+            knockback,
+            slowing,
+            pierce,
             timer_count: 0,
             reflect_count: 0,
         }

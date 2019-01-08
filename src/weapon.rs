@@ -28,4 +28,7 @@ pub struct Weapon {
     pub bullet_collider: (f32, f32),
     pub bullet_timer_limit: u32,
     pub bullet_reflect_limit: u32,
+    pub bullet_knockback: f32,
+    pub bullet_slowing: f32,
+    pub bullet_pierce: bool,
 }

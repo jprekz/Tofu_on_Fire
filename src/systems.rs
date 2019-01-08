@@ -177,6 +177,9 @@ impl<'s> System<'s> for PlayerSystem {
                         player.team,
                         weapon.bullet_timer_limit,
                         weapon.bullet_reflect_limit,
+                        weapon.bullet_knockback,
+                        weapon.bullet_slowing,
+                        weapon.bullet_pierce,
                     )),
                     ..Default::default()
                 });
@@ -185,12 +188,15 @@ impl<'s> System<'s> for PlayerSystem {
             }
 
             for &collided in &collider.collided {
+                let bullet = bullets.get(collided).unwrap();
                 match colliders.get(collided).unwrap().tag.as_str() {
-                    "Bullet" if bullets.get(collided).unwrap().team != player.team => {
+                    "Bullet" if bullet.team != player.team => {
                         let b_pos = transforms.get(collided).unwrap().translation().xy();
                         let p_pos = transform.translation().xy();
                         let dist = p_pos - b_pos;
-                        rigidbody.acceleration = dist.normalize() * 500.0;
+                        rigidbody.velocity *= 1.0 - bullet.slowing;
+                        rigidbody.acceleration *= 1.0 - bullet.slowing;
+                        rigidbody.acceleration += dist.normalize() * bullet.knockback;
                     }
                     _ => {}
                 }
@@ -248,7 +254,7 @@ impl<'s> System<'s> for BulletSystem {
                         }
                     }
                     "Player" => {
-                        if players.get(collided).unwrap().team != bullet.team {
+                        if players.get(collided).unwrap().team != bullet.team && !bullet.pierce {
                             entities.delete(entity).unwrap();
                         }
                     }
