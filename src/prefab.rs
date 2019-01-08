@@ -4,7 +4,7 @@ use amethyst::{
     core::Transform,
     derive::PrefabData,
     ecs::prelude::*,
-    renderer::{SpriteRender, SpriteSheetHandle, Transparent},
+    renderer::{CameraPrefab, SpriteRender, SpriteSheetHandle, Transparent},
 };
 use serde_derive::{Deserialize, Serialize};
 
@@ -14,6 +14,7 @@ use crate::components::*;
 pub struct MyPrefabData {
     pub transform: Option<Transform>,
     pub rigidbody: Option<Rigidbody>,
+    pub camera: Option<CameraPrefab>,
     pub sprite: Option<SpriteRenderPrefab>,
     pub collider: Option<RectCollider>,
     pub player: Option<Player>,

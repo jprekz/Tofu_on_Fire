@@ -1,12 +1,10 @@
 use amethyst::{
     assets::{AssetStorage, Loader, PrefabLoader, RonFormat},
-    core::nalgebra::*,
-    core::transform::Transform,
     input::is_key_down,
     prelude::*,
     renderer::*,
-    winit::VirtualKeyCode,
     utils::fps_counter::FPSCounter,
+    winit::VirtualKeyCode,
 };
 
 use crate::prefab::*;
@@ -39,8 +37,6 @@ impl SimpleState for Game {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
         let sprite_sheet_handle = load_sprite_sheet(world);
-
-        initialise_camera(world);
 
         world.add_resource(sprite_sheet_handle);
 
@@ -80,19 +76,4 @@ fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
         (),
         &sprite_sheet_store,
     )
-}
-
-fn initialise_camera(world: &mut World) {
-    use amethyst::renderer::{Camera, Projection};
-
-    let mut transform = Transform::default();
-    transform.set_position(Vector3::new(0.0, 0.0, 100.0));
-
-    world
-        .create_entity()
-        .with(Camera::from(Projection::orthographic(
-            0.0, 640.0, 480.0, 0.0, // Y axis reversed
-        )))
-        .with(transform)
-        .build();
 }
