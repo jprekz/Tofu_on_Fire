@@ -1,21 +1,6 @@
 #![enable(implicit_some)]
 Prefab (
     entities: [
-        // camera
-        (
-            data: (
-                transform: (translation: (0.0, 0.0, 100.0)),
-                camera: Orthographic((
-                    left: 0.0,
-                    right: 640.0,
-                    bottom: 480.0, // Y axis reversed
-                    top: 0.0,
-                    znear: 0.1,
-                    zfar: 2000.0,
-                )),
-            ),
-        ),
-
         // player
         (
             data: (
@@ -28,13 +13,30 @@ Prefab (
             ),
         ),
         (
-            parent: 1,
+            parent: 0,
             data: (
                 transform: (translation: (0.0, 0.0, 1.0)),
                 sprite: (sprite_number: 3),
                 reticle: (),
             ),
         ),
+
+        // camera
+        (
+            parent: 0,
+            data: (
+                transform: (translation: (-320.0, -240.0, 100.0)),
+                camera: Orthographic((
+                    left: 0.0,
+                    right: 640.0,
+                    bottom: 480.0, // Y axis reversed
+                    top: 0.0,
+                    znear: 0.1,
+                    zfar: 2000.0,
+                )),
+            ),
+        ),
+
 
         // ai
         (
