@@ -36,8 +36,8 @@ impl SimpleState for Game {
 
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
-        let sprite_sheet_handle = load_sprite_sheet(world);
 
+        let sprite_sheet_handle = load_sprite_sheet(world);
         world.add_resource(sprite_sheet_handle);
 
         let weapon_list = WeaponList::load("resources/weapon_list.ron");
