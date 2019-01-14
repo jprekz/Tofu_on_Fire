@@ -3,6 +3,7 @@ use amethyst::{
     input::InputBundle,
     prelude::*,
     renderer::*,
+    ui::{DrawUi, UiBundle},
     utils::{application_root_dir, fps_counter::FPSCounterBundle},
 };
 
@@ -29,7 +30,8 @@ fn main() -> amethyst::Result<()> {
                     ColorMask::all(),
                     ALPHA,
                     Some(DepthMode::LessEqualWrite),
-                )),
+                ))
+                .with_pass(DrawUi::new()),
         );
         RenderBundle::new(pipe, Some(config))
             .with_sprite_sheet_processor()
@@ -46,9 +48,10 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
         .with_bundle(bundle::GameBundle::default())?
-        .with_bundle(render_bundle)?;
+        .with_bundle(render_bundle)?
+        .with_bundle(UiBundle::<String, String>::new())?;
 
-    let mut game = Application::new("./", game::Game, game_data)?;
+    let mut game = Application::new("./", game::Game::default(), game_data)?;
 
     game.run();
 
