@@ -184,7 +184,6 @@ impl<'s> System<'s> for PlayerSystem {
                     ..Default::default()
                 });
                 player.trigger_timer = weapon.rate;
-                rigidbody.acceleration -= bullet_vel * weapon.recoil;
             }
 
             for &collided in &collider.collided {

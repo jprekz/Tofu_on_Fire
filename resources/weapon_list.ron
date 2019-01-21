@@ -3,7 +3,6 @@ WeaponList (
         (
             move_speed: 1.0,
             rate: 18,
-            recoil: 10.0,
             bullet_sprite: 4,
             bullet_spread: 0.05,
             bullet_speed: 3.0,
@@ -20,7 +19,6 @@ WeaponList (
         (
             move_speed: 1.5,
             rate: 5,
-            recoil: 1.0,
             bullet_sprite: 6,
             bullet_spread: 0.2,
             bullet_speed: 5.0,
@@ -37,7 +35,6 @@ WeaponList (
         (
             move_speed: 1.0,
             rate: 3,
-            recoil: 0.0,
             bullet_sprite: 5,
             bullet_spread: 0.3,
             bullet_speed: 5.0,
