@@ -195,7 +195,8 @@ impl<'s> System<'s> for PlayerSystem {
                         let dist = p_pos - b_pos;
                         rigidbody.velocity *= 1.0 - bullet.slowing;
                         rigidbody.acceleration *= 1.0 - bullet.slowing;
-                        rigidbody.acceleration += dist.normalize() * bullet.knockback;
+                        rigidbody.acceleration +=
+                            dist.try_normalize(0.0).unwrap_or(Vector2::zeros()) * bullet.knockback;
                     }
                     _ => {}
                 }
