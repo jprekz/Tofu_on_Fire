@@ -25,11 +25,11 @@ Prefab (
         (
             parent: 0,
             data: (
-                transform: (translation: (-320.0, -240.0, 100.0)),
+                transform: (translation: (-160.0, -120.0, 100.0)),
                 camera: Orthographic((
                     left: 0.0,
-                    right: 640.0,
-                    bottom: 480.0, // Y axis reversed
+                    right: 320.0,
+                    bottom: 240.0, // Y axis reversed
                     top: 0.0,
                     znear: 0.1,
                     zfar: 2000.0,

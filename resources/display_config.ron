@@ -1,6 +1,7 @@
 (
   title: "Tofu on Fire",
   dimensions: Some((1280, 960)),
+  //dimensions: Some((640, 480)),
   max_dimensions: None,
   min_dimensions: None,
   fullscreen: false,

@@ -1,5 +1,5 @@
 (
-    spritesheet_width: 136,
+    spritesheet_width: 144,
     spritesheet_height: 32,
     sprites: [
         // player1
@@ -35,7 +35,7 @@
             x: 96,
             y: 0,
             width: 16,
-            height: 8,
+            height: 16,
         ),
         // bullet2
         (
@@ -48,8 +48,8 @@
         (
             x: 128,
             y: 0,
-            width: 8,
-            height: 4,
+            width: 16,
+            height: 16,
         ),
     ],
 )
