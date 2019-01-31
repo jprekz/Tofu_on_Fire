@@ -39,6 +39,9 @@ impl RectCollider {
 pub struct CollisionSystem {
     collide_entries: HashSet<(String, String)>,
     trigger_entries: HashSet<(String, String)>,
+    collided_changeset: Vec<(Entity, Entity)>,
+    collision_x_changeset: ChangeSet<AddAssignAbsMax>,
+    collision_y_changeset: ChangeSet<AddAssignAbsMax>,
 }
 impl CollisionSystem {
     pub fn collide(mut self, a: impl Into<String>, b: impl Into<String>) -> Self {
@@ -67,8 +70,17 @@ impl<'s> System<'s> for CollisionSystem {
     fn run(&mut self, system_data: Self::SystemData) {
         let (entities, mut colliders, mut transforms, mut rigidbodies) = system_data;
 
-        let mut collision_changeset = ChangeSet::new();
-        let mut collided_changeset = Vec::new();
+        let Self {
+            collide_entries,
+            trigger_entries,
+            collided_changeset,
+            collision_x_changeset,
+            collision_y_changeset,
+        } = self;
+
+        collided_changeset.clear();
+        collision_x_changeset.clear();
+        collision_y_changeset.clear();
 
         for collider in (&mut colliders).join() {
             collider.collided.clear();
@@ -91,41 +103,45 @@ impl<'s> System<'s> for CollisionSystem {
                     let tag_b = collider_b.tag.clone();
                     let entry = (tag_a, tag_b);
 
-                    if self.trigger_entries.contains(&entry) {
+                    if trigger_entries.contains(&entry) {
                         collided_changeset.push((ent_a, ent_b));
                         collided_changeset.push((ent_b, ent_a));
                     }
 
-                    if !self.collide_entries.contains(&entry) {
+                    if !collide_entries.contains(&entry) {
                         continue;
                     }
 
                     if sinking.x < sinking.y {
                         if sub.x > 0.0 {
-                            collision_changeset.add(ent_a, Vector2::new(-sinking.x, 0.0));
-                            collision_changeset.add(ent_b, Vector2::new(sinking.x, 0.0));
+                            collision_x_changeset.add(ent_a, (-sinking.x).into());
+                            collision_x_changeset.add(ent_b, (sinking.x).into());
                         } else {
-                            collision_changeset.add(ent_a, Vector2::new(sinking.x, 0.0));
-                            collision_changeset.add(ent_b, Vector2::new(-sinking.x, 0.0));
+                            collision_x_changeset.add(ent_a, (sinking.x).into());
+                            collision_x_changeset.add(ent_b, (-sinking.x).into());
                         }
                     } else {
                         if sub.y > 0.0 {
-                            collision_changeset.add(ent_a, Vector2::new(0.0, -sinking.y));
-                            collision_changeset.add(ent_b, Vector2::new(0.0, sinking.y));
+                            collision_y_changeset.add(ent_a, (-sinking.y).into());
+                            collision_y_changeset.add(ent_b, (sinking.y).into());
                         } else {
-                            collision_changeset.add(ent_a, Vector2::new(0.0, sinking.y));
-                            collision_changeset.add(ent_b, Vector2::new(0.0, -sinking.y));
+                            collision_y_changeset.add(ent_a, (sinking.y).into());
+                            collision_y_changeset.add(ent_b, (-sinking.y).into());
                         }
                     }
                 }
             }
         }
 
-        for (collider, &modifier) in (&mut colliders, &collision_changeset).join() {
-            collider.collision = modifier;
+        for (ref mut collider, ref modifier) in (&mut colliders, collision_x_changeset).join() {
+            collider.collision.x = modifier.0;
         }
+        for (ref mut collider, ref modifier) in (&mut colliders, collision_y_changeset).join() {
+            collider.collision.y = modifier.0;
+        }
+
         for (a, b) in collided_changeset {
-            colliders.get_mut(a).unwrap().collided.push(b);
+            colliders.get_mut(*a).unwrap().collided.push(*b);
         }
 
         for (collider, transform, rigidbody) in
@@ -140,5 +156,20 @@ impl<'s> System<'s> for CollisionSystem {
                 transform.move_global(collider.collision.to_homogeneous());
             }
         }
+    }
+}
+
+#[derive(Clone, Copy)]
+struct AddAssignAbsMax(f32);
+impl std::ops::AddAssign for AddAssignAbsMax {
+    fn add_assign(&mut self, other: Self) {
+        if self.0.abs() < other.0.abs() {
+            self.0 = other.0
+        };
+    }
+}
+impl Into<AddAssignAbsMax> for f32 {
+    fn into(self) -> AddAssignAbsMax {
+        AddAssignAbsMax(self)
     }
 }
