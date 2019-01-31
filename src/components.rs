@@ -38,7 +38,18 @@ pub struct Playable {
 #[prefab(Component)]
 pub struct AI {
     #[serde(skip)]
-    pub target: Option<Entity>,
+    pub state: AIState,
+}
+#[derive(Clone, Debug)]
+pub enum AIState {
+    Go(Entity),
+    Away(Entity),
+    Neutral,
+}
+impl Default for AIState {
+    fn default() -> AIState {
+        AIState::Neutral
+    }
 }
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Default, Clone, Debug)]

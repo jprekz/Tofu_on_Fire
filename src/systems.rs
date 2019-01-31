@@ -73,34 +73,82 @@ impl<'s> System<'s> for AISystem {
         WriteStorage<'s, AI>,
         WriteStorage<'s, Player>,
         ReadStorage<'s, Transform>,
+        ReadStorage<'s, Bullet>,
     );
 
-    fn run(&mut self, (entities, mut ai, mut players, transforms): Self::SystemData) {
+    fn run(&mut self, (entities, mut ai, mut players, transforms, bullets): Self::SystemData) {
         for (entity, ai, transform) in (&entities, &mut ai, &transforms).join() {
             let mut rng = thread_rng();
-            if ai.target.is_none() || rng.gen_bool(0.01) {
-                let my_team = players.get(entity).unwrap().team;
-                ai.target = (&entities, &players)
+
+            let my_team = players.get(entity).unwrap().team;
+            let my_pos = transform.translation().xy();
+
+            // change target
+            if rng.gen_bool(0.01) {
+                if let Some(next_target) = (&entities, &players)
                     .join()
                     .filter(|(_, target)| target.team != my_team)
                     .collect::<Vec<_>>()
                     .choose(&mut rng)
-                    .map(|(entity, _)| *entity);
+                    .map(|(entity, _)| *entity)
+                {
+                    ai.state = AIState::Go(next_target);
+                }
             }
 
-            if let Some(target) = ai.target {
-                let my_pos = transform.translation().xy();
-                let target_pos = transforms.get(target).unwrap().translation().xy();
-                let dist = target_pos - my_pos;
-                let move_vec = if dist != Vector2::zeros() {
-                    dist.normalize()
-                } else {
-                    Vector2::zeros()
-                };
+            if rng.gen_bool(0.1) {
+                if let Some(next_target) = (&entities, &bullets, &transforms)
+                    .join()
+                    .filter(|(_, bullet, _)| bullet.team != my_team)
+                    .filter(|(_, _, transform)| {
+                        (transform.translation().xy() - my_pos).norm() < 40.0
+                    })
+                    .min_by_key(|(_, _, transform)| {
+                        (transform.translation().xy() - my_pos).norm() as i32
+                    })
+                    .map(|(entity, _, _)| entity)
+                {
+                    ai.state = AIState::Away(next_target);
+                }
+            }
 
-                let player = players.get_mut(entity).unwrap();
-                player.input_move = move_vec;
-                player.input_shot = true;
+            match ai.state.clone() {
+                AIState::Go(target) => {
+                    let target_pos = transforms.get(target).unwrap().translation().xy();
+                    let dist = target_pos - my_pos;
+                    let move_vec = if dist != Vector2::zeros() {
+                        dist.normalize()
+                    } else {
+                        Vector2::zeros()
+                    };
+
+                    let player = players.get_mut(entity).unwrap();
+                    player.input_move = move_vec;
+                    player.input_shot = true;
+                }
+                AIState::Away(target) => {
+                    let target_pos = if let Some(t) = transforms.get(target) {
+                        t.translation().xy()
+                    } else {
+                        ai.state = AIState::Neutral;
+                        continue;
+                    };
+                    let dist = target_pos - my_pos;
+                    if dist.norm() > 40.0 {
+                        ai.state = AIState::Neutral;
+                        continue;
+                    }
+                    let move_vec = if dist != Vector2::zeros() {
+                        -dist.normalize()
+                    } else {
+                        Vector2::zeros()
+                    };
+
+                    let player = players.get_mut(entity).unwrap();
+                    player.input_move = move_vec;
+                    player.input_shot = true;
+                }
+                _ => {}
             }
         }
     }
