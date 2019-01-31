@@ -111,19 +111,21 @@ impl<'s> System<'s> for PlayerSystem {
     type SystemData = (
         Write<'s, EventChannel<MyPrefabData>>,
         Read<'s, WeaponList>,
-        ReadStorage<'s, Bullet>,
         (
             WriteStorage<'s, Player>,
+            ReadStorage<'s, Bullet>,
             ReadStorage<'s, Transform>,
             WriteStorage<'s, Rigidbody>,
             ReadStorage<'s, RectCollider>,
+            ReadStorage<'s, ColliderResult>,
         ),
     );
 
-    fn run(&mut self, (mut prefab_data_loader, weapon_list, bullets, storages): Self::SystemData) {
-        let (mut players, transforms, mut rigidbodies, colliders) = storages;
-        for (player, transform, rigidbody, collider) in
-            (&mut players, &transforms, &mut rigidbodies, &colliders).join()
+    fn run(&mut self, (mut prefab_data_loader, weapon_list, storages): Self::SystemData) {
+        let (mut players, bullets, transforms, mut rigidbodies, colliders, results) = storages;
+
+        for (player, transform, rigidbody, result) in
+            (&mut players, &transforms, &mut rigidbodies, &results).join()
         {
             let weapon = &weapon_list[player.weapon];
 
@@ -186,7 +188,7 @@ impl<'s> System<'s> for PlayerSystem {
                 player.trigger_timer = weapon.rate;
             }
 
-            for &collided in &collider.collided {
+            for &collided in &result.collided {
                 let bullet = bullets.get(collided).unwrap();
                 match colliders.get(collided).unwrap().tag.as_str() {
                     "Bullet" if bullet.team != player.team => {
@@ -233,11 +235,12 @@ impl<'s> System<'s> for BulletSystem {
         Entities<'s>,
         WriteStorage<'s, Bullet>,
         ReadStorage<'s, RectCollider>,
+        ReadStorage<'s, ColliderResult>,
         ReadStorage<'s, Player>,
     );
 
-    fn run(&mut self, (entities, mut bullets, colliders, players): Self::SystemData) {
-        for (entity, bullet, collider) in (&entities, &mut bullets, &colliders).join() {
+    fn run(&mut self, (entities, mut bullets, colliders, results, players): Self::SystemData) {
+        for (entity, bullet, result) in (&entities, &mut bullets, &results).join() {
             if bullet.timer_limit != 0 {
                 bullet.timer_count += 1;
                 if bullet.timer_count > bullet.timer_limit {
@@ -245,7 +248,7 @@ impl<'s> System<'s> for BulletSystem {
                 }
             }
 
-            for &collided in &collider.collided {
+            for &collided in &result.collided {
                 match colliders.get(collided).unwrap().tag.as_str() {
                     "Wall" => {
                         bullet.reflect_count += 1;

@@ -7,7 +7,7 @@ use amethyst::{
 use serde_derive::{Deserialize, Serialize};
 use specs_derive::Component;
 
-pub use crate::collision::RectCollider;
+pub use crate::collision::{RectCollider, ColliderResult};
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
