@@ -9,7 +9,29 @@ use serde_derive::{Deserialize, Serialize};
 use specs_derive::Component;
 use std::collections::HashSet;
 
-use crate::components::Rigidbody;
+#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[prefab(Component)]
+#[serde(default)]
+pub struct Rigidbody {
+    pub velocity: Vector2<f32>,
+    pub acceleration: Vector2<f32>,
+    pub drag: f32,
+    pub bounciness: f32,
+    pub friction: f32,
+    pub auto_rotate: bool,
+}
+impl Default for Rigidbody {
+    fn default() -> Rigidbody {
+        Rigidbody {
+            velocity: Vector2::zeros(),
+            acceleration: Vector2::zeros(),
+            drag: 0.0,
+            bounciness: 0.0,
+            friction: 0.0,
+            auto_rotate: false,
+        }
+    }
+}
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
