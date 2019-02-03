@@ -221,7 +221,7 @@ impl<'s> System<'s> for PlayerSystem {
                         ..Default::default()
                     }),
                     sprite: Some(SpriteRenderPrefab {
-                        sprite_number: weapon.bullet_sprite,
+                        sprite_number: weapon.bullet_sprite + player.team as usize,
                     }),
                     collider: Some(RectCollider::new(
                         "Bullet",

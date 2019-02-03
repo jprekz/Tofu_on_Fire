@@ -19,7 +19,7 @@ WeaponList (
         (
             move_speed: 1.5,
             rate: 5,
-            bullet_sprite: 5,
+            bullet_sprite: 6,
             bullet_spread: 0.2,
             bullet_speed: 5.0,
             bullet_drag: 0.0,
@@ -35,7 +35,7 @@ WeaponList (
         (
             move_speed: 1.0,
             rate: 3,
-            bullet_sprite: 6,
+            bullet_sprite: 8,
             bullet_spread: 0.3,
             bullet_speed: 5.0,
             bullet_drag: 0.02,

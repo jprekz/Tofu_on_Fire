@@ -1,53 +1,75 @@
 (
     spritesheet_width: 144,
-    spritesheet_height: 32,
+    spritesheet_height: 64,
     sprites: [
-        // player1
-        (
-            x: 0,
-            y: 0,
-            width: 16,
-            height: 16,
-        ),
-        // player2
-        (
-            x: 16,
-            y: 0,
-            width: 16,
-            height: 16,
-        ),
         // wall
         (
-            x: 32,
+            x: 0,
             y: 0,
             width: 32,
             height: 32,
         ),
         // reticle
         (
-            x: 64,
-            y: 0,
+            x: 0,
+            y: 32,
             width: 32,
             height: 32,
         ),
+
+        // player1
+        (
+            x: 32,
+            y: 0,
+            width: 16,
+            height: 16,
+        ),
+        // player2
+        (
+            x: 32,
+            y: 16,
+            width: 16,
+            height: 16,
+        ),
+
         // bullet1
         (
-            x: 96,
+            x: 48,
             y: 0,
             width: 16,
             height: 16,
         ),
+        (
+            x: 48,
+            y: 16,
+            width: 16,
+            height: 16,
+        ),
+
         // bullet2
         (
-            x: 112,
+            x: 64,
             y: 0,
             width: 16,
             height: 16,
         ),
+        (
+            x: 64,
+            y: 16,
+            width: 16,
+            height: 16,
+        ),
+
         // bullet3
         (
-            x: 128,
+            x: 80,
             y: 0,
+            width: 16,
+            height: 16,
+        ),
+        (
+            x: 80,
+            y: 16,
             width: 16,
             height: 16,
         ),

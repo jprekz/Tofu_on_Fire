@@ -83,7 +83,7 @@ impl<'a> PrefabData<'a> for MapTilePrefab {
         let collider = RectCollider::new("Wall", width, height);
         colliders.insert(entity, collider)?;
 
-        let sprite_render_prefab = SpriteRenderPrefab { sprite_number: 2 };
+        let sprite_render_prefab = SpriteRenderPrefab { sprite_number: 0 };
         sprite_render_prefab
             .add_to_entity(entity, sprite_render_data, &[])
             .map(|_| ())
