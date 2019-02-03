@@ -14,6 +14,8 @@ use crate::weapon::*;
 
 pub use crate::collision::CollisionSystem;
 
+const PI: f32 = std::f32::consts::PI;
+
 trait Vector2Ext<N> {
     fn to_polar(&self) -> (N, N);
     fn from_polar(r: N, theta: N) -> Self;
@@ -85,19 +87,17 @@ impl<'s> System<'s> for AISystem {
 
             // change target
             if rng.gen_bool(0.01) {
-                if let Some(next_target) = (&entities, &players)
+                if let Some((next_target, _)) = (&entities, &players)
                     .join()
                     .filter(|(_, target)| target.team != my_team)
-                    .collect::<Vec<_>>()
                     .choose(&mut rng)
-                    .map(|(entity, _)| *entity)
                 {
                     ai.state = AIState::Go(next_target);
                 }
             }
 
             if rng.gen_bool(0.1) {
-                if let Some(next_target) = (&entities, &bullets, &transforms)
+                if let Some((next_target, _, _)) = (&entities, &bullets, &transforms)
                     .join()
                     .filter(|(_, bullet, _)| bullet.team != my_team)
                     .filter(|(_, _, transform)| {
@@ -106,7 +106,6 @@ impl<'s> System<'s> for AISystem {
                     .min_by_key(|(_, _, transform)| {
                         (transform.translation().xy() - my_pos).norm() as i32
                     })
-                    .map(|(entity, _, _)| entity)
                 {
                     ai.state = AIState::Away(next_target);
                 }
@@ -116,11 +115,17 @@ impl<'s> System<'s> for AISystem {
                 AIState::Go(target) => {
                     let target_pos = transforms.get(target).unwrap().translation().xy();
                     let dist = target_pos - my_pos;
-                    let move_vec = if dist != Vector2::zeros() {
+                    let mut move_vec = if dist != Vector2::zeros() {
                         dist.normalize()
                     } else {
                         Vector2::zeros()
                     };
+
+                    if dist.norm() > 40.0 {
+                        let (r, theta) = dist.to_polar();
+                        let theta = (theta * 4.0 / PI).round() * PI / 4.0;
+                        move_vec = Vector2::from_polar(r, theta).normalize();
+                    }
 
                     let player = players.get_mut(entity).unwrap();
                     player.input_move = move_vec;
