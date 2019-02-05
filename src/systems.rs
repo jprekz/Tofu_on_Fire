@@ -4,16 +4,15 @@ use amethyst::{
     core::Transform,
     ecs::prelude::*,
     input::InputHandler,
-    shrev::{EventChannel, ReaderId},
 };
 use rand::{distributions::*, prelude::*};
 
+use crate::common::prefab::*;
 use crate::components::*;
 use crate::prefab::*;
 use crate::weapon::*;
-use crate::runtimeprefabloader::*;
 
-pub use crate::collision::CollisionSystem;
+pub use crate::common::collision2d::CollisionSystem;
 
 const PI: f32 = std::f32::consts::PI;
 
@@ -340,31 +339,6 @@ impl<'s> System<'s> for RigidbodySystem {
                 let (_, rad) = rigidbody.velocity.to_polar();
                 transform.set_rotation_euler(0.0, 0.0, rad);
             }
-        }
-    }
-}
-
-#[derive(Default)]
-pub struct PrefabDataLoaderSystem<T: 'static> {
-    reader: Option<ReaderId<T>>,
-}
-impl<'s, T> System<'s> for PrefabDataLoaderSystem<T>
-where
-    T: amethyst::assets::PrefabData<'s> + Send + Sync + 'static,
-{
-    type SystemData = (Entities<'s>, Read<'s, EventChannel<T>>, T::SystemData);
-
-    fn setup(&mut self, res: &mut Resources) {
-        Self::SystemData::setup(res);
-        self.reader = Some(res.fetch_mut::<EventChannel<T>>().register_reader());
-    }
-
-    fn run(&mut self, (entities, channel, mut prefab_system_data): Self::SystemData) {
-        for prefab_data in channel.read(self.reader.as_mut().unwrap()) {
-            let entity = entities.create();
-            prefab_data
-                .add_to_entity(entity, &mut prefab_system_data, &[entity])
-                .expect("Unable to add prefab system data to entity");
         }
     }
 }

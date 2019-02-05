@@ -8,13 +8,12 @@ use amethyst::{
 };
 
 mod bundle;
-mod collision;
+mod common;
 mod components;
 mod game;
 mod prefab;
 mod systems;
 mod weapon;
-mod runtimeprefabloader;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
