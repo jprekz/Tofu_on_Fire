@@ -14,7 +14,6 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
     fn build(self, builder: &mut DispatcherBuilder<'a, 'b>) -> Result<()> {
         builder.add(PrefabLoaderSystem::<MyPrefabData>::default(), "", &[]);
         builder.add(PrefabLoaderSystem::<MapTilePrefab>::default(), "", &[]);
-        builder.add(PrefabDataLoaderSystem::<MyPrefabData>::default(), "", &[]);
 
         builder.add_barrier();
 

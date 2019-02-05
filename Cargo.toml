@@ -7,6 +7,8 @@ edition = "2018"
 [dependencies]
 amethyst = { version = "0.10.0", features = ["sdl_controller"] }
 specs-derive = "*"
+shred = "*"
+shred-derive = "*"
 serde = "1.0"
 serde_derive = "1.0"
 rand = "0.6"

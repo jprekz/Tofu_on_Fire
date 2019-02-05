@@ -14,6 +14,7 @@ mod game;
 mod prefab;
 mod systems;
 mod weapon;
+mod runtimeprefabloader;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
@@ -45,9 +46,9 @@ fn main() -> amethyst::Result<()> {
 
     let game_data = GameDataBuilder::default()
         .with_bundle(FPSCounterBundle)?
-        .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
         .with_bundle(bundle::GameBundle::default())?
+        .with_bundle(TransformBundle::new())?
         .with_bundle(render_bundle)?
         .with_bundle(UiBundle::<String, String>::new())?;
 

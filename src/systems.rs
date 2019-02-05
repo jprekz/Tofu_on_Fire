@@ -11,6 +11,7 @@ use rand::{distributions::*, prelude::*};
 use crate::components::*;
 use crate::prefab::*;
 use crate::weapon::*;
+use crate::runtimeprefabloader::*;
 
 pub use crate::collision::CollisionSystem;
 
@@ -162,7 +163,7 @@ impl<'s> System<'s> for AISystem {
 pub struct PlayerSystem;
 impl<'s> System<'s> for PlayerSystem {
     type SystemData = (
-        Write<'s, EventChannel<MyPrefabData>>,
+        RuntimePrefabLoader<'s, MyPrefabData>,
         Read<'s, WeaponList>,
         (
             WriteStorage<'s, Player>,
@@ -174,7 +175,7 @@ impl<'s> System<'s> for PlayerSystem {
         ),
     );
 
-    fn run(&mut self, (mut prefab_data_loader, weapon_list, storages): Self::SystemData) {
+    fn run(&mut self, (mut prefab_loader, weapon_list, storages): Self::SystemData) {
         let (mut players, bullets, transforms, mut rigidbodies, colliders, results) = storages;
 
         for (player, transform, rigidbody, result) in
@@ -210,7 +211,7 @@ impl<'s> System<'s> for PlayerSystem {
                 let mut bullet_transform = transform.clone();
                 bullet_transform.set_z(-1.0);
 
-                prefab_data_loader.single_write(MyPrefabData {
+                prefab_loader.load_main(MyPrefabData {
                     transform: Some(bullet_transform),
                     rigidbody: Some(Rigidbody {
                         velocity: bullet_vel * weapon.bullet_speed,
