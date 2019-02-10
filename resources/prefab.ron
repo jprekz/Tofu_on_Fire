@@ -5,7 +5,7 @@ Prefab (
         (
             data: (
                 transform: (translation: (40.0, 40.0, 0.0)),
-                rigidbody: (drag: 0.5),
+                rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 2),
                 player: (team: 0, weapon: 0),
                 playable: (),
@@ -42,7 +42,7 @@ Prefab (
         (
             data: (
                 transform: (translation: (80.0, 80.0, 0.0)),
-                rigidbody: (drag: 0.5),
+                rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 2),
                 player: (team: 0, weapon: 0),
                 ai: (),
@@ -52,7 +52,7 @@ Prefab (
         (
             data: (
                 transform: (translation: (560.0, 80.0, 0.0)),
-                rigidbody: (drag: 0.5),
+                rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 2),
                 player: (team: 0, weapon: 1),
                 ai: (),
@@ -62,7 +62,7 @@ Prefab (
         (
             data: (
                 transform: (translation: (80.0, 400.0, 0.0)),
-                rigidbody: (drag: 0.5),
+                rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 2),
                 player: (team: 0, weapon: 2),
                 ai: (),
@@ -74,7 +74,7 @@ Prefab (
         (
             data: (
                 transform: (translation: (560.0, 400.0, 0.0)),
-                rigidbody: (drag: 0.5),
+                rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 3),
                 player: (team: 1, weapon: 0),
                 ai: (),
@@ -84,7 +84,7 @@ Prefab (
         (
             data: (
                 transform: (translation: (560.0, 400.0, 0.0)),
-                rigidbody: (drag: 0.5),
+                rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 3),
                 player: (team: 1, weapon: 0),
                 ai: (),
@@ -94,7 +94,7 @@ Prefab (
         (
             data: (
                 transform: (translation: (560.0, 400.0, 0.0)),
-                rigidbody: (drag: 0.5),
+                rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 3),
                 player: (team: 1, weapon: 1),
                 ai: (),
@@ -104,7 +104,7 @@ Prefab (
         (
             data: (
                 transform: (translation: (560.0, 400.0, 0.0)),
-                rigidbody: (drag: 0.5),
+                rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 3),
                 player: (team: 1, weapon: 1),
                 ai: (),
@@ -114,7 +114,7 @@ Prefab (
         (
             data: (
                 transform: (translation: (560.0, 400.0, 0.0)),
-                rigidbody: (drag: 0.5),
+                rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 3),
                 player: (team: 1, weapon: 2),
                 ai: (),
@@ -124,7 +124,7 @@ Prefab (
         (
             data: (
                 transform: (translation: (560.0, 400.0, 0.0)),
-                rigidbody: (drag: 0.5),
+                rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 3),
                 player: (team: 1, weapon: 2),
                 ai: (),
