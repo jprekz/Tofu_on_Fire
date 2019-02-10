@@ -34,6 +34,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
             "player_system",
             &["playable_system", "ai_system"],
         );
+        builder.add(PlayerSpawnSystem, "player_spawn_system", &["player_system"]);
         builder.add(ReticleSystem, "reticle_system", &["player_system"]);
         builder.add(BulletSystem, "bullet_system", &["player_system"]);
 

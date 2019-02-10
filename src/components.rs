@@ -14,6 +14,7 @@ pub use crate::common::collision2d::{ColliderResult, RectCollider, Rigidbody};
 pub struct Player {
     pub team: u32,
     pub weapon: usize,
+    pub hp: f32,
 
     #[serde(skip, default = "Vector2::zeros")]
     pub input_move: Vector2<f32>,
@@ -56,6 +57,12 @@ impl Default for AIState {
 #[storage(NullStorage)]
 #[prefab(Component)]
 pub struct Reticle;
+
+#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[prefab(Component)]
+pub struct SpawnPoint {
+    pub team: u32,
+}
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]

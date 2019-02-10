@@ -1,8 +1,5 @@
 use amethyst::{
-    core::nalgebra::*,
-    core::transform::components::Parent,
-    core::Transform,
-    ecs::prelude::*,
+    core::nalgebra::*, core::transform::components::Parent, core::Transform, ecs::prelude::*,
     input::InputHandler,
 };
 use rand::{distributions::*, prelude::*};
@@ -245,6 +242,7 @@ impl<'s> System<'s> for PlayerSystem {
                 let bullet = bullets.get(collided).unwrap();
                 match colliders.get(collided).unwrap().tag.as_str() {
                     "Bullet" if bullet.team != player.team => {
+                        player.hp -= 10.0;
                         let b_pos = transforms.get(collided).unwrap().translation().xy();
                         let p_pos = transform.translation().xy();
                         let dist = p_pos - b_pos;
@@ -255,6 +253,40 @@ impl<'s> System<'s> for PlayerSystem {
                     }
                     _ => {}
                 }
+            }
+        }
+    }
+}
+
+pub struct PlayerSpawnSystem;
+impl<'s> System<'s> for PlayerSpawnSystem {
+    type SystemData = (
+        Entities<'s>,
+        WriteStorage<'s, Player>,
+        ReadStorage<'s, SpawnPoint>,
+        WriteStorage<'s, Transform>,
+        WriteStorage<'s, Rigidbody>,
+    );
+
+    fn run(
+        &mut self,
+        (entities, mut players, spawnpoints, mut transforms, mut rigidbodies): Self::SystemData,
+    ) {
+        for (entity, player) in (&entities, &mut players).join() {
+            if player.hp > 0.0 {
+                continue;
+            }
+            player.hp = 100.0;
+            rigidbodies.get_mut(entity).unwrap().velocity = Vector2::zeros();
+            let point = (&spawnpoints, &transforms)
+                .join()
+                .filter(|(spawnpoint, _)| spawnpoint.team == player.team)
+                .next()
+                .map(|(_, transform)| transform.translation().clone());
+            if let Some(point) = point {
+                let transform = transforms.get_mut(entity).unwrap();
+                transform.set_x(point.x);
+                transform.set_y(point.y);
             }
         }
     }

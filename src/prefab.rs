@@ -22,6 +22,7 @@ pub struct MyPrefabData {
     pub ai: Option<AI>,
     pub bullet: Option<Bullet>,
     pub reticle: Option<Reticle>,
+    pub spawn_point: Option<SpawnPoint>,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
