@@ -1,6 +1,6 @@
 use amethyst::{
     core::nalgebra::*, core::transform::components::Parent, core::Transform, ecs::prelude::*,
-    input::InputHandler,
+    input::InputHandler, renderer::SpriteRender,
 };
 use rand::{distributions::*, prelude::*};
 
@@ -300,6 +300,32 @@ impl<'s> System<'s> for ReticleSystem {
             let v = if aim_r < 0.1 { move_vec } else { aim_vec } * 100.0;
             transform.set_x(v.x);
             transform.set_y(v.y);
+        }
+    }
+}
+
+pub struct ShieldSystem;
+impl<'s> System<'s> for ShieldSystem {
+    type SystemData = (
+        ReadStorage<'s, Shield>,
+        WriteStorage<'s, SpriteRender>,
+        ReadStorage<'s, Parent>,
+        ReadStorage<'s, Player>,
+    );
+
+    fn run(&mut self, (shields, mut renders, parents, players): Self::SystemData) {
+        for (_, parent, render) in (&shields, &parents, &mut renders).join() {
+            let player = players.get(parent.entity).unwrap();
+            let hp = player.hp;
+            if hp >= 100.0 {
+                render.sprite_number = 10;
+            } else if hp > 66.6 {
+                render.sprite_number = 11;
+            } else if hp > 33.3 {
+                render.sprite_number = 12;
+            } else {
+                render.sprite_number = 13;
+            }
         }
     }
 }

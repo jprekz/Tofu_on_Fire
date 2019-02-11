@@ -20,6 +20,14 @@ Prefab (
                 reticle: (),
             ),
         ),
+        (
+            parent: 0,
+            data: (
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 10),
+                shield: (),
+            ),
+        ),
 
         // camera
         (
@@ -50,6 +58,14 @@ Prefab (
             ),
         ),
         (
+            parent: 4,
+            data: (
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 10),
+                shield: (),
+            ),
+        ),
+        (
             data: (
                 transform: (translation: (560.0, 80.0, 0.0)),
                 rigidbody: (drag: 0.2),
@@ -60,6 +76,14 @@ Prefab (
             ),
         ),
         (
+            parent: 6,
+            data: (
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 10),
+                shield: (),
+            ),
+        ),
+        (
             data: (
                 transform: (translation: (80.0, 400.0, 0.0)),
                 rigidbody: (drag: 0.2),
@@ -67,6 +91,14 @@ Prefab (
                 player: (team: 0, weapon: 2, hp: 100.0),
                 ai: (),
                 collider: (tag: "Player", width: 16.0, height: 16.0),
+            ),
+        ),
+        (
+            parent: 8,
+            data: (
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 10),
+                shield: (),
             ),
         ),
 
@@ -82,6 +114,14 @@ Prefab (
             ),
         ),
         (
+            parent: 10,
+            data: (
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 10),
+                shield: (),
+            ),
+        ),
+        (
             data: (
                 transform: (translation: (560.0, 400.0, 0.0)),
                 rigidbody: (drag: 0.2),
@@ -92,13 +132,11 @@ Prefab (
             ),
         ),
         (
+            parent: 12,
             data: (
-                transform: (translation: (560.0, 400.0, 0.0)),
-                rigidbody: (drag: 0.2),
-                sprite: (sprite_number: 3),
-                player: (team: 1, weapon: 1, hp: 100.0),
-                ai: (),
-                collider: (tag: "Player", width: 16.0, height: 16.0),
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 10),
+                shield: (),
             ),
         ),
         (
@@ -112,13 +150,29 @@ Prefab (
             ),
         ),
         (
+            parent: 14,
+            data: (
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 10),
+                shield: (),
+            ),
+        ),
+        (
             data: (
                 transform: (translation: (560.0, 400.0, 0.0)),
                 rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 3),
-                player: (team: 1, weapon: 2, hp: 100.0),
+                player: (team: 1, weapon: 1, hp: 100.0),
                 ai: (),
                 collider: (tag: "Player", width: 16.0, height: 16.0),
+            ),
+        ),
+        (
+            parent: 16,
+            data: (
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 10),
+                shield: (),
             ),
         ),
         (
@@ -129,6 +183,32 @@ Prefab (
                 player: (team: 1, weapon: 2, hp: 100.0),
                 ai: (),
                 collider: (tag: "Player", width: 16.0, height: 16.0),
+            ),
+        ),
+        (
+            parent: 18,
+            data: (
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 10),
+                shield: (),
+            ),
+        ),
+        (
+            data: (
+                transform: (translation: (560.0, 400.0, 0.0)),
+                rigidbody: (drag: 0.2),
+                sprite: (sprite_number: 3),
+                player: (team: 1, weapon: 2, hp: 100.0),
+                ai: (),
+                collider: (tag: "Player", width: 16.0, height: 16.0),
+            ),
+        ),
+        (
+            parent: 20,
+            data: (
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 10),
+                shield: (),
             ),
         ),
 
