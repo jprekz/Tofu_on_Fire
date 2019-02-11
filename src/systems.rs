@@ -10,7 +10,7 @@ use crate::prefab::*;
 use crate::weapon::*;
 
 pub use crate::common::{
-    collision2d::CollisionSystem,
+    collision2d::{CollisionSystem, RigidbodySystem},
     vector2ext::Vector2Ext,
 };
 
@@ -338,28 +338,6 @@ impl<'s> System<'s> for BulletSystem {
                     }
                     _ => {}
                 }
-            }
-        }
-    }
-}
-
-pub struct RigidbodySystem;
-impl<'s> System<'s> for RigidbodySystem {
-    type SystemData = (WriteStorage<'s, Transform>, WriteStorage<'s, Rigidbody>);
-
-    fn run(&mut self, (mut transforms, mut rigidbodies): Self::SystemData) {
-        for (transform, rigidbody) in (&mut transforms, &mut rigidbodies).join() {
-            rigidbody.velocity += rigidbody.acceleration;
-            transform.move_global(
-                rigidbody
-                    .velocity
-                    .map(|x| x.max(-5.0).min(5.0))
-                    .to_homogeneous(),
-            );
-            rigidbody.velocity -= rigidbody.velocity * rigidbody.drag;
-            if rigidbody.auto_rotate {
-                let (_, rad) = rigidbody.velocity.to_polar();
-                transform.set_rotation_euler(0.0, 0.0, rad);
             }
         }
     }

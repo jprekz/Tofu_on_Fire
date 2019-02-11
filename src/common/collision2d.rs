@@ -7,6 +7,9 @@ use amethyst::{
 };
 use serde_derive::{Deserialize, Serialize};
 use specs_derive::Component;
+
+use crate::common::vector2ext::Vector2Ext;
+
 use std::collections::HashSet;
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
@@ -29,6 +32,28 @@ impl Default for Rigidbody {
             bounciness: 0.0,
             friction: 0.0,
             auto_rotate: false,
+        }
+    }
+}
+
+pub struct RigidbodySystem;
+impl<'s> System<'s> for RigidbodySystem {
+    type SystemData = (WriteStorage<'s, Transform>, WriteStorage<'s, Rigidbody>);
+
+    fn run(&mut self, (mut transforms, mut rigidbodies): Self::SystemData) {
+        for (transform, rigidbody) in (&mut transforms, &mut rigidbodies).join() {
+            rigidbody.velocity += rigidbody.acceleration;
+            transform.move_global(
+                rigidbody
+                    .velocity
+                    .map(|x| x.max(-5.0).min(5.0))
+                    .to_homogeneous(),
+            );
+            rigidbody.velocity -= rigidbody.velocity * rigidbody.drag;
+            if rigidbody.auto_rotate {
+                let (_, rad) = rigidbody.velocity.to_polar();
+                transform.set_rotation_euler(0.0, 0.0, rad);
+            }
         }
     }
 }
