@@ -9,22 +9,12 @@ use crate::components::*;
 use crate::prefab::*;
 use crate::weapon::*;
 
-pub use crate::common::collision2d::CollisionSystem;
+pub use crate::common::{
+    collision2d::CollisionSystem,
+    vector2ext::Vector2Ext,
+};
 
 const PI: f32 = std::f32::consts::PI;
-
-trait Vector2Ext<N> {
-    fn to_polar(&self) -> (N, N);
-    fn from_polar(r: N, theta: N) -> Self;
-}
-impl<N: Real> Vector2Ext<N> for Vector2<N> {
-    fn to_polar(&self) -> (N, N) {
-        (self.x.hypot(self.y), self.y.atan2(self.x))
-    }
-    fn from_polar(r: N, theta: N) -> Self {
-        Vector2::new(theta.cos() * r, theta.sin() * r)
-    }
-}
 
 pub struct PlayableSystem;
 impl<'s> System<'s> for PlayableSystem {
