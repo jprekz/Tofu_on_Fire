@@ -27,7 +27,7 @@ impl SimpleState for Game {
     ) -> SimpleTrans {
         match &event {
             StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::Escape) => Trans::Quit,
-            StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::S) => {
+            StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::F1) => {
                 let StateData { world, .. } = data;
                 MapPrefabData::save(world);
                 Trans::None
