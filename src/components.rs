@@ -43,6 +43,11 @@ pub struct Reticle;
 #[derive(Component, PrefabData, Deserialize, Serialize, Default, Clone, Debug)]
 #[storage(NullStorage)]
 #[prefab(Component)]
+pub struct ReticleLine;
+
+#[derive(Component, PrefabData, Deserialize, Serialize, Default, Clone, Debug)]
+#[storage(NullStorage)]
+#[prefab(Component)]
 pub struct Shield;
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]

@@ -22,6 +22,7 @@ pub struct MyPrefabData {
     pub ai: Option<AI>,
     pub bullet: Option<Bullet>,
     pub reticle: Option<Reticle>,
+    pub reticle_line: Option<ReticleLine>,
     pub shield: Option<Shield>,
     pub spawn_point: Option<SpawnPoint>,
     pub map: Option<Map>,

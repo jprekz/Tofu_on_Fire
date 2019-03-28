@@ -205,12 +205,13 @@ pub struct ReticleSystem;
 impl<'s> System<'s> for ReticleSystem {
     type SystemData = (
         ReadStorage<'s, Reticle>,
+        ReadStorage<'s, ReticleLine>,
         ReadStorage<'s, Parent>,
         WriteStorage<'s, Transform>,
         ReadStorage<'s, Player>,
     );
 
-    fn run(&mut self, (reticles, parents, mut transforms, players): Self::SystemData) {
+    fn run(&mut self, (reticles, lines, parents, mut transforms, players): Self::SystemData) {
         for (_, parent, transform) in (&reticles, &parents, &mut transforms).join() {
             let player = players.get(parent.entity).unwrap();
             let move_vec = player.input_move;
@@ -219,6 +220,16 @@ impl<'s> System<'s> for ReticleSystem {
             let v = if aim_r < 0.1 { move_vec } else { aim_vec } * 100.0;
             transform.set_x(v.x);
             transform.set_y(v.y);
+        }
+        for (_, parent, transform) in (&lines, &parents, &mut transforms).join() {
+            let player = players.get(parent.entity).unwrap();
+            let move_vec = player.input_move;
+            let aim_vec = player.input_aim;
+            let aim_r = aim_vec.x.hypot(aim_vec.y);
+            let v = if aim_r < 0.1 { move_vec } else { aim_vec } * 100.0;
+            let (l, rad) = v.to_polar();
+            transform.set_rotation_euler(0.0, 0.0, rad);
+            transform.set_scale(l / 100.0, 1.0, 1.0);
         }
     }
 }

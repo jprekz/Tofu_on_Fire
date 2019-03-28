@@ -99,5 +99,13 @@
             width: 16,
             height: 16,
         ),
+
+        // line [14]
+        (
+            x: 32,
+            y: 48,
+            width: 16,
+            height: 16,
+        ),
     ],
 )
