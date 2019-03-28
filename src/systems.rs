@@ -277,6 +277,7 @@ impl<'s> System<'s> for PlayerSpawnSystem {
                 let transform = transforms.get_mut(entity).unwrap();
                 transform.set_x(point.x);
                 transform.set_y(point.y);
+                player.weapon = (player.weapon + 1) % 3;
             }
         }
     }
