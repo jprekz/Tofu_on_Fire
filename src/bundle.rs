@@ -4,6 +4,7 @@ use amethyst::{
     ecs::prelude::DispatcherBuilder,
 };
 
+use crate::ai::AISystem;
 use crate::prefab::*;
 use crate::systems::*;
 
