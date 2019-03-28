@@ -105,3 +105,8 @@ impl Bullet {
         }
     }
 }
+
+#[derive(Component, PrefabData, Deserialize, Serialize, Default, Clone, Debug)]
+#[storage(NullStorage)]
+#[prefab(Component)]
+pub struct Map;

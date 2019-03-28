@@ -1,0 +1,48 @@
+#![enable(implicit_some)]
+Prefab (
+    entities: [
+        // player
+        (
+            data: (
+                transform: (translation: (40.0, 40.0, 0.0)),
+                rigidbody: (drag: 0.2),
+                sprite: (sprite_number: 2),
+                player: (team: 0, weapon: 0, hp: 100.0),
+                playable: (),
+                collider: (tag: "Player", width: 16.0, height: 16.0),
+            ),
+        ),
+        (
+            parent: 0,
+            data: (
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 1),
+                reticle: (),
+            ),
+        ),
+        (
+            parent: 0,
+            data: (
+                transform: (translation: (0.0, 0.0, 1.0)),
+                sprite: (sprite_number: 10),
+                shield: (),
+            ),
+        ),
+
+        // camera
+        (
+            parent: 0,
+            data: (
+                transform: (translation: (-160.0, -120.0, 100.0)),
+                camera: Orthographic((
+                    left: 0.0,
+                    right: 320.0,
+                    bottom: 240.0, // Y axis reversed
+                    top: 0.0,
+                    znear: 0.1,
+                    zfar: 2000.0,
+                )),
+            ),
+        ),
+    ],
+)

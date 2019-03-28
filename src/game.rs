@@ -21,17 +21,17 @@ pub struct Game {
 impl SimpleState for Game {
     fn handle_event(
         &mut self,
-        _: StateData<'_, GameData<'_, '_>>,
+        data: StateData<'_, GameData<'_, '_>>,
         event: StateEvent,
     ) -> SimpleTrans {
-        if let StateEvent::Window(event) = event {
-            if is_key_down(&event, VirtualKeyCode::Escape) {
-                Trans::Quit
-            } else {
+        match &event {
+            StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::Escape) => Trans::Quit,
+            StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::S) => {
+                let StateData { world, .. } = data;
+                MapPrefabData::save(world);
                 Trans::None
             }
-        } else {
-            Trans::None
+            _ => Trans::None,
         }
     }
 
@@ -65,14 +65,31 @@ impl SimpleState for Game {
         let weapon_list = WeaponList::load("resources/weapon_list.ron");
         world.add_resource(weapon_list);
 
-        let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-            loader.load("resources/prefab.ron", RonFormat, (), ())
+        let prefab_handle = world.exec(|loader: PrefabLoader<'_, MapPrefabData>| {
+            loader.load("resources/map.ron", RonFormat, (), ())
         });
         world.create_entity().with(prefab_handle).build();
 
-        let prefab_handle = world.exec(|loader: PrefabLoader<'_, MapTilePrefab>| {
-            loader.load("resources/map1.ron", RonFormat, (), ())
+        let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
+            loader.load("resources/player.ron", RonFormat, (), ())
         });
+        world.create_entity().with(prefab_handle).build();
+
+        let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
+            loader.load("resources/ai.ron", RonFormat, (), ())
+        });
+        world.create_entity().with(prefab_handle.clone()).build();
+        world.create_entity().with(prefab_handle.clone()).build();
+        world.create_entity().with(prefab_handle.clone()).build();
+        world.create_entity().with(prefab_handle).build();
+
+        let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
+            loader.load("resources/enemy.ron", RonFormat, (), ())
+        });
+        world.create_entity().with(prefab_handle.clone()).build();
+        world.create_entity().with(prefab_handle.clone()).build();
+        world.create_entity().with(prefab_handle.clone()).build();
+        world.create_entity().with(prefab_handle.clone()).build();
         world.create_entity().with(prefab_handle).build();
 
         world.exec(|mut creator: UiCreator<'_>| {

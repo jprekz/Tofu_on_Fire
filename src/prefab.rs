@@ -1,6 +1,5 @@
 use amethyst::{
     assets::{PrefabData, PrefabError, ProgressCounter},
-    core::nalgebra::*,
     core::Transform,
     derive::PrefabData,
     ecs::prelude::*,
@@ -24,6 +23,7 @@ pub struct MyPrefabData {
     pub reticle: Option<Reticle>,
     pub shield: Option<Shield>,
     pub spawn_point: Option<SpawnPoint>,
+    pub map: Option<Map>,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -53,41 +53,52 @@ impl<'a> PrefabData<'a> for SpriteRenderPrefab {
     }
 }
 
-#[derive(Clone, Deserialize, Serialize)]
-pub struct MapTilePrefab {
-    pos: (i32, i32),
-    size: (i32, i32),
+#[derive(PrefabData, Deserialize, Serialize, Default)]
+pub struct MapPrefabData {
+    pub transform: Option<Transform>,
+    pub collider: Option<RectCollider>,
+    pub sprite: Option<SpriteRenderPrefab>,
+    pub spawn_point: Option<SpawnPoint>,
+    #[serde(skip)]
+    pub map: Map,
 }
-impl<'a> PrefabData<'a> for MapTilePrefab {
-    type SystemData = (
-        WriteStorage<'a, Transform>,
-        WriteStorage<'a, RectCollider>,
-        <SpriteRenderPrefab as PrefabData<'a>>::SystemData,
-    );
-    type Result = ();
 
-    fn add_to_entity(
-        &self,
-        entity: Entity,
-        (transforms, colliders, sprite_render_data): &mut Self::SystemData,
-        _: &[Entity],
-    ) -> Result<(), PrefabError> {
-        let width = self.size.0 as f32 * 32.0;
-        let height = self.size.1 as f32 * 32.0;
-        let x = (self.pos.0 * 32) as f32 + width / 2.0;
-        let y = (self.pos.1 * 32) as f32 + height / 2.0;
+impl MapPrefabData {
+    pub fn save(world: &mut World) {
+        use amethyst::assets::Prefab;
+        use ron::ser::{to_string_pretty, PrettyConfig};
+        use std::io::{BufWriter, Write};
 
-        let mut transform = Transform::default();
-        transform.set_position(Vector3::new(x, y, 0.0));
-        transform.set_scale(width / 32.0, height / 32.0, 1.0);
-        transforms.insert(entity, transform)?;
-
-        let collider = RectCollider::new("Wall", width, height);
-        colliders.insert(entity, collider)?;
-
-        let sprite_render_prefab = SpriteRenderPrefab { sprite_number: 0 };
-        sprite_render_prefab
-            .add_to_entity(entity, sprite_render_data, &[])
-            .map(|_| ())
+        let mut prefab = Prefab::<MapPrefabData>::new();
+        world.exec(
+            |data: (
+                Entities<'_>,
+                ReadStorage<'_, Transform>,
+                ReadStorage<'_, RectCollider>,
+                ReadStorage<'_, SpriteRender>,
+                ReadStorage<'_, SpawnPoint>,
+                ReadStorage<'_, Map>,
+            )| {
+                let (entities, transforms, colliders, sprites, spawnpoints, maps) = data;
+                for (entity, _) in (&entities, &maps).join() {
+                    prefab.add(
+                        None,
+                        Some(MapPrefabData {
+                            transform: transforms.get(entity).cloned(),
+                            collider: colliders.get(entity).cloned(),
+                            sprite: sprites.get(entity).map(|e| SpriteRenderPrefab {
+                                sprite_number: e.sprite_number,
+                            }),
+                            spawn_point: spawnpoints.get(entity).cloned(),
+                            map: Map,
+                        }),
+                    );
+                }
+            },
+        );
+        let s = to_string_pretty(&prefab, PrettyConfig::default()).unwrap();
+        println!("{}", s);
+        let mut f = BufWriter::new(std::fs::File::create("resources/map.ron").unwrap());
+        f.write(s.as_bytes()).unwrap();
     }
 }
