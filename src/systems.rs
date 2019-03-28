@@ -54,8 +54,8 @@ impl<'s> System<'s> for PlayableSystem {
     }
 }
 
-pub struct PlayerSystem;
-impl<'s> System<'s> for PlayerSystem {
+pub struct PlayerControlSystem;
+impl<'s> System<'s> for PlayerControlSystem {
     type SystemData = (
         RuntimePrefabLoader<'s, MyPrefabData>,
         AudioPlayer<'s>,
@@ -63,26 +63,16 @@ impl<'s> System<'s> for PlayerSystem {
         (
             Entities<'s>,
             WriteStorage<'s, Player>,
-            ReadStorage<'s, Bullet>,
             ReadStorage<'s, Transform>,
             WriteStorage<'s, Rigidbody>,
-            ReadStorage<'s, RectCollider>,
-            ReadStorage<'s, ColliderResult>,
         ),
     );
 
     fn run(&mut self, (mut prefab_loader, mut audio, weapon_list, storages): Self::SystemData) {
-        let (entities, mut players, bullets, transforms, mut rigidbodies, colliders, results) =
-            storages;
+        let (entities, mut players, transforms, mut rigidbodies) = storages;
 
-        for (entity, player, transform, rigidbody, result) in (
-            &entities,
-            &mut players,
-            &transforms,
-            &mut rigidbodies,
-            &results,
-        )
-            .join()
+        for (entity, player, transform, rigidbody) in
+            (&entities, &mut players, &transforms, &mut rigidbodies).join()
         {
             let weapon = &weapon_list[player.weapon];
 
@@ -145,7 +135,27 @@ impl<'s> System<'s> for PlayerSystem {
                 player.trigger_timer = weapon.rate;
                 audio.play_once(entity, 0.2);
             }
+        }
+    }
+}
 
+pub struct PlayerCollisionSystem;
+impl<'s> System<'s> for PlayerCollisionSystem {
+    type SystemData = (
+        WriteStorage<'s, Player>,
+        ReadStorage<'s, Bullet>,
+        ReadStorage<'s, Transform>,
+        WriteStorage<'s, Rigidbody>,
+        ReadStorage<'s, RectCollider>,
+        ReadStorage<'s, ColliderResult>,
+    );
+
+    fn run(&mut self, storages: Self::SystemData) {
+        let (mut players, bullets, transforms, mut rigidbodies, colliders, results) = storages;
+
+        for (player, transform, rigidbody, result) in
+            (&mut players, &transforms, &mut rigidbodies, &results).join()
+        {
             for &collided in &result.collided {
                 let bullet = bullets.get(collided).unwrap();
                 match colliders.get(collided).unwrap().tag.as_str() {
