@@ -9,7 +9,6 @@ Prefab (
                 sprite: (sprite_number: 2),
                 player: (team: 0, weapon: 0, hp: 100.0),
                 playable: (),
-                ai: (),
                 collider: (tag: "Player", width: 16.0, height: 16.0),
             ),
         ),
