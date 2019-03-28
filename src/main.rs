@@ -1,4 +1,5 @@
 use amethyst::{
+    audio::AudioBundle,
     core::transform::TransformBundle,
     input::InputBundle,
     prelude::*,
@@ -8,6 +9,7 @@ use amethyst::{
 };
 
 mod ai;
+mod audio;
 mod bundle;
 mod common;
 mod components;
@@ -45,6 +47,7 @@ fn main() -> amethyst::Result<()> {
     };
 
     let game_data = GameDataBuilder::default()
+        .with_bundle(AudioBundle::new(|_: &mut ()| None))?
         .with_bundle(FPSCounterBundle)?
         .with_bundle(input_bundle)?
         .with_bundle(bundle::GameBundle::default())?

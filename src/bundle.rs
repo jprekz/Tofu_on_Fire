@@ -5,6 +5,7 @@ use amethyst::{
 };
 
 use crate::ai::AISystem;
+use crate::audio::MyAudioSystem;
 use crate::prefab::*;
 use crate::systems::*;
 
@@ -39,6 +40,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
         builder.add(ShieldSystem, "shield_system", &["player_system"]);
         builder.add(ReticleSystem, "reticle_system", &["player_system"]);
         builder.add(BulletSystem, "bullet_system", &["player_system"]);
+        builder.add(MyAudioSystem, "my_audio_system", &["player_system"]);
 
         Ok(())
     }

@@ -10,6 +10,7 @@ use amethyst::{
     winit::VirtualKeyCode,
 };
 
+use crate::audio::*;
 use crate::prefab::*;
 use crate::weapon::*;
 
@@ -95,6 +96,8 @@ impl SimpleState for Game {
         world.exec(|mut creator: UiCreator<'_>| {
             creator.create("resources/fps.ron", ());
         });
+
+        initialise_audio(world);
     }
 }
 

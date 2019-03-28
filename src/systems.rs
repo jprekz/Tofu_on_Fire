@@ -4,6 +4,7 @@ use amethyst::{
 };
 use rand::{distributions::*, prelude::*};
 
+use crate::audio::*;
 use crate::common::prefab::*;
 use crate::components::*;
 use crate::prefab::*;
@@ -57,8 +58,10 @@ pub struct PlayerSystem;
 impl<'s> System<'s> for PlayerSystem {
     type SystemData = (
         RuntimePrefabLoader<'s, MyPrefabData>,
+        AudioPlayer<'s>,
         Read<'s, WeaponList>,
         (
+            Entities<'s>,
             WriteStorage<'s, Player>,
             ReadStorage<'s, Bullet>,
             ReadStorage<'s, Transform>,
@@ -68,11 +71,18 @@ impl<'s> System<'s> for PlayerSystem {
         ),
     );
 
-    fn run(&mut self, (mut prefab_loader, weapon_list, storages): Self::SystemData) {
-        let (mut players, bullets, transforms, mut rigidbodies, colliders, results) = storages;
+    fn run(&mut self, (mut prefab_loader, mut audio, weapon_list, storages): Self::SystemData) {
+        let (entities, mut players, bullets, transforms, mut rigidbodies, colliders, results) =
+            storages;
 
-        for (player, transform, rigidbody, result) in
-            (&mut players, &transforms, &mut rigidbodies, &results).join()
+        for (entity, player, transform, rigidbody, result) in (
+            &entities,
+            &mut players,
+            &transforms,
+            &mut rigidbodies,
+            &results,
+        )
+            .join()
         {
             let weapon = &weapon_list[player.weapon];
 
@@ -133,6 +143,7 @@ impl<'s> System<'s> for PlayerSystem {
                     ..Default::default()
                 });
                 player.trigger_timer = weapon.rate;
+                audio.play_once(entity, 0.2);
             }
 
             for &collided in &result.collided {
