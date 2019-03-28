@@ -14,8 +14,6 @@ pub use crate::common::{
     vector2ext::Vector2Ext,
 };
 
-const PI: f32 = std::f32::consts::PI;
-
 pub struct PlayableSystem;
 impl<'s> System<'s> for PlayableSystem {
     type SystemData = (
@@ -51,97 +49,6 @@ impl<'s> System<'s> for PlayableSystem {
             player.input_shot = shot;
             player.input_change = change && !playable.input_change_hold;
             playable.input_change_hold = change;
-        }
-    }
-}
-
-pub struct AISystem;
-impl<'s> System<'s> for AISystem {
-    type SystemData = (
-        Entities<'s>,
-        WriteStorage<'s, AI>,
-        WriteStorage<'s, Player>,
-        ReadStorage<'s, Transform>,
-        ReadStorage<'s, Bullet>,
-    );
-
-    fn run(&mut self, (entities, mut ai, mut players, transforms, bullets): Self::SystemData) {
-        for (entity, ai, transform) in (&entities, &mut ai, &transforms).join() {
-            let mut rng = thread_rng();
-
-            let my_team = players.get(entity).unwrap().team;
-            let my_pos = transform.translation().xy();
-
-            // change target
-            if rng.gen_bool(0.01) {
-                if let Some((next_target, _)) = (&entities, &players)
-                    .join()
-                    .filter(|(_, target)| target.team != my_team)
-                    .choose(&mut rng)
-                {
-                    ai.state = AIState::Go(next_target);
-                }
-            }
-
-            if rng.gen_bool(0.1) {
-                if let Some((next_target, _, _)) = (&entities, &bullets, &transforms)
-                    .join()
-                    .filter(|(_, bullet, _)| bullet.team != my_team)
-                    .filter(|(_, _, transform)| {
-                        (transform.translation().xy() - my_pos).norm() < 40.0
-                    })
-                    .min_by_key(|(_, _, transform)| {
-                        (transform.translation().xy() - my_pos).norm() as i32
-                    })
-                {
-                    ai.state = AIState::Away(next_target);
-                }
-            }
-
-            match ai.state.clone() {
-                AIState::Go(target) => {
-                    let target_pos = transforms.get(target).unwrap().translation().xy();
-                    let dist = target_pos - my_pos;
-                    let mut move_vec = if dist != Vector2::zeros() {
-                        dist.normalize()
-                    } else {
-                        Vector2::zeros()
-                    };
-
-                    if dist.norm() > 40.0 {
-                        let (r, theta) = dist.to_polar();
-                        let theta = (theta * 4.0 / PI).round() * PI / 4.0;
-                        move_vec = Vector2::from_polar(r, theta).normalize();
-                    }
-
-                    let player = players.get_mut(entity).unwrap();
-                    player.input_move = move_vec;
-                    player.input_shot = true;
-                }
-                AIState::Away(target) => {
-                    let target_pos = if let Some(t) = transforms.get(target) {
-                        t.translation().xy()
-                    } else {
-                        ai.state = AIState::Neutral;
-                        continue;
-                    };
-                    let dist = target_pos - my_pos;
-                    if dist.norm() > 40.0 {
-                        ai.state = AIState::Neutral;
-                        continue;
-                    }
-                    let move_vec = if dist != Vector2::zeros() {
-                        -dist.normalize()
-                    } else {
-                        Vector2::zeros()
-                    };
-
-                    let player = players.get_mut(entity).unwrap();
-                    player.input_move = move_vec;
-                    player.input_shot = true;
-                }
-                _ => {}
-            }
         }
     }
 }

@@ -7,6 +7,7 @@ use amethyst::{
 };
 use serde_derive::{Deserialize, Serialize};
 
+use crate::ai::AI;
 use crate::components::*;
 
 #[derive(PrefabData, Deserialize, Serialize, Default)]

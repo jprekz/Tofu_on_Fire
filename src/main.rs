@@ -7,6 +7,7 @@ use amethyst::{
     utils::{application_root_dir, fps_counter::FPSCounterBundle},
 };
 
+mod ai;
 mod bundle;
 mod common;
 mod components;
