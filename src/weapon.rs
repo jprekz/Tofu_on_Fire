@@ -18,6 +18,7 @@ impl Deref for WeaponList {
 pub struct Weapon {
     pub move_speed: f32,
     pub rate: u32,
+    pub bullet_damage: f32,
     pub bullet_sprite: usize,
     pub bullet_spread: f32,
     pub bullet_speed: f32,

@@ -124,6 +124,7 @@ impl<'s> System<'s> for PlayerControlSystem {
                     )),
                     bullet: Some(Bullet::new(
                         player.team,
+                        weapon.bullet_damage,
                         weapon.bullet_timer_limit,
                         weapon.bullet_reflect_limit,
                         weapon.bullet_knockback,
@@ -160,7 +161,7 @@ impl<'s> System<'s> for PlayerCollisionSystem {
                 let bullet = bullets.get(collided).unwrap();
                 match colliders.get(collided).unwrap().tag.as_str() {
                     "Bullet" if bullet.team != player.team => {
-                        player.hp -= 10.0;
+                        player.hp -= bullet.damage;
                         let b_pos = transforms.get(collided).unwrap().translation().xy();
                         let p_pos = transform.translation().xy();
                         let dist = p_pos - b_pos;
@@ -306,7 +307,7 @@ impl<'s> System<'s> for BulletSystem {
                             if !bullet.pierce {
                                 entities.delete(entity).unwrap();
                             }
-                            audio.play_once(entity, 3, 0.5);
+                            audio.play_once(entity, 3, bullet.damage / 25.0);
                         }
                     }
                     _ => {}

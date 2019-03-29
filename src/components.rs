@@ -60,6 +60,7 @@ pub struct SpawnPoint {
 #[prefab(Component)]
 pub struct Bullet {
     pub team: u32,
+    pub damage: f32,
     pub timer_limit: u32,
     pub reflect_limit: u32,
     pub knockback: f32,
@@ -74,6 +75,7 @@ pub struct Bullet {
 impl Bullet {
     pub fn new(
         team: u32,
+        damage: f32,
         timer_limit: u32,
         reflect_limit: u32,
         knockback: f32,
@@ -82,6 +84,7 @@ impl Bullet {
     ) -> Bullet {
         Bullet {
             team,
+            damage,
             timer_limit,
             reflect_limit,
             knockback,
