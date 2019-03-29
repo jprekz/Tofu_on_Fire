@@ -19,7 +19,10 @@ mod systems;
 mod weapon;
 
 fn main() -> amethyst::Result<()> {
-    amethyst::start_logger(Default::default());
+    amethyst::Logger::from_config(Default::default())
+        .level_for("gfx_device_gl", amethyst::LogLevelFilter::Warn)
+        .level_for("amethyst_assets", amethyst::LogLevelFilter::Info)
+        .start();
 
     let app_root = application_root_dir();
 
