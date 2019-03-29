@@ -278,9 +278,13 @@ impl<'s> System<'s> for BulletSystem {
         ReadStorage<'s, RectCollider>,
         ReadStorage<'s, ColliderResult>,
         ReadStorage<'s, Player>,
+        AudioPlayer<'s>,
     );
 
-    fn run(&mut self, (entities, mut bullets, colliders, results, players): Self::SystemData) {
+    fn run(
+        &mut self,
+        (entities, mut bullets, colliders, results, players, mut audio): Self::SystemData,
+    ) {
         for (entity, bullet, result) in (&entities, &mut bullets, &results).join() {
             if bullet.timer_limit != 0 {
                 bullet.timer_count += 1;
@@ -298,8 +302,11 @@ impl<'s> System<'s> for BulletSystem {
                         }
                     }
                     "Player" => {
-                        if players.get(collided).unwrap().team != bullet.team && !bullet.pierce {
-                            entities.delete(entity).unwrap();
+                        if players.get(collided).unwrap().team != bullet.team {
+                            if !bullet.pierce {
+                                entities.delete(entity).unwrap();
+                            }
+                            audio.play_once(entity, 3, 0.5);
                         }
                     }
                     _ => {}

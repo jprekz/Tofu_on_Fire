@@ -18,6 +18,7 @@ pub fn initialise_audio(world: &mut World) {
             load("audio/shot1.wav", world),
             load("audio/shot2.wav", world),
             load("audio/shot3.wav", world),
+            load("audio/damage1.wav", world),
         ],
     };
     world.add_resource(sounds);
