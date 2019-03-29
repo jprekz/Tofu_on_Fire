@@ -133,7 +133,7 @@ impl<'s> System<'s> for PlayerControlSystem {
                     ..Default::default()
                 });
                 player.trigger_timer = weapon.rate;
-                audio.play_once(entity, 0.2);
+                audio.play_once(entity, player.weapon, 0.2);
             }
         }
     }

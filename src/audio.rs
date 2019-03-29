@@ -9,23 +9,28 @@ use shred_derive::SystemData;
 use specs_derive::Component;
 
 pub struct Sounds {
-    pub shoot: SourceHandle,
+    pub array: Vec<SourceHandle>,
 }
 
 pub fn initialise_audio(world: &mut World) {
-    let source_handle = {
-        let loader = world.read_resource::<Loader>();
-        loader.load("audio/shot1.wav", WavFormat, (), (), &world.read_resource())
-    };
     let sounds = Sounds {
-        shoot: source_handle,
+        array: vec![
+            load("audio/shot1.wav", world),
+            load("audio/shot2.wav", world),
+            load("audio/shot3.wav", world),
+        ],
     };
     world.add_resource(sounds);
     world.add_resource(());
 }
+fn load(name: &str, world: &mut World) -> SourceHandle {
+    let loader = world.read_resource::<Loader>();
+    loader.load(name, WavFormat, (), (), &world.read_resource())
+}
 
 #[derive(Component, Clone, Debug)]
 pub struct PlayOnce {
+    sound: usize,
     volume: f32,
 }
 
@@ -35,8 +40,10 @@ pub struct AudioPlayer<'a> {
 }
 
 impl<'a> AudioPlayer<'a> {
-    pub fn play_once(&mut self, entity: Entity, volume: f32) {
-        self.storage.insert(entity, PlayOnce { volume }).unwrap();
+    pub fn play_once(&mut self, entity: Entity, sound: usize, volume: f32) {
+        self.storage
+            .insert(entity, PlayOnce { sound, volume })
+            .unwrap();
     }
 }
 
@@ -66,8 +73,9 @@ impl<'s> System<'s> for MyAudioSystem {
             if volume <= 0.0 {
                 continue;
             }
+            let volume = volume * volume;
             if let Some(ref output) = output.as_ref() {
-                if let Some(sound) = storage.get(&sounds.shoot) {
+                if let Some(sound) = storage.get(&sounds.array[p.sound]) {
                     output.play_once(sound, p.volume * volume);
                 }
             }
