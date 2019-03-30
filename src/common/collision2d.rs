@@ -77,8 +77,13 @@ impl RectCollider {
 
 #[derive(Component, Debug)]
 pub struct ColliderResult {
-    pub collided: Vec<Entity>,
+    pub collided: Vec<Collided>,
     pub collision: Vector2<f32>,
+}
+#[derive(Debug)]
+pub struct Collided {
+    pub entity: Entity,
+    pub tag: String,
 }
 
 #[derive(Default)]
@@ -144,10 +149,13 @@ impl<'s> System<'s> for CollisionSystem {
                     let sinking_x = th_x - sub.x.abs();
                     let sinking_y = th_y - sub.y.abs();
                     if sinking_x > 0.0 && sinking_y > 0.0 {
-                        let entry = (tag_a.clone(), tag_b);
+                        let entry = (tag_a.clone(), tag_b.clone());
 
                         if self.trigger_entries.contains(&entry) {
-                            result_a.collided.push(ent_b);
+                            result_a.collided.push(Collided {
+                                entity: ent_b,
+                                tag: tag_b,
+                            });
                         }
 
                         if !self.collide_entries.contains(&entry) {

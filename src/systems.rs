@@ -147,22 +147,21 @@ impl<'s> System<'s> for PlayerCollisionSystem {
         ReadStorage<'s, Bullet>,
         ReadStorage<'s, Transform>,
         WriteStorage<'s, Rigidbody>,
-        ReadStorage<'s, RectCollider>,
         ReadStorage<'s, ColliderResult>,
     );
 
     fn run(&mut self, storages: Self::SystemData) {
-        let (mut players, bullets, transforms, mut rigidbodies, colliders, results) = storages;
+        let (mut players, bullets, transforms, mut rigidbodies, results) = storages;
 
         for (player, transform, rigidbody, result) in
             (&mut players, &transforms, &mut rigidbodies, &results).join()
         {
-            for &collided in &result.collided {
-                let bullet = bullets.get(collided).unwrap();
-                match colliders.get(collided).unwrap().tag.as_str() {
+            for collided in &result.collided {
+                let bullet = bullets.get(collided.entity).unwrap();
+                match collided.tag.as_str() {
                     "Bullet" if bullet.team != player.team => {
                         player.hp -= bullet.damage;
-                        let b_pos = transforms.get(collided).unwrap().translation().xy();
+                        let b_pos = transforms.get(collided.entity).unwrap().translation().xy();
                         let p_pos = transform.translation().xy();
                         let dist = p_pos - b_pos;
                         rigidbody.velocity *= 1.0 - bullet.slowing;
@@ -276,16 +275,12 @@ impl<'s> System<'s> for BulletSystem {
     type SystemData = (
         Entities<'s>,
         WriteStorage<'s, Bullet>,
-        ReadStorage<'s, RectCollider>,
         ReadStorage<'s, ColliderResult>,
         ReadStorage<'s, Player>,
         AudioPlayer<'s>,
     );
 
-    fn run(
-        &mut self,
-        (entities, mut bullets, colliders, results, players, mut audio): Self::SystemData,
-    ) {
+    fn run(&mut self, (entities, mut bullets, results, players, mut audio): Self::SystemData) {
         for (entity, bullet, result) in (&entities, &mut bullets, &results).join() {
             if bullet.timer_limit != 0 {
                 bullet.timer_count += 1;
@@ -294,8 +289,8 @@ impl<'s> System<'s> for BulletSystem {
                 }
             }
 
-            for &collided in &result.collided {
-                match colliders.get(collided).unwrap().tag.as_str() {
+            for collided in &result.collided {
+                match collided.tag.as_str() {
                     "Wall" => {
                         bullet.reflect_count += 1;
                         if bullet.reflect_count > bullet.reflect_limit {
@@ -303,7 +298,7 @@ impl<'s> System<'s> for BulletSystem {
                         }
                     }
                     "Player" => {
-                        if players.get(collided).unwrap().team != bullet.team {
+                        if players.get(collided.entity).unwrap().team != bullet.team {
                             if !bullet.pierce {
                                 entities.delete(entity).unwrap();
                             }
