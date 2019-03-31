@@ -156,14 +156,14 @@
             parent: None,
             data: Some((
                 transform: Some((
-                    translation: (112, 224, 0),
+                    translation: (112, 240, 0),
                     rotation: (1, 0, 0, 0),
-                    scale: (1, 6, 1),
+                    scale: (1, 5, 1),
                 )),
                 collider: Some((
                     tag: "Wall",
                     width: 32,
-                    height: 192,
+                    height: 160,
                 )),
                 sprite: Some((
                     sprite_number: 0,
@@ -232,14 +232,14 @@
             parent: None,
             data: Some((
                 transform: Some((
-                    translation: (528, 256, 0),
+                    translation: (528, 240, 0),
                     rotation: (1, 0, 0, 0),
-                    scale: (1, 6, 1),
+                    scale: (1, 5, 1),
                 )),
                 collider: Some((
                     tag: "Wall",
                     width: 32,
-                    height: 192,
+                    height: 160,
                 )),
                 sprite: Some((
                     sprite_number: 0,
@@ -251,13 +251,32 @@
             parent: None,
             data: Some((
                 transform: Some((
-                    translation: (320, 240, 0),
+                    translation: (208, 240, 0),
                     rotation: (1, 0, 0, 0),
-                    scale: (10, 1, 1),
+                    scale: (3, 1, 1),
                 )),
                 collider: Some((
                     tag: "Wall",
-                    width: 320,
+                    width: 96,
+                    height: 32,
+                )),
+                sprite: Some((
+                    sprite_number: 0,
+                )),
+                spawn_point: None,
+            )),
+        ),
+        (
+            parent: None,
+            data: Some((
+                transform: Some((
+                    translation: (432, 240, 0),
+                    rotation: (1, 0, 0, 0),
+                    scale: (3, 1, 1),
+                )),
+                collider: Some((
+                    tag: "Wall",
+                    width: 96,
                     height: 32,
                 )),
                 sprite: Some((
