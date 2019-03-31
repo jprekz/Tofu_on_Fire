@@ -1,7 +1,9 @@
 use amethyst::{
-    assets::{AssetStorage, Loader, PrefabLoader, RonFormat},
+    assets::{AssetStorage, Handle, Loader, Prefab, PrefabLoader, RonFormat},
+    core::nalgebra::*,
     core::Time,
-    ecs::prelude::Entity,
+    core::Transform,
+    ecs::prelude::*,
     input::is_key_down,
     prelude::*,
     renderer::*,
@@ -11,12 +13,19 @@ use amethyst::{
 };
 
 use crate::audio::*;
+use crate::components::*;
 use crate::prefab::*;
 use crate::weapon::*;
 
 #[derive(Default)]
 pub struct Game {
     fps_display: Option<Entity>,
+    player_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
+    ai_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
+    enemy_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
+    player_weapon: usize,
+    ai_weapon: usize,
+    enemy_weapon: usize,
 }
 
 impl SimpleState for Game {
@@ -57,8 +66,76 @@ impl SimpleState for Game {
         Trans::None
     }
 
+    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        let StateData { world, .. } = data;
+
+        if world.read_resource::<Time>().frame_number() % 128 == 0 {
+            let (mut army_count, mut enemy_count) = (0u32, 0u32);
+            for player in world.read_storage::<Player>().join() {
+                if player.team == 0 {
+                    army_count += 1;
+                } else {
+                    enemy_count += 1;
+                }
+            }
+
+            if army_count < 10 {
+                if let Some(point) = get_spawn_point(world, 0) {
+                    let mut transform = Transform::default();
+                    transform.set_xyz(point.x, point.y, 0.0);
+                    world
+                        .create_entity()
+                        .with(self.ai_prefab_handle.clone().unwrap())
+                        .with(transform)
+                        .with(Player {
+                            weapon: self.ai_weapon,
+                            ..Default::default()
+                        })
+                        .build();
+                    self.ai_weapon = (self.ai_weapon + 1) % 3;
+                }
+            }
+            if enemy_count < 10 {
+                if let Some(point) = get_spawn_point(world, 1) {
+                    let mut transform = Transform::default();
+                    transform.set_xyz(point.x, point.y, 0.0);
+                    world
+                        .create_entity()
+                        .with(self.enemy_prefab_handle.clone().unwrap())
+                        .with(transform)
+                        .with(Player {
+                            team: 1,
+                            weapon: self.enemy_weapon,
+                            ..Default::default()
+                        })
+                        .build();
+                    self.enemy_weapon = (self.enemy_weapon + 1) % 3;
+                }
+            }
+        }
+
+        if world.read_storage::<Playable>().join().next().is_none() {
+            if let Some(point) = get_spawn_point(world, 0) {
+                let mut transform = Transform::default();
+                transform.set_xyz(point.x, point.y, 0.0);
+                world
+                    .create_entity()
+                    .with(self.player_prefab_handle.clone().unwrap())
+                    .with(transform)
+                    .with(Player {
+                        weapon: self.player_weapon,
+                        ..Default::default()
+                    })
+                    .build();
+                self.player_weapon = (self.player_weapon + 1) % 3;
+            }
+        }
+
+        Trans::None
+    }
+
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-        let world = data.world;
+        let StateData { world, .. } = data;
 
         let sprite_sheet_handle = load_sprite_sheet(world);
         world.add_resource(sprite_sheet_handle);
@@ -72,26 +149,24 @@ impl SimpleState for Game {
         world.create_entity().with(prefab_handle).build();
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-            loader.load("resources/player.ron", RonFormat, (), ())
+            loader.load("resources/camera.ron", RonFormat, (), ())
         });
         world.create_entity().with(prefab_handle).build();
+
+        let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
+            loader.load("resources/player.ron", RonFormat, (), ())
+        });
+        self.player_prefab_handle = Some(prefab_handle);
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
             loader.load("resources/ai.ron", RonFormat, (), ())
         });
-        world.create_entity().with(prefab_handle.clone()).build();
-        world.create_entity().with(prefab_handle.clone()).build();
-        world.create_entity().with(prefab_handle.clone()).build();
-        world.create_entity().with(prefab_handle).build();
+        self.ai_prefab_handle = Some(prefab_handle);
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
             loader.load("resources/enemy.ron", RonFormat, (), ())
         });
-        world.create_entity().with(prefab_handle.clone()).build();
-        world.create_entity().with(prefab_handle.clone()).build();
-        world.create_entity().with(prefab_handle.clone()).build();
-        world.create_entity().with(prefab_handle.clone()).build();
-        world.create_entity().with(prefab_handle).build();
+        self.enemy_prefab_handle = Some(prefab_handle);
 
         world.exec(|mut creator: UiCreator<'_>| {
             creator.create("resources/fps.ron", ());
@@ -121,5 +196,17 @@ fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
         texture_handle,
         (),
         &sprite_sheet_store,
+    )
+}
+
+fn get_spawn_point(world: &mut World, team: u32) -> Option<Vector2<f32>> {
+    world.exec(
+        |(spawnpoints, transforms): (ReadStorage<'_, SpawnPoint>, WriteStorage<'_, Transform>)| {
+            (&spawnpoints, &transforms)
+                .join()
+                .filter(|(spawnpoint, _)| spawnpoint.team == team)
+                .next()
+                .map(|(_, transform)| transform.translation().xy())
+        },
     )
 }

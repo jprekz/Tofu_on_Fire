@@ -4,10 +4,10 @@ Prefab (
         // ai
         (
             data: (
-                transform: (translation: (80.0, 80.0, 0.0)),
+                // transform: (translation: (0.0, 0.0, 0.0)),
                 rigidbody: (drag: 0.2),
                 sprite: (sprite_number: 2),
-                player: (team: 0, weapon: 0, hp: 100.0),
+                // player: (team: 0, weapon: 0, hp: 100.0),
                 ai: (),
                 collider: (tag: "Player", width: 16.0, height: 16.0),
             ),

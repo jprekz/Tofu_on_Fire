@@ -1,6 +1,10 @@
 use amethyst::{
-    core::nalgebra::*, core::transform::components::Parent, core::Transform, ecs::prelude::*,
-    input::InputHandler, renderer::SpriteRender,
+    core::nalgebra::*,
+    core::transform::*,
+    core::Transform,
+    ecs::prelude::*,
+    input::InputHandler,
+    renderer::{Camera, SpriteRender},
 };
 use rand::{distributions::*, prelude::*};
 
@@ -143,24 +147,40 @@ impl<'s> System<'s> for PlayerControlSystem {
 pub struct PlayerCollisionSystem;
 impl<'s> System<'s> for PlayerCollisionSystem {
     type SystemData = (
-        WriteStorage<'s, Player>,
-        ReadStorage<'s, Bullet>,
-        ReadStorage<'s, Transform>,
-        WriteStorage<'s, Rigidbody>,
-        ReadStorage<'s, ColliderResult>,
+        Entities<'s>,
+        WriteExpect<'s, ParentHierarchy>,
+        (
+            WriteStorage<'s, Player>,
+            ReadStorage<'s, Bullet>,
+            ReadStorage<'s, Transform>,
+            WriteStorage<'s, Rigidbody>,
+            ReadStorage<'s, ColliderResult>,
+        ),
     );
 
-    fn run(&mut self, storages: Self::SystemData) {
+    fn run(&mut self, (entities, hierarchy, storages): Self::SystemData) {
         let (mut players, bullets, transforms, mut rigidbodies, results) = storages;
 
-        for (player, transform, rigidbody, result) in
-            (&mut players, &transforms, &mut rigidbodies, &results).join()
+        for (entity, player, transform, rigidbody, result) in (
+            &entities,
+            &mut players,
+            &transforms,
+            &mut rigidbodies,
+            &results,
+        )
+            .join()
         {
             for collided in &result.collided {
                 let bullet = bullets.get(collided.entity).unwrap();
                 match collided.tag.as_str() {
                     "Bullet" if bullet.team != player.team => {
                         player.hp -= bullet.damage;
+                        if player.hp <= 0.0 {
+                            entities.delete(entity).unwrap();
+                            for entity in hierarchy.all_children_iter(entity) {
+                                entities.delete(entity).unwrap();
+                            }
+                        }
                         let b_pos = transforms.get(collided.entity).unwrap().translation().xy();
                         let p_pos = transform.translation().xy();
                         let dist = p_pos - b_pos;
@@ -171,41 +191,6 @@ impl<'s> System<'s> for PlayerCollisionSystem {
                     }
                     _ => {}
                 }
-            }
-        }
-    }
-}
-
-pub struct PlayerSpawnSystem;
-impl<'s> System<'s> for PlayerSpawnSystem {
-    type SystemData = (
-        Entities<'s>,
-        WriteStorage<'s, Player>,
-        ReadStorage<'s, SpawnPoint>,
-        WriteStorage<'s, Transform>,
-        WriteStorage<'s, Rigidbody>,
-    );
-
-    fn run(
-        &mut self,
-        (entities, mut players, spawnpoints, mut transforms, mut rigidbodies): Self::SystemData,
-    ) {
-        for (entity, player) in (&entities, &mut players).join() {
-            if player.hp > 0.0 {
-                continue;
-            }
-            player.hp = 100.0;
-            rigidbodies.get_mut(entity).unwrap().velocity = Vector2::zeros();
-            let point = (&spawnpoints, &transforms)
-                .join()
-                .filter(|(spawnpoint, _)| spawnpoint.team == player.team)
-                .next()
-                .map(|(_, transform)| transform.translation().clone());
-            if let Some(point) = point {
-                let transform = transforms.get_mut(entity).unwrap();
-                transform.set_x(point.x);
-                transform.set_y(point.y);
-                player.weapon = (player.weapon + 1) % 3;
             }
         }
     }
@@ -308,6 +293,30 @@ impl<'s> System<'s> for BulletSystem {
                     _ => {}
                 }
             }
+        }
+    }
+}
+
+pub struct CameraSystem;
+impl<'s> System<'s> for CameraSystem {
+    type SystemData = (
+        ReadStorage<'s, Camera>,
+        WriteStorage<'s, Transform>,
+        ReadStorage<'s, Playable>,
+    );
+
+    fn run(&mut self, (cameras, mut transforms, playables): Self::SystemData) {
+        let target_pos = {
+            if let Some((transform, _)) = (&transforms, &playables).join().next() {
+                transform.translation().xy()
+            } else {
+                return;
+            }
+        };
+
+        for (transform, _) in (&mut transforms, &cameras).join() {
+            transform.set_x(target_pos.x);
+            transform.set_y(target_pos.y);
         }
     }
 }

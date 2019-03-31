@@ -27,6 +27,20 @@ pub struct Player {
     #[serde(skip, default = "zero")]
     pub trigger_timer: u32,
 }
+impl Default for Player {
+    fn default() -> Player {
+        Player {
+            team: 0,
+            weapon: 0,
+            hp: 100.0,
+            input_move: Vector2::zeros(),
+            input_aim: Vector2::zeros(),
+            input_shot: false,
+            input_change: false,
+            trigger_timer: 0,
+        }
+    }
+}
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]

@@ -114,7 +114,12 @@ impl<'s> System<'s> for AISystem {
 
             match ai.state.clone() {
                 AIState::Go(target) => {
-                    let target_pos = transforms.get(target).unwrap().translation().xy();
+                    let target_pos = if let Some(t) = transforms.get(target) {
+                        t.translation().xy()
+                    } else {
+                        ai.state = AIState::Neutral;
+                        continue;
+                    };
                     let dist = target_pos - my_pos;
                     let mut move_vec = normalize(dist);
 

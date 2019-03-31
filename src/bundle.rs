@@ -41,14 +41,10 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
             "player_collision_system",
             &["player_control_system"],
         );
-        builder.add(
-            PlayerSpawnSystem,
-            "player_spawn_system",
-            &["player_control_system"],
-        );
         builder.add(ShieldSystem, "shield_system", &["player_control_system"]);
         builder.add(ReticleSystem, "reticle_system", &["player_control_system"]);
         builder.add(BulletSystem, "bullet_system", &["player_control_system"]);
+        builder.add(CameraSystem, "camera_system", &["player_control_system"]);
 
         builder.add_barrier();
         builder.add(MyAudioSystem, "my_audio_system", &[]);

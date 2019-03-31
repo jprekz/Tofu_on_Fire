@@ -1,9 +1,9 @@
-use crate::components::Player;
 use amethyst::{
     assets::{AssetStorage, Loader},
     audio::*,
     core::Transform,
     ecs::prelude::*,
+    renderer::Camera,
 };
 use shred_derive::SystemData;
 use specs_derive::Component;
@@ -56,16 +56,19 @@ impl<'s> System<'s> for MyAudioSystem {
         ReadExpect<'s, Sounds>,
         Option<Read<'s, output::Output>>,
         ReadStorage<'s, Transform>,
-        ReadStorage<'s, Player>,
+        ReadStorage<'s, Camera>,
     );
 
     fn run(
         &mut self,
-        (mut play_once, storage, sounds, output, transforms, players): Self::SystemData,
+        (mut play_once, storage, sounds, output, transforms, cameras): Self::SystemData,
     ) {
         let player_pos = {
-            let camera_transform = (&transforms, &players).join().next().unwrap().0;
-            camera_transform.translation().xy()
+            if let Some((camera_transform, _)) = (&transforms, &cameras).join().next() {
+                camera_transform.translation().xy()
+            } else {
+                return;
+            }
         };
         for (p, transform) in (&play_once, &transforms).join() {
             let p_pos = transform.translation().xy();
