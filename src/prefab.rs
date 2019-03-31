@@ -101,4 +101,21 @@ impl MapPrefabData {
         let mut f = BufWriter::new(std::fs::File::create("resources/map.ron").unwrap());
         f.write(s.as_bytes()).unwrap();
     }
+    pub fn reload(world: &mut World) {
+        use amethyst::assets::{PrefabLoader, RonFormat};
+
+        let entities: Vec<Entity> =
+            world.exec(|(entities, maps): (Entities, ReadStorage<'_, Map>)| {
+                (&entities, &maps)
+                    .join()
+                    .map(|(entity, _)| entity)
+                    .collect()
+            });
+        world.delete_entities(&entities).unwrap();
+
+        let prefab_handle = world.exec(|loader: PrefabLoader<'_, MapPrefabData>| {
+            loader.load("resources/map.ron", RonFormat, (), ())
+        });
+        world.create_entity().with(prefab_handle).build();
+    }
 }

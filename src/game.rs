@@ -41,6 +41,11 @@ impl SimpleState for Game {
                 MapPrefabData::save(world);
                 Trans::None
             }
+            StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::F2) => {
+                let StateData { world, .. } = data;
+                MapPrefabData::reload(world);
+                Trans::None
+            }
             _ => Trans::None,
         }
     }
