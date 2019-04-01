@@ -110,6 +110,13 @@ impl Bullet {
     }
 }
 
+#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[prefab(Component)]
+pub struct Item {
+    pub hp: f32,
+    pub timer: i32,
+}
+
 #[derive(Component, PrefabData, Deserialize, Serialize, Default, Clone, Debug)]
 #[storage(NullStorage)]
 #[prefab(Component)]

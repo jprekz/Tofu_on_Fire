@@ -4,7 +4,7 @@ use amethyst::{
     core::Transform,
     ecs::prelude::*,
     input::InputHandler,
-    renderer::{Camera, SpriteRender},
+    renderer::{Camera, Hidden, SpriteRender},
 };
 use rand::{distributions::*, prelude::*};
 
@@ -147,40 +147,28 @@ impl<'s> System<'s> for PlayerControlSystem {
 pub struct PlayerCollisionSystem;
 impl<'s> System<'s> for PlayerCollisionSystem {
     type SystemData = (
-        Entities<'s>,
-        WriteExpect<'s, ParentHierarchy>,
-        (
-            WriteStorage<'s, Player>,
-            ReadStorage<'s, Bullet>,
-            ReadStorage<'s, Transform>,
-            WriteStorage<'s, Rigidbody>,
-            ReadStorage<'s, ColliderResult>,
-        ),
+        WriteStorage<'s, Player>,
+        ReadStorage<'s, Bullet>,
+        ReadStorage<'s, Transform>,
+        WriteStorage<'s, Rigidbody>,
+        ReadStorage<'s, ColliderResult>,
     );
 
-    fn run(&mut self, (entities, hierarchy, storages): Self::SystemData) {
-        let (mut players, bullets, transforms, mut rigidbodies, results) = storages;
-
-        for (entity, player, transform, rigidbody, result) in (
-            &entities,
-            &mut players,
-            &transforms,
-            &mut rigidbodies,
-            &results,
-        )
-            .join()
+    fn run(
+        &mut self,
+        (mut players, bullets, transforms, mut rigidbodies, results): Self::SystemData,
+    ) {
+        for (player, transform, rigidbody, result) in
+            (&mut players, &transforms, &mut rigidbodies, &results).join()
         {
             for collided in &result.collided {
-                let bullet = bullets.get(collided.entity).unwrap();
                 match collided.tag.as_str() {
-                    "Bullet" if bullet.team != player.team => {
-                        player.hp -= bullet.damage;
-                        if player.hp <= 0.0 {
-                            entities.delete(entity).unwrap();
-                            for entity in hierarchy.all_children_iter(entity) {
-                                entities.delete(entity).unwrap();
-                            }
+                    "Bullet" => {
+                        let bullet = bullets.get(collided.entity).unwrap();
+                        if bullet.team == player.team {
+                            continue;
                         }
+                        player.hp -= bullet.damage;
                         let b_pos = transforms.get(collided.entity).unwrap().translation().xy();
                         let p_pos = transform.translation().xy();
                         let dist = p_pos - b_pos;
@@ -192,6 +180,99 @@ impl<'s> System<'s> for PlayerCollisionSystem {
                     _ => {}
                 }
             }
+        }
+    }
+}
+
+pub struct PlayerDeathSystem;
+impl<'s> System<'s> for PlayerDeathSystem {
+    type SystemData = (
+        Entities<'s>,
+        WriteStorage<'s, Player>,
+        ReadStorage<'s, Transform>,
+        WriteExpect<'s, ParentHierarchy>,
+        RuntimePrefabLoader<'s, MyPrefabData>,
+    );
+
+    fn run(
+        &mut self,
+        (entities, players, tramsforms, hierarchy, mut prefab_loader): Self::SystemData,
+    ) {
+        use rand::prelude::*;
+
+        for (entity, player) in (&entities, &players).join() {
+            if player.hp > 0.0 {
+                continue;
+            }
+            entities.delete(entity).unwrap();
+            for entity in hierarchy.all_children_iter(entity) {
+                entities.delete(entity).unwrap();
+            }
+            for _ in 0..10 {
+                prefab_loader.load_main(MyPrefabData {
+                    transform: Some(tramsforms.get(entity).unwrap().clone()),
+                    rigidbody: Some(Rigidbody {
+                        velocity: Vector2::from_polar(3.0, random::<f32>() * f32::two_pi()),
+                        drag: 0.05,
+                        bounciness: 0.8,
+                        ..Default::default()
+                    }),
+                    sprite: Some(SpriteRenderPrefab { sprite_number: 15 }),
+                    collider: Some(RectCollider::new("Item", 4.0, 4.0)),
+                    item: Some(Item {
+                        hp: 10.0,
+                        timer: 300,
+                    }),
+                    ..Default::default()
+                });
+            }
+        }
+    }
+}
+
+pub struct ItemSystem;
+impl<'s> System<'s> for ItemSystem {
+    type SystemData = (
+        Entities<'s>,
+        WriteStorage<'s, Item>,
+        ReadStorage<'s, ColliderResult>,
+        WriteStorage<'s, Player>,
+        WriteStorage<'s, Hidden>,
+    );
+
+    fn run(&mut self, (entities, mut items, results, mut players, mut hidden): Self::SystemData) {
+        for (entity, mut item, result) in (&entities, &mut items, &results).join() {
+            item.timer -= 1;
+            if item.timer < 120 {
+                if item.timer % 8 <= 4 {
+                    let _ = hidden.remove(entity);
+                } else {
+                    let _ = hidden.insert(entity, Hidden);
+                }
+            }
+            if item.timer < 0 {
+                entities.delete(entity).unwrap();
+                continue;
+            }
+
+            let collided_players = result
+                .collided
+                .iter()
+                .filter(|collided| collided.tag == "Player")
+                .count();
+            if collided_players == 0 {
+                continue;
+            }
+            for collided in &result.collided {
+                match collided.tag.as_str() {
+                    "Player" => {
+                        let player = players.get_mut(collided.entity).unwrap();
+                        player.hp = (player.hp + item.hp).min(100.0);
+                    }
+                    _ => {}
+                }
+            }
+            entities.delete(entity).unwrap();
         }
     }
 }

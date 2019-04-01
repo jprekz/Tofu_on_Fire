@@ -24,6 +24,7 @@ pub struct MyPrefabData {
     pub reticle: Option<Reticle>,
     pub reticle_line: Option<ReticleLine>,
     pub shield: Option<Shield>,
+    pub item: Option<Item>,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
