@@ -1,0 +1,38 @@
+#![enable(implicit_some)]
+Container(
+    transform: (
+        id: "background",
+        percent: true,
+        width: 1.0, // percent???
+        height: 1.0,
+    ),
+    children: [
+        Text(
+            transform: (
+                id: "fps_text",
+                anchor: TopLeft,
+                x: 100.0,
+                y: -25.0,
+                width: 200.0,
+                height: 50.0,
+                transparent: true,
+            ),
+            text: (
+                text: "N/A",
+                font_size: 25.0,
+                color: (1.0, 1.0, 1.0, 1.0),
+            ),
+        ),
+        Image(
+            transform: (
+                id: "title",
+                percent: true,
+                width: 1.0,
+                height: 1.0,
+            ),
+            image: (
+                image: File("texture/title.png", Png, (channel: Srgb)),
+            )
+        ),
+    ],
+)

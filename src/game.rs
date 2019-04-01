@@ -5,6 +5,7 @@ use amethyst::{
     core::Transform,
     ecs::prelude::*,
     input::is_key_down,
+    input::InputHandler,
     prelude::*,
     renderer::*,
     ui::*,
@@ -50,9 +51,10 @@ impl SimpleState for Game {
         }
     }
 
-    fn fixed_update(&mut self, data: StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+    fn shadow_fixed_update(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let StateData { world, .. } = data;
 
+        // display fps
         if self.fps_display.is_none() {
             world.exec(|finder: UiFinder<'_>| {
                 if let Some(entity) = finder.find("fps_text") {
@@ -67,13 +69,12 @@ impl SimpleState for Game {
                 fps_display.text = format!("FPS: {:.*}", 2, fps);
             }
         }
-
-        Trans::None
     }
 
-    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+    fn shadow_update(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let StateData { world, .. } = data;
 
+        // spawn npc
         if world.read_resource::<Time>().frame_number() % 128 == 0 {
             let (mut army_count, mut enemy_count) = (0u32, 0u32);
             for player in world.read_storage::<Player>().join() {
@@ -118,22 +119,47 @@ impl SimpleState for Game {
                 }
             }
         }
+    }
 
-        if world.read_storage::<Playable>().join().next().is_none() {
-            if let Some(point) = get_spawn_point(world, 0) {
-                let mut transform = Transform::default();
-                transform.set_xyz(point.x, point.y, 0.0);
-                world
-                    .create_entity()
-                    .with(self.player_prefab_handle.clone().unwrap())
-                    .with(transform)
-                    .with(Player {
-                        weapon: self.player_weapon,
-                        ..Default::default()
-                    })
-                    .build();
-                self.player_weapon = (self.player_weapon + 1) % 3;
+    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        let StateData { world, .. } = data;
+
+        let pressed_any_key = {
+            let input = world.read_resource::<InputHandler<String, String>>();
+            let shot = input.action_is_down("shot").unwrap();
+            let change = input.action_is_down("change").unwrap();
+            shot || change
+        };
+
+        if pressed_any_key {
+            // hide title
+            world.exec(
+                |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
+                    if let Some(entity) = finder.find("title") {
+                        hidden.insert(entity, HiddenPropagate).unwrap();
+                    }
+                },
+            );
+
+            // spawn player
+            if world.read_storage::<Playable>().join().next().is_none() {
+                if let Some(point) = get_spawn_point(world, 0) {
+                    let mut transform = Transform::default();
+                    transform.set_xyz(point.x, point.y, 0.0);
+                    world
+                        .create_entity()
+                        .with(self.player_prefab_handle.clone().unwrap())
+                        .with(transform)
+                        .with(Player {
+                            weapon: self.player_weapon,
+                            ..Default::default()
+                        })
+                        .build();
+                    self.player_weapon = (self.player_weapon + 1) % 3;
+                }
             }
+
+            return Trans::Push(Box::new(Playing::default()));
         }
 
         Trans::None
@@ -174,10 +200,49 @@ impl SimpleState for Game {
         self.enemy_prefab_handle = Some(prefab_handle);
 
         world.exec(|mut creator: UiCreator<'_>| {
-            creator.create("resources/fps.ron", ());
+            creator.create("resources/ui.ron", ());
         });
 
         initialise_audio(world);
+    }
+
+    fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
+        let StateData { world, .. } = data;
+
+        // show title
+        world.exec(
+            |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
+                if let Some(entity) = finder.find("title") {
+                    hidden.remove(entity).unwrap();
+                }
+            },
+        );
+    }
+}
+
+#[derive(Default)]
+pub struct Playing;
+
+impl SimpleState for Playing {
+    fn handle_event(
+        &mut self,
+        _data: StateData<'_, GameData<'_, '_>>,
+        event: StateEvent,
+    ) -> SimpleTrans {
+        match &event {
+            StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::Escape) => Trans::Quit,
+            _ => Trans::None,
+        }
+    }
+
+    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        let StateData { world, .. } = data;
+
+        if world.read_storage::<Playable>().join().next().is_none() {
+            return Trans::Pop;
+        }
+
+        Trans::None
     }
 }
 
