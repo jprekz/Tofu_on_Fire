@@ -24,7 +24,7 @@ macro_rules! skip_fail {
         match $res {
             Ok(val) => val,
             Err(e) => {
-                log::warn!("{}", e);
+                log::warn!("{} (L{})", e, line!());
                 continue;
             }
         }
