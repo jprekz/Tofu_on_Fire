@@ -297,19 +297,50 @@ impl<'s> System<'s> for BulletSystem {
     }
 }
 
-pub struct CameraSystem;
+#[derive(Default)]
+pub struct CameraSystem {
+    target_entity: Option<Entity>,
+    timer: i32,
+}
 impl<'s> System<'s> for CameraSystem {
     type SystemData = (
+        Entities<'s>,
         ReadStorage<'s, Camera>,
         WriteStorage<'s, Transform>,
         ReadStorage<'s, Playable>,
+        ReadStorage<'s, Player>,
     );
 
-    fn run(&mut self, (cameras, mut transforms, playables): Self::SystemData) {
+    fn run(&mut self, (entities, cameras, mut transforms, playables, players): Self::SystemData) {
+        if self.timer > 0 {
+            self.timer -= 1;
+            if self.timer == 0 {
+                self.target_entity = None;
+            }
+        }
+
+        let target_entity = {
+            if let Some((entity, _)) = (&entities, &playables).join().next() {
+                self.timer = 0;
+                entity
+            } else if let Some(entity) = self.target_entity {
+                entity
+            } else if self.timer > 0 {
+                return;
+            } else if let Some((entity, _)) = (&entities, &players).join().next() {
+                entity
+            } else {
+                return;
+            }
+        };
+        self.target_entity = Some(target_entity);
+
         let target_pos = {
-            if let Some((transform, _)) = (&transforms, &playables).join().next() {
+            if let Some(transform) = transforms.get(target_entity) {
                 transform.translation().xy()
             } else {
+                self.target_entity = None;
+                self.timer = 60;
                 return;
             }
         };
