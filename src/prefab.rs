@@ -33,7 +33,7 @@ pub struct SpriteRenderPrefab {
 }
 impl<'a> PrefabData<'a> for SpriteRenderPrefab {
     type SystemData = (
-        Option<Read<'a, SpriteSheetHandle>>,
+        ReadExpect<'a, SpriteSheetHandle>,
         WriteStorage<'a, SpriteRender>,
         WriteStorage<'a, Transparent>,
     );
@@ -47,7 +47,7 @@ impl<'a> PrefabData<'a> for SpriteRenderPrefab {
     ) -> Result<(), PrefabError> {
         transparents.insert(entity, Transparent)?;
         let sprite_render = SpriteRender {
-            sprite_sheet: sheet.as_mut().unwrap().clone(),
+            sprite_sheet: sheet.clone(),
             sprite_number: self.sprite_number,
         };
         renders.insert(entity, sprite_render).map(|_| ())
@@ -65,7 +65,7 @@ pub struct MapPrefabData {
 }
 
 impl MapPrefabData {
-    pub fn save(world: &mut World) {
+    pub fn save(world: &mut World) -> Result<(), Box<std::error::Error>> {
         use amethyst::assets::Prefab;
         use ron::ser::{to_string_pretty, PrettyConfig};
         use std::io::{BufWriter, Write};
@@ -97,10 +97,11 @@ impl MapPrefabData {
                 }
             },
         );
-        let s = to_string_pretty(&prefab, PrettyConfig::default()).unwrap();
-        println!("{}", s);
-        let mut f = BufWriter::new(std::fs::File::create("resources/map.ron").unwrap());
-        f.write(s.as_bytes()).unwrap();
+        let s = to_string_pretty(&prefab, PrettyConfig::default())?;
+        let mut f = BufWriter::new(std::fs::File::create("resources/map.ron")?);
+        f.write(s.as_bytes())?;
+
+        Ok(())
     }
     pub fn reload(world: &mut World) {
         use amethyst::assets::{PrefabLoader, RonFormat};
@@ -112,7 +113,10 @@ impl MapPrefabData {
                     .map(|(entity, _)| entity)
                     .collect()
             });
-        world.delete_entities(&entities).unwrap();
+        if world.delete_entities(&entities).is_err() {
+            log::error!("Failed to delete map entities");
+            panic!("Failed to delete map entities");
+        }
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MapPrefabData>| {
             loader.load("resources/map.ron", RonFormat, (), ())

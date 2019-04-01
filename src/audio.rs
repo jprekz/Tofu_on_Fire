@@ -42,9 +42,10 @@ pub struct AudioPlayer<'a> {
 
 impl<'a> AudioPlayer<'a> {
     pub fn play_once(&mut self, entity: Entity, sound: usize, volume: f32) {
-        self.storage
-            .insert(entity, PlayOnce { sound, volume })
-            .unwrap();
+        let result = self.storage.insert(entity, PlayOnce { sound, volume });
+        if result.is_err() {
+            log::warn!("Failed to insert PlayOnce component");
+        }
     }
 }
 

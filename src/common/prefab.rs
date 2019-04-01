@@ -57,7 +57,8 @@ where
     }
 
     fn run(&mut self, (entities, channel, mut prefab_system_data): Self::SystemData) {
-        for prefab_data in channel.read(self.reader.as_mut().unwrap()) {
+        let reader = self.reader.as_mut().expect("Failed to get ReaderId??");
+        for prefab_data in channel.read(reader) {
             let entity = entities.create();
             prefab_data
                 .add_to_entity(entity, &mut prefab_system_data, &[entity])

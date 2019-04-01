@@ -19,6 +19,18 @@ pub use crate::common::{
     vector2ext::Vector2Ext,
 };
 
+macro_rules! skip_fail {
+    ($res:expr) => {
+        match $res {
+            Ok(val) => val,
+            Err(e) => {
+                log::warn!("{}", e);
+                continue;
+            }
+        }
+    };
+}
+
 pub struct PlayableSystem;
 impl<'s> System<'s> for PlayableSystem {
     type SystemData = (
@@ -31,22 +43,22 @@ impl<'s> System<'s> for PlayableSystem {
         let axis_xy_value =
             |x: &str, y: &str| Some(Vector2::new(input.axis_value(x)?, input.axis_value(y)?));
 
-        let move_vec = axis_xy_value("move_x", "move_y").unwrap();
-        let left_vec = axis_xy_value("left_x", "left_y").unwrap();
+        let move_vec = axis_xy_value("move_x", "move_y").unwrap_or(Vector2::zeros());
+        let left_vec = axis_xy_value("left_x", "left_y").unwrap_or(Vector2::zeros());
         let move_vec = move_vec + left_vec;
         let (move_r, move_theta) = move_vec.to_polar();
         let move_vec = Vector2::from_polar(move_r.min(1.0), move_theta);
         let move_vec = move_vec.map(|v| v as f32);
 
-        let aim_vec = axis_xy_value("aim_x", "aim_y").unwrap();
-        let right_vec = axis_xy_value("right_x", "right_y").unwrap();
+        let aim_vec = axis_xy_value("aim_x", "aim_y").unwrap_or(Vector2::zeros());
+        let right_vec = axis_xy_value("right_x", "right_y").unwrap_or(Vector2::zeros());
         let aim_vec = aim_vec + right_vec;
         let (aim_r, aim_theta) = aim_vec.to_polar();
         let aim_vec = Vector2::from_polar(aim_r.min(1.0), aim_theta);
         let aim_vec = aim_vec.map(|v| v as f32);
 
-        let shot = input.action_is_down("shot").unwrap();
-        let change = input.action_is_down("change").unwrap();
+        let shot = input.action_is_down("shot").unwrap_or(false);
+        let change = input.action_is_down("change").unwrap_or(false);
 
         for (playable, player) in (&mut playables, &mut players).join() {
             player.input_move = move_vec;
@@ -164,12 +176,18 @@ impl<'s> System<'s> for PlayerCollisionSystem {
             for collided in &result.collided {
                 match collided.tag.as_str() {
                     "Bullet" => {
-                        let bullet = bullets.get(collided.entity).unwrap();
+                        let bullet = skip_fail!(bullets
+                            .get(collided.entity)
+                            .ok_or("Failed to get bullet component"));
                         if bullet.team == player.team {
                             continue;
                         }
                         player.hp -= bullet.damage;
-                        let b_pos = transforms.get(collided.entity).unwrap().translation().xy();
+                        let b_pos = skip_fail!(transforms
+                            .get(collided.entity)
+                            .ok_or("Failed to get transform component"))
+                        .translation()
+                        .xy();
                         let p_pos = transform.translation().xy();
                         let dist = p_pos - b_pos;
                         rigidbody.velocity *= 1.0 - bullet.slowing;
@@ -204,13 +222,17 @@ impl<'s> System<'s> for PlayerDeathSystem {
             if player.hp > 0.0 {
                 continue;
             }
-            entities.delete(entity).unwrap();
+            skip_fail!(entities.delete(entity));
             for entity in hierarchy.all_children_iter(entity) {
-                entities.delete(entity).unwrap();
+                skip_fail!(entities.delete(entity));
             }
+            let transform = skip_fail!(tramsforms
+                .get(entity)
+                .ok_or("Failed to get transform component"))
+            .clone();
             for _ in 0..10 {
                 prefab_loader.load_main(MyPrefabData {
-                    transform: Some(tramsforms.get(entity).unwrap().clone()),
+                    transform: Some(transform.clone()),
                     rigidbody: Some(Rigidbody {
                         velocity: Vector2::from_polar(3.0, random::<f32>() * f32::two_pi()),
                         drag: 0.05,
@@ -251,7 +273,7 @@ impl<'s> System<'s> for ItemSystem {
                 }
             }
             if item.timer < 0 {
-                entities.delete(entity).unwrap();
+                skip_fail!(entities.delete(entity));
                 continue;
             }
 
@@ -260,19 +282,20 @@ impl<'s> System<'s> for ItemSystem {
                 .iter()
                 .filter(|collided| collided.tag == "Player")
                 .count();
-            if collided_players == 0 {
-                continue;
-            }
-            for collided in &result.collided {
-                match collided.tag.as_str() {
-                    "Player" => {
-                        let player = players.get_mut(collided.entity).unwrap();
-                        player.hp = (player.hp + item.hp).min(100.0);
+            if collided_players > 0 {
+                for collided in &result.collided {
+                    match collided.tag.as_str() {
+                        "Player" => {
+                            let player = skip_fail!(players
+                                .get_mut(collided.entity)
+                                .ok_or("Failed to get player component"));
+                            player.hp = (player.hp + item.hp).min(100.0);
+                        }
+                        _ => {}
                     }
-                    _ => {}
                 }
+                skip_fail!(entities.delete(entity));
             }
-            entities.delete(entity).unwrap();
         }
     }
 }
@@ -289,7 +312,9 @@ impl<'s> System<'s> for ReticleSystem {
 
     fn run(&mut self, (reticles, lines, parents, mut transforms, players): Self::SystemData) {
         for (_, parent, transform) in (&reticles, &parents, &mut transforms).join() {
-            let player = players.get(parent.entity).unwrap();
+            let player = skip_fail!(players
+                .get(parent.entity)
+                .ok_or("Failed to get player component"));
             let move_vec = player.input_move;
             let aim_vec = player.input_aim;
             let aim_r = aim_vec.x.hypot(aim_vec.y);
@@ -298,7 +323,9 @@ impl<'s> System<'s> for ReticleSystem {
             transform.set_y(v.y);
         }
         for (_, parent, transform) in (&lines, &parents, &mut transforms).join() {
-            let player = players.get(parent.entity).unwrap();
+            let player = skip_fail!(players
+                .get(parent.entity)
+                .ok_or("Failed to get player component"));
             let move_vec = player.input_move;
             let aim_vec = player.input_aim;
             let aim_r = aim_vec.x.hypot(aim_vec.y);
@@ -321,7 +348,9 @@ impl<'s> System<'s> for ShieldSystem {
 
     fn run(&mut self, (shields, mut renders, parents, players): Self::SystemData) {
         for (_, parent, render) in (&shields, &parents, &mut renders).join() {
-            let player = players.get(parent.entity).unwrap();
+            let player = skip_fail!(players
+                .get(parent.entity)
+                .ok_or("Failed to get player component"));
             let hp = player.hp;
             if hp >= 100.0 {
                 render.sprite_number = 10;
@@ -351,7 +380,8 @@ impl<'s> System<'s> for BulletSystem {
             if bullet.timer_limit != 0 {
                 bullet.timer_count += 1;
                 if bullet.timer_count > bullet.timer_limit {
-                    entities.delete(entity).unwrap();
+                    skip_fail!(entities.delete(entity));
+                    continue;
                 }
             }
 
@@ -360,13 +390,16 @@ impl<'s> System<'s> for BulletSystem {
                     "Wall" => {
                         bullet.reflect_count += 1;
                         if bullet.reflect_count > bullet.reflect_limit {
-                            entities.delete(entity).unwrap();
+                            skip_fail!(entities.delete(entity));
                         }
                     }
                     "Player" => {
-                        if players.get(collided.entity).unwrap().team != bullet.team {
+                        let player = skip_fail!(players
+                            .get(collided.entity)
+                            .ok_or("Failed to get player component"));
+                        if player.team != bullet.team {
                             if !bullet.pierce {
-                                entities.delete(entity).unwrap();
+                                skip_fail!(entities.delete(entity));
                             }
                             audio.play_once(entity, 3, bullet.damage / 25.0);
                         }

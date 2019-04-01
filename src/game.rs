@@ -39,7 +39,9 @@ impl SimpleState for Game {
             StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::Escape) => Trans::Quit,
             StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::F1) => {
                 let StateData { world, .. } = data;
-                MapPrefabData::save(world);
+                if let Err(e) = MapPrefabData::save(world) {
+                    log::warn!("Failed to save map: {}", e);
+                }
                 Trans::None
             }
             StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::F2) => {
@@ -91,7 +93,11 @@ impl SimpleState for Game {
                     transform.set_xyz(point.x, point.y, 0.0);
                     world
                         .create_entity()
-                        .with(self.ai_prefab_handle.clone().unwrap())
+                        .with(
+                            self.ai_prefab_handle
+                                .clone()
+                                .expect("Failed to get prefab handle??"),
+                        )
                         .with(transform)
                         .with(Player {
                             weapon: self.ai_weapon,
@@ -107,7 +113,11 @@ impl SimpleState for Game {
                     transform.set_xyz(point.x, point.y, 0.0);
                     world
                         .create_entity()
-                        .with(self.enemy_prefab_handle.clone().unwrap())
+                        .with(
+                            self.enemy_prefab_handle
+                                .clone()
+                                .expect("Failed to get prefab handle??"),
+                        )
                         .with(transform)
                         .with(Player {
                             team: 1,
@@ -126,8 +136,9 @@ impl SimpleState for Game {
 
         let pressed_any_key = {
             let input = world.read_resource::<InputHandler<String, String>>();
-            let shot = input.action_is_down("shot").unwrap();
-            let change = input.action_is_down("change").unwrap();
+
+            let shot = input.action_is_down("shot").unwrap_or(false);
+            let change = input.action_is_down("change").unwrap_or(false);
             shot || change
         };
 
@@ -136,7 +147,9 @@ impl SimpleState for Game {
             world.exec(
                 |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
                     if let Some(entity) = finder.find("title") {
-                        hidden.insert(entity, HiddenPropagate).unwrap();
+                        if hidden.insert(entity, HiddenPropagate).is_err() {
+                            log::warn!("Failed to insert HiddenPropagate component");
+                        }
                     }
                 },
             );
@@ -148,7 +161,11 @@ impl SimpleState for Game {
                     transform.set_xyz(point.x, point.y, 0.0);
                     world
                         .create_entity()
-                        .with(self.player_prefab_handle.clone().unwrap())
+                        .with(
+                            self.player_prefab_handle
+                                .clone()
+                                .expect("Failed to get prefab handle??"),
+                        )
                         .with(transform)
                         .with(Player {
                             weapon: self.player_weapon,
@@ -213,7 +230,9 @@ impl SimpleState for Game {
         world.exec(
             |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
                 if let Some(entity) = finder.find("title") {
-                    hidden.remove(entity).unwrap();
+                    if hidden.remove(entity).is_none() {
+                        log::warn!("Failed to remove HiddenPropagate component");
+                    }
                 }
             },
         );
