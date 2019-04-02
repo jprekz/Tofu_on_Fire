@@ -210,11 +210,12 @@ impl<'s> System<'s> for PlayerDeathSystem {
         ReadStorage<'s, Transform>,
         WriteExpect<'s, ParentHierarchy>,
         RuntimePrefabLoader<'s, MyPrefabData>,
+        AudioPlayer<'s>,
     );
 
     fn run(
         &mut self,
-        (entities, players, tramsforms, hierarchy, mut prefab_loader): Self::SystemData,
+        (entities, players, tramsforms, hierarchy, mut prefab_loader, mut audio): Self::SystemData,
     ) {
         use rand::prelude::*;
 
@@ -248,6 +249,7 @@ impl<'s> System<'s> for PlayerDeathSystem {
                     ..Default::default()
                 });
             }
+            audio.play_once(entity, 4, 0.5);
         }
     }
 }

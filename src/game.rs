@@ -222,25 +222,12 @@ impl SimpleState for Game {
 
         initialise_audio(world);
     }
-
-    fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-        let StateData { world, .. } = data;
-
-        // show title
-        world.exec(
-            |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
-                if let Some(entity) = finder.find("title") {
-                    if hidden.remove(entity).is_none() {
-                        log::warn!("Failed to remove HiddenPropagate component");
-                    }
-                }
-            },
-        );
-    }
 }
 
 #[derive(Default)]
-pub struct Playing;
+pub struct Playing {
+    timer: Option<i32>,
+}
 
 impl SimpleState for Playing {
     fn handle_event(
@@ -257,8 +244,27 @@ impl SimpleState for Playing {
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
         let StateData { world, .. } = data;
 
-        if world.read_storage::<Playable>().join().next().is_none() {
-            return Trans::Pop;
+        if self.timer.is_none() && world.read_storage::<Playable>().join().next().is_none() {
+            self.timer = Some(120);
+        }
+
+        if let Some(ref mut timer) = self.timer {
+            *timer -= 1;
+            if *timer == 60 {
+                // show title
+                world.exec(
+                    |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
+                        if let Some(entity) = finder.find("title") {
+                            if hidden.remove(entity).is_none() {
+                                log::warn!("Failed to remove HiddenPropagate component");
+                            }
+                        }
+                    },
+                );
+            }
+            if *timer < 0 {
+                return Trans::Pop;
+            }
         }
 
         Trans::None
