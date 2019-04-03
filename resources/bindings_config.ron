@@ -1,16 +1,18 @@
 (
   axes: {
-    "move_x": Emulated(pos: Key(D), neg: Key(A)),
-    "move_y": Emulated(pos: Key(S), neg: Key(W)),
-    "aim_x": Emulated(pos: Key(Right), neg: Key(Left)),
-    "aim_y": Emulated(pos: Key(Down), neg: Key(Up)),
+    "move_x": Emulated(pos: Key(Right), neg: Key(Left)),
+    "move_y": Emulated(pos: Key(Down), neg: Key(Up)),
+    "dpad_x": Emulated(pos: Controller(0, DPadRight), neg: Controller(0, DPadLeft)),
+    "dpad_y": Emulated(pos: Controller(0, DPadDown), neg: Controller(0, DPadUp)),
     "left_x": Controller(controller_id: 0, axis: LeftX, invert: false, dead_zone: 0.0),
     "left_y": Controller(controller_id: 0, axis: LeftY, invert: false, dead_zone: 0.0),
+
     "right_x": Controller(controller_id: 0, axis: RightX, invert: false, dead_zone: 0.0),
     "right_y": Controller(controller_id: 0, axis: RightY, invert: false, dead_zone: 0.0),
   },
   actions: {
-    "shot": [[Key(Space)], [Controller(0, RightShoulder)]],
-    "change": [[Key(Q)], [Controller(0, LeftShoulder)]],
+    "shot": [[Key(Z)], [Controller(0, A)], [Controller(0, Y)], [Controller(0, RightShoulder)]],
+    "hold": [[Key(X)], [Controller(0, B)], [Controller(0, X)], [Controller(0, LeftShoulder)]],
+    "change": [[Key(Tab)], [Controller(0, Back)]],
   },
 )

@@ -40,29 +40,36 @@ impl<'s> System<'s> for PlayableSystem {
     );
 
     fn run(&mut self, (input, mut playables, mut players): Self::SystemData) {
-        let axis_xy_value =
-            |x: &str, y: &str| Some(Vector2::new(input.axis_value(x)?, input.axis_value(y)?));
+        let axis_xy_value = |x: &str, y: &str| {
+            Some(Vector2::new(
+                input.axis_value(x)? as f32,
+                input.axis_value(y)? as f32,
+            ))
+        };
 
         let move_vec = axis_xy_value("move_x", "move_y").unwrap_or(Vector2::zeros());
+        let dpad_vec = axis_xy_value("dpad_x", "dpad_y").unwrap_or(Vector2::zeros());
         let left_vec = axis_xy_value("left_x", "left_y").unwrap_or(Vector2::zeros());
-        let move_vec = move_vec + left_vec;
+        let move_vec = move_vec + dpad_vec + left_vec;
         let (move_r, move_theta) = move_vec.to_polar();
         let move_vec = Vector2::from_polar(move_r.min(1.0), move_theta);
-        let move_vec = move_vec.map(|v| v as f32);
 
-        let aim_vec = axis_xy_value("aim_x", "aim_y").unwrap_or(Vector2::zeros());
-        let right_vec = axis_xy_value("right_x", "right_y").unwrap_or(Vector2::zeros());
-        let aim_vec = aim_vec + right_vec;
-        let (aim_r, aim_theta) = aim_vec.to_polar();
-        let aim_vec = Vector2::from_polar(aim_r.min(1.0), aim_theta);
-        let aim_vec = aim_vec.map(|v| v as f32);
+        let aim_vec = axis_xy_value("right_x", "right_y").unwrap_or(Vector2::zeros());
+        let (aim_r, _) = aim_vec.to_polar();
+        let aim_vec = if aim_r < 0.1 { move_vec } else { aim_vec };
 
         let shot = input.action_is_down("shot").unwrap_or(false);
+        let hold = input.action_is_down("hold").unwrap_or(false);
         let change = input.action_is_down("change").unwrap_or(false);
 
         for (playable, player) in (&mut playables, &mut players).join() {
             player.input_move = move_vec;
-            player.input_aim = aim_vec;
+            if !hold {
+                let (aim_r, aim_theta) = aim_vec.to_polar();
+                if aim_r >= 0.1 {
+                    player.input_aim = Vector2::from_polar(1.0, aim_theta);
+                };
+            }
             player.input_shot = shot;
             player.input_change = change && !playable.input_change_hold;
             playable.input_change_hold = change;
@@ -94,7 +101,6 @@ impl<'s> System<'s> for PlayerControlSystem {
 
             let move_vec = player.input_move;
             let aim_vec = player.input_aim;
-            let aim_r = aim_vec.x.hypot(aim_vec.y);
             let shot = player.input_shot;
             let change = player.input_change;
 
@@ -111,11 +117,13 @@ impl<'s> System<'s> for PlayerControlSystem {
                 player.trigger_timer -= 1;
             }
             if shot && player.trigger_timer == 0 {
-                let bullet_vel = if aim_r < 0.1 { move_vec } else { aim_vec };
-                let (r, theta) = bullet_vel.to_polar();
-                let spread = Uniform::new_inclusive(-weapon.bullet_spread, weapon.bullet_spread)
-                    .sample(&mut thread_rng());
-                let bullet_vel = Vector2::from_polar(r, theta + spread);
+                let bullet_vel = {
+                    let (r, theta) = aim_vec.to_polar();
+                    let spread =
+                        Uniform::new_inclusive(-weapon.bullet_spread, weapon.bullet_spread)
+                            .sample(&mut thread_rng());
+                    Vector2::from_polar(r, theta + spread)
+                };
 
                 let mut bullet_transform = transform.clone();
                 bullet_transform.set_z(-1.0);
@@ -317,22 +325,16 @@ impl<'s> System<'s> for ReticleSystem {
             let player = skip_fail!(players
                 .get(parent.entity)
                 .ok_or("Failed to get player component"));
-            let move_vec = player.input_move;
-            let aim_vec = player.input_aim;
-            let aim_r = aim_vec.x.hypot(aim_vec.y);
-            let v = if aim_r < 0.1 { move_vec } else { aim_vec } * 100.0;
-            transform.set_x(v.x);
-            transform.set_y(v.y);
+            let aim_vec = player.input_aim * 100.0;
+            transform.set_x(aim_vec.x);
+            transform.set_y(aim_vec.y);
         }
         for (_, parent, transform) in (&lines, &parents, &mut transforms).join() {
             let player = skip_fail!(players
                 .get(parent.entity)
                 .ok_or("Failed to get player component"));
-            let move_vec = player.input_move;
-            let aim_vec = player.input_aim;
-            let aim_r = aim_vec.x.hypot(aim_vec.y);
-            let v = if aim_r < 0.1 { move_vec } else { aim_vec } * 100.0;
-            let (l, rad) = v.to_polar();
+            let aim_vec = player.input_aim * 100.0;
+            let (l, rad) = aim_vec.to_polar();
             transform.set_rotation_euler(0.0, 0.0, rad);
             transform.set_scale(l / 100.0, 1.0, 1.0);
         }

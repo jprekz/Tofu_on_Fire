@@ -138,8 +138,8 @@ impl SimpleState for Game {
             let input = world.read_resource::<InputHandler<String, String>>();
 
             let shot = input.action_is_down("shot").unwrap_or(false);
-            let change = input.action_is_down("change").unwrap_or(false);
-            shot || change
+            let hold = input.action_is_down("hold").unwrap_or(false);
+            shot || hold
         };
 
         if pressed_any_key {

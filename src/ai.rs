@@ -118,7 +118,7 @@ impl<'s> System<'s> for AISystem {
                 }
             };
 
-            let (input_move, input_shot) = match ai.state.clone() {
+            let (input_move, input_aim, input_shot) = match ai.state.clone() {
                 AIState::Go(target) => {
                     let target_pos = if let Some(t) = transforms.get(target) {
                         t.translation().xy()
@@ -135,7 +135,7 @@ impl<'s> System<'s> for AISystem {
                         move_vec = Vector2::from_polar(r, theta).normalize();
                     }
 
-                    (move_vec, true)
+                    (move_vec, move_vec, true)
                 }
                 AIState::Back(target) => {
                     let target_pos = if let Some(t) = transforms.get(target) {
@@ -147,7 +147,7 @@ impl<'s> System<'s> for AISystem {
                     let dist = target_pos - my_pos;
                     let move_vec = -normalize(dist);
 
-                    (move_vec, true)
+                    (move_vec, move_vec, true)
                 }
                 AIState::Right(target) => {
                     let target_pos = if let Some(t) = transforms.get(target) {
@@ -159,7 +159,7 @@ impl<'s> System<'s> for AISystem {
                     let dist = target_pos - my_pos;
                     let move_vec = Rotation2::new(Real::frac_pi_2()) * normalize(dist);
 
-                    (move_vec, true)
+                    (move_vec, move_vec, true)
                 }
                 AIState::Left(target) => {
                     let target_pos = if let Some(t) = transforms.get(target) {
@@ -171,14 +171,15 @@ impl<'s> System<'s> for AISystem {
                     let dist = target_pos - my_pos;
                     let move_vec = Rotation2::new(Real::frac_pi_2()).inverse() * normalize(dist);
 
-                    (move_vec, true)
+                    (move_vec, move_vec, true)
                 }
-                _ => (Vector2::zeros(), false),
+                _ => (Vector2::zeros(), Vector2::zeros(), false),
             };
 
             match players.get_mut(entity) {
                 Some(player) => {
                     player.input_move = input_move;
+                    player.input_aim = input_aim;
                     player.input_shot = input_shot;
                 }
                 None => {
