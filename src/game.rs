@@ -245,12 +245,12 @@ impl SimpleState for Playing {
         let StateData { world, .. } = data;
 
         if self.timer.is_none() && world.read_storage::<Playable>().join().next().is_none() {
-            self.timer = Some(120);
+            self.timer = Some(90);
         }
 
         if let Some(ref mut timer) = self.timer {
             *timer -= 1;
-            if *timer == 60 {
+            if *timer == 30 {
                 // show title
                 world.exec(
                     |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
