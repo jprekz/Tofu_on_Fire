@@ -158,7 +158,7 @@ impl<'s> System<'s> for PlayerControlSystem {
                     ..Default::default()
                 });
                 player.trigger_timer = weapon.rate;
-                audio.play_once(entity, player.weapon, 0.2);
+                audio.play_once(entity, player.weapon, 0.4);
             }
         }
     }
@@ -278,7 +278,7 @@ impl<'s> System<'s> for PlayerDeathSystem {
                     ..Default::default()
                 });
             }
-            audio.play_once(entity, 4, 0.5);
+            audio.play_once(entity, 4, 1.0);
         }
     }
 }
@@ -441,7 +441,7 @@ impl<'s> System<'s> for BulletSystem {
                             if !bullet.pierce {
                                 skip_fail!(entities.delete(entity));
                             }
-                            audio.play_once(entity, 3, bullet.damage / 25.0);
+                            audio.play_once(entity, 3, 0.2 + bullet.damage / 25.0);
                         }
                     }
                     _ => {}
