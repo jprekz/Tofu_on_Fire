@@ -25,6 +25,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
                 .collide("Player", "Wall")
                 .collide("Bullet", "Wall")
                 .collide("Item", "Wall")
+                .collide("Particle", "Wall")
                 .trigger("Bullet", "Wall")
                 .trigger("Player", "Bullet")
                 .trigger("Player", "Item"),
@@ -57,6 +58,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
             &["player_control_system"],
         );
 
+        builder.add(ParticleSystem, "particle_system", &[]);
         builder.add(ItemSystem, "item_system", &[]);
 
         builder.add_barrier();

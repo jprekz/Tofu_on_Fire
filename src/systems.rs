@@ -257,7 +257,43 @@ impl<'s> System<'s> for PlayerDeathSystem {
                     ..Default::default()
                 });
             }
+            let mut transform = transform.clone();
+            transform.set_scale(0.5, 0.2, 1.0);
+            for _ in 0..12 {
+                prefab_loader.load_main(MyPrefabData {
+                    transform: Some(transform.clone()),
+                    rigidbody: Some(Rigidbody {
+                        velocity: Vector2::from_polar(
+                            random::<f32>() * 6.0 + 1.0,
+                            random::<f32>() * f32::two_pi(),
+                        ),
+                        drag: 0.05,
+                        bounciness: 0.8,
+                        auto_rotate: true,
+                        ..Default::default()
+                    }),
+                    sprite: Some(SpriteRenderPrefab { sprite_number: 15 }),
+                    collider: Some(RectCollider::new("Particle", 1.0, 1.0)),
+                    particle: Some(Particle { timer: 16 }),
+                    ..Default::default()
+                });
+            }
             audio.play_once(entity, 4, 0.5);
+        }
+    }
+}
+
+pub struct ParticleSystem;
+impl<'s> System<'s> for ParticleSystem {
+    type SystemData = (Entities<'s>, WriteStorage<'s, Particle>);
+
+    fn run(&mut self, (entities, mut particles): Self::SystemData) {
+        for (entity, mut particle) in (&entities, &mut particles).join() {
+            particle.timer -= 1;
+            if particle.timer < 0 {
+                skip_fail!(entities.delete(entity));
+                continue;
+            }
         }
     }
 }

@@ -117,6 +117,12 @@ pub struct Item {
     pub timer: i32,
 }
 
+#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[prefab(Component)]
+pub struct Particle {
+    pub timer: i32,
+}
+
 #[derive(Component, PrefabData, Deserialize, Serialize, Default, Clone, Debug)]
 #[storage(NullStorage)]
 #[prefab(Component)]
