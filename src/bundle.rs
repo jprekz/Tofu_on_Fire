@@ -1,7 +1,8 @@
 use amethyst::{
     assets::PrefabLoaderSystem,
-    core::bundle::{Result, SystemBundle},
+    core::bundle::SystemBundle,
     ecs::prelude::DispatcherBuilder,
+    error::Error,
 };
 
 use crate::ai::AISystem;
@@ -13,7 +14,7 @@ use crate::systems::*;
 pub struct GameBundle;
 
 impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
-    fn build(self, builder: &mut DispatcherBuilder<'a, 'b>) -> Result<()> {
+    fn build(self, builder: &mut DispatcherBuilder<'a, 'b>) -> Result<(), Error> {
         builder.add(PrefabLoaderSystem::<MapPrefabData>::default(), "", &[]);
         builder.add(PrefabLoaderSystem::<MyPrefabData>::default(), "", &[]);
 

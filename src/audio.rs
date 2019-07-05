@@ -27,7 +27,7 @@ pub fn initialise_audio(world: &mut World) {
 }
 fn load(name: &str, world: &mut World) -> SourceHandle {
     let loader = world.read_resource::<Loader>();
-    loader.load(name, WavFormat, (), (), &world.read_resource())
+    loader.load(name, WavFormat, (), &world.read_resource())
 }
 
 #[derive(Component, Clone, Debug)]
@@ -75,7 +75,7 @@ impl<'s> System<'s> for MyAudioSystem {
         for (p, transform) in (&play_once, &transforms).join() {
             let p_pos = transform.translation().xy();
             let dist = (player_pos - p_pos).norm();
-            let volume = 1.0 - dist / 200.0;
+            let volume = 1.0 - dist.as_f32() / 200.0;
             if volume <= 0.0 {
                 continue;
             }

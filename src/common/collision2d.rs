@@ -1,9 +1,11 @@
 use amethyst::{
-    assets::{PrefabData, PrefabError},
-    core::nalgebra::*,
+    assets::PrefabData, 
+    core::Float,
+    core::math::*,
     core::Transform,
     derive::PrefabData,
     ecs::prelude::*,
+    Error,
 };
 use serde_derive::{Deserialize, Serialize};
 use specs_derive::Component;
@@ -43,11 +45,12 @@ impl<'s> System<'s> for RigidbodySystem {
     fn run(&mut self, (mut transforms, mut rigidbodies): Self::SystemData) {
         for (transform, rigidbody) in (&mut transforms, &mut rigidbodies).join() {
             rigidbody.velocity += rigidbody.acceleration;
-            transform.move_global(
+            transform.prepend_translation(
                 rigidbody
                     .velocity
                     .map(|x| x.max(-5.0).min(5.0))
-                    .to_homogeneous(),
+                    .to_homogeneous()
+                    .map(Float::from),
             );
             rigidbody.velocity -= rigidbody.velocity * rigidbody.drag;
             if rigidbody.auto_rotate {
@@ -165,7 +168,7 @@ impl<'s> System<'s> for CollisionSystem {
                     let b_width = collider_b.width;
                     let b_height = collider_b.height;
 
-                    let sub = b_pos - a_pos;
+                    let sub = (b_pos - a_pos).map(Float::as_f32);
                     let th_x = (a_width + b_width) / 2.0;
                     let th_y = (a_height + b_height) / 2.0;
                     let sinking_x = th_x - sub.x.abs();
@@ -250,7 +253,7 @@ impl<'s> System<'s> for CollisionSystem {
                 let friction = rigidbody.friction;
                 rigidbody.velocity -= rigidbody.velocity.dot(&normal) * normal * (1.0 + bounciness);
                 rigidbody.velocity *= 1.0 - friction;
-                transform.move_global(result.collision.to_homogeneous());
+                transform.prepend_translation(result.collision.to_homogeneous().map(Float::from));
             }
         }
     }

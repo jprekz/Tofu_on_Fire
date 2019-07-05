@@ -61,7 +61,7 @@ where
         for prefab_data in channel.read(reader) {
             let entity = entities.create();
             prefab_data
-                .add_to_entity(entity, &mut prefab_system_data, &[entity])
+                .add_to_entity(entity, &mut prefab_system_data, &[entity], &[])
                 .expect("Unable to add prefab system data to entity");
         }
     }

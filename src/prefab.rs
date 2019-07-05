@@ -1,9 +1,12 @@
 use amethyst::{
-    assets::{PrefabData, PrefabError, ProgressCounter},
+    assets::{PrefabData, ProgressCounter},
     core::Transform,
     derive::PrefabData,
     ecs::prelude::*,
-    renderer::{CameraPrefab, SpriteRender, SpriteSheetHandle, Transparent},
+    renderer::{SpriteRender, Transparent},
+    renderer::camera::CameraPrefab,
+    renderer::sprite::SpriteSheetHandle,
+    Error,
 };
 use serde_derive::{Deserialize, Serialize};
 
@@ -45,13 +48,15 @@ impl<'a> PrefabData<'a> for SpriteRenderPrefab {
         entity: Entity,
         (sheet, renders, transparents): &mut Self::SystemData,
         _: &[Entity],
-    ) -> Result<(), PrefabError> {
+        _: &[Entity],
+    ) -> Result<(), Error> {
         transparents.insert(entity, Transparent)?;
         let sprite_render = SpriteRender {
             sprite_sheet: sheet.clone(),
             sprite_number: self.sprite_number,
         };
-        renders.insert(entity, sprite_render).map(|_| ())
+        renders.insert(entity, sprite_render).map(|_| ())?;
+        Ok(())
     }
 }
 
@@ -120,7 +125,7 @@ impl MapPrefabData {
         }
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MapPrefabData>| {
-            loader.load("resources/map.ron", RonFormat, (), ())
+            loader.load("resources/map.ron", RonFormat, ())
         });
         world.create_entity().with(prefab_handle).build();
     }
