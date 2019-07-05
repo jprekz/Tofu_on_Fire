@@ -1,21 +1,16 @@
 use amethyst::{
     assets::{AssetStorage, Handle, Loader, Prefab, PrefabLoader, RonFormat},
-    core::math::*,
+    core::nalgebra::*,
     core::Time,
     core::Transform,
     ecs::prelude::*,
     input::is_key_down,
-    input::{InputHandler, StringBindings},
+    input::InputHandler,
     prelude::*,
-    renderer::{
-        sprite::SpriteSheetHandle,
-        *
-    },
+    renderer::*,
     ui::*,
     utils::fps_counter::FPSCounter,
     winit::VirtualKeyCode,
-    core::{HiddenPropagate},
-    core::Float,
 };
 
 use crate::audio::*;
@@ -95,7 +90,7 @@ impl SimpleState for Game {
             if army_count < 10 {
                 if let Some(point) = get_spawn_point(world, 0) {
                     let mut transform = Transform::default();
-                    transform.set_translation_xyz(point.x, point.y, 0.0);
+                    transform.set_xyz(point.x, point.y, 0.0);
                     world
                         .create_entity()
                         .with(
@@ -115,7 +110,7 @@ impl SimpleState for Game {
             if enemy_count < 10 {
                 if let Some(point) = get_spawn_point(world, 1) {
                     let mut transform = Transform::default();
-                    transform.set_translation_xyz(point.x, point.y, 0.0);
+                    transform.set_xyz(point.x, point.y, 0.0);
                     world
                         .create_entity()
                         .with(
@@ -140,7 +135,7 @@ impl SimpleState for Game {
         let StateData { world, .. } = data;
 
         let pressed_any_key = {
-            let input = world.read_resource::<InputHandler<StringBindings>>();
+            let input = world.read_resource::<InputHandler<String, String>>();
 
             let shot = input.action_is_down("shot").unwrap_or(false);
             let hold = input.action_is_down("hold").unwrap_or(false);
@@ -163,7 +158,7 @@ impl SimpleState for Game {
             if world.read_storage::<Playable>().join().next().is_none() {
                 if let Some(point) = get_spawn_point(world, 0) {
                     let mut transform = Transform::default();
-                    transform.set_translation_xyz(point.x, point.y, 0.0);
+                    transform.set_xyz(point.x, point.y, 0.0);
                     world
                         .create_entity()
                         .with(
@@ -197,27 +192,27 @@ impl SimpleState for Game {
         world.add_resource(weapon_list);
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MapPrefabData>| {
-            loader.load("resources/map.ron", RonFormat, ())
+            loader.load("resources/map.ron", RonFormat, (), ())
         });
         world.create_entity().with(prefab_handle).build();
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-            loader.load("resources/camera.ron", RonFormat, ())
+            loader.load("resources/camera.ron", RonFormat, (), ())
         });
         world.create_entity().with(prefab_handle).build();
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-            loader.load("resources/player.ron", RonFormat, ())
+            loader.load("resources/player.ron", RonFormat, (), ())
         });
         self.player_prefab_handle = Some(prefab_handle);
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-            loader.load("resources/ai.ron", RonFormat, ())
+            loader.load("resources/ai.ron", RonFormat, (), ())
         });
         self.ai_prefab_handle = Some(prefab_handle);
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-            loader.load("resources/enemy.ron", RonFormat, ())
+            loader.load("resources/enemy.ron", RonFormat, (), ())
         });
         self.enemy_prefab_handle = Some(prefab_handle);
 
@@ -282,7 +277,8 @@ fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
         let texture_storage = world.read_resource::<AssetStorage<Texture>>();
         loader.load(
             "texture/spritesheet.png",
-            ImageFormat::default(),
+            PngFormat,
+            TextureMetadata::srgb_scale(),
             (),
             &texture_storage,
         )
@@ -291,13 +287,14 @@ fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
     let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
     loader.load(
         "texture/spritesheet.ron",
-        SpriteSheetFormat(texture_handle),
+        SpriteSheetFormat,
+        texture_handle,
         (),
         &sprite_sheet_store,
     )
 }
 
-fn get_spawn_point(world: &mut World, team: u32) -> Option<Vector2<Float>> {
+fn get_spawn_point(world: &mut World, team: u32) -> Option<Vector2<f32>> {
     world.exec(
         |(spawnpoints, transforms): (ReadStorage<'_, SpawnPoint>, WriteStorage<'_, Transform>)| {
             (&spawnpoints, &transforms)

@@ -1,9 +1,8 @@
 use amethyst::{
-    assets::PrefabData,
-    core::math::*,
+    assets::{PrefabData, PrefabError},
+    core::nalgebra::*,
     derive::PrefabData,
     ecs::prelude::*,
-    Error,
 };
 use serde_derive::{Deserialize, Serialize};
 use specs_derive::Component;

@@ -1,13 +1,11 @@
 use crate::common::vector2ext::Vector2Ext;
 use crate::components::*;
 use amethyst::{
-    assets::PrefabData,
-    core::Float,
-    core::math::*,
+    assets::{PrefabData, PrefabError},
+    core::nalgebra::*,
     core::Transform,
     derive::PrefabData,
     ecs::prelude::*,
-    Error,
 };
 use rand::prelude::*;
 use serde_derive::{Deserialize, Serialize};
@@ -80,7 +78,7 @@ impl<'s> System<'s> for AISystem {
                     .join()
                     .filter(|(_, target, _)| target.team != my_team)
                     .min_by_key(|(_, _, transform)| {
-                        (transform.translation().xy() - my_pos).norm().as_f32() as i32
+                        (transform.translation().xy() - my_pos).norm() as i32
                     })
                 {
                     ai.state = AIState::Go(next_target);
@@ -102,10 +100,10 @@ impl<'s> System<'s> for AISystem {
                     .join()
                     .filter(|(_, bullet, _)| bullet.team != my_team)
                     .filter(|(_, _, transform)| {
-                        (transform.translation().xy() - my_pos).norm().as_f32() < 40.0
+                        (transform.translation().xy() - my_pos).norm() < 40.0
                     })
                     .min_by_key(|(_, _, transform)| {
-                        (transform.translation().xy() - my_pos).norm().as_f32() as i32
+                        (transform.translation().xy() - my_pos).norm() as i32
                     })
                 {
                     ai.state = AIState::Back(next_target);
@@ -128,7 +126,7 @@ impl<'s> System<'s> for AISystem {
                         ai.state = AIState::Neutral;
                         continue;
                     };
-                    let dist = (target_pos - my_pos).map(Float::as_f32);
+                    let dist = target_pos - my_pos;
                     let mut move_vec = normalize(dist);
 
                     if dist.norm() > 40.0 {
@@ -146,7 +144,7 @@ impl<'s> System<'s> for AISystem {
                         ai.state = AIState::Neutral;
                         continue;
                     };
-                    let dist = (target_pos - my_pos).map(Float::as_f32);
+                    let dist = target_pos - my_pos;
                     let move_vec = -normalize(dist);
 
                     (move_vec, move_vec, true)
@@ -158,8 +156,8 @@ impl<'s> System<'s> for AISystem {
                         ai.state = AIState::Neutral;
                         continue;
                     };
-                    let dist = (target_pos - my_pos).map(Float::as_f32);
-                    let move_vec = Rotation2::new(f32::frac_pi_2()) * normalize(dist);
+                    let dist = target_pos - my_pos;
+                    let move_vec = Rotation2::new(Real::frac_pi_2()) * normalize(dist);
 
                     (move_vec, move_vec, true)
                 }
@@ -170,8 +168,8 @@ impl<'s> System<'s> for AISystem {
                         ai.state = AIState::Neutral;
                         continue;
                     };
-                    let dist = (target_pos - my_pos).map(Float::as_f32);
-                    let move_vec = Rotation2::new(f32::frac_pi_2()).inverse() * normalize(dist);
+                    let dist = target_pos - my_pos;
+                    let move_vec = Rotation2::new(Real::frac_pi_2()).inverse() * normalize(dist);
 
                     (move_vec, move_vec, true)
                 }
