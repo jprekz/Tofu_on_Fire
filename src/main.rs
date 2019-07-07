@@ -50,7 +50,9 @@ fn main() -> amethyst::Result<()> {
     };
 
     let game_data = GameDataBuilder::default()
-        .with_bundle(AudioBundle::new(|_: &mut ()| None))?
+        .with_bundle(AudioBundle::new(|music: &mut audio::Music| {
+            music.music.next()
+        }))?
         .with_bundle(FPSCounterBundle)?
         .with_bundle(input_bundle)?
         .with_bundle(bundle::GameBundle::default())?

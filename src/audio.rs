@@ -8,8 +8,14 @@ use amethyst::{
 use shred_derive::SystemData;
 use specs_derive::Component;
 
+use std::iter::{repeat, Repeat};
+
 pub struct Sounds {
     pub array: Vec<SourceHandle>,
+}
+
+pub struct Music {
+    pub music: Repeat<SourceHandle>,
 }
 
 pub fn initialise_audio(world: &mut World) {
@@ -22,7 +28,10 @@ pub fn initialise_audio(world: &mut World) {
             load("audio/death1.wav", world),
         ],
     };
+    let music = repeat(load("audio/bgm.wav", world));
+    let music = Music { music };
     world.add_resource(sounds);
+    world.add_resource(music);
     world.add_resource(());
 }
 fn load(name: &str, world: &mut World) -> SourceHandle {
