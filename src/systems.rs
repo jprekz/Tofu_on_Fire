@@ -462,18 +462,25 @@ impl<'s> System<'s> for AreaSystem {
         ReadStorage<'s, Player>,
         ReadStorage<'s, Area>,
         ReadStorage<'s, ColliderResult>,
+        WriteStorage<'s, Transform>,
         WriteExpect<'s, Score>,
     );
 
-    fn run(&mut self, (players, areas, results, mut score): Self::SystemData) {
+    fn run(&mut self, (players, areas, results, mut transforms, mut score): Self::SystemData) {
         self.timer += 1;
         if self.timer % 60 != 0 {
             return;
         }
-        for (_, result) in (&areas, &results).join() {
+        for (_, result, transform) in (&areas, &results, &mut transforms).join() {
             for collided in &result.collided {
                 let team = players.get(collided.entity).unwrap().team;
                 score.score[team as usize] += 1;
+                let position = score.score[0] as i32 - score.score[1] as i32;
+                let ratio = position as f32 / 100.0 + 0.5;
+                let position_x = 640.0 * ratio;
+                let position_y = 480.0 * ratio;
+                transform.set_x(position_x);
+                transform.set_y(position_y);
             }
         }
     }
