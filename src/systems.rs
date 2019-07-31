@@ -14,6 +14,8 @@ use crate::components::*;
 use crate::prefab::*;
 use crate::weapon::*;
 
+use crate::game::Score;
+
 pub use crate::common::{
     collision2d::{CollisionSystem, RigidbodySystem},
     vector2ext::Vector2Ext,
@@ -446,6 +448,32 @@ impl<'s> System<'s> for BulletSystem {
                     }
                     _ => {}
                 }
+            }
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct AreaSystem {
+    timer: i32,
+}
+impl<'s> System<'s> for AreaSystem {
+    type SystemData = (
+        ReadStorage<'s, Player>,
+        ReadStorage<'s, Area>,
+        ReadStorage<'s, ColliderResult>,
+        WriteExpect<'s, Score>,
+    );
+
+    fn run(&mut self, (players, areas, results, mut score): Self::SystemData) {
+        self.timer += 1;
+        if self.timer % 60 != 0 {
+            return;
+        }
+        for (_, result) in (&areas, &results).join() {
+            for collided in &result.collided {
+                let team = players.get(collided.entity).unwrap().team;
+                score.score[team as usize] += 1;
             }
         }
     }

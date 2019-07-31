@@ -70,6 +70,11 @@ pub struct SpawnPoint {
     pub team: u32,
 }
 
+#[derive(Component, PrefabData, Deserialize, Serialize, Default, Clone, Debug)]
+#[storage(NullStorage)]
+#[prefab(Component)]
+pub struct Area;
+
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
 pub struct Bullet {

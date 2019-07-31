@@ -28,7 +28,8 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
                 .collide("Particle", "Wall")
                 .trigger("Bullet", "Wall")
                 .trigger("Player", "Bullet")
-                .trigger("Player", "Item"),
+                .trigger("Player", "Item")
+                .trigger("Player", "Area"),
             "collision_system",
             &["rigidbody_system"],
         );
@@ -60,6 +61,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
 
         builder.add(ParticleSystem, "particle_system", &[]);
         builder.add(ItemSystem, "item_system", &[]);
+        builder.add(AreaSystem::default(), "area_system", &[]);
 
         builder.add_barrier();
         builder.add(MyAudioSystem, "my_audio_system", &[]);

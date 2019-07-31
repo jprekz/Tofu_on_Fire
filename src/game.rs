@@ -18,9 +18,15 @@ use crate::components::*;
 use crate::prefab::*;
 use crate::weapon::*;
 
+pub struct Score {
+    pub score: Vec<u32>,
+}
+
 #[derive(Default)]
 pub struct Game {
     fps_display: Option<Entity>,
+    score_0: Option<Entity>,
+    score_1: Option<Entity>,
     player_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
     ai_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
     enemy_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
@@ -47,6 +53,7 @@ impl SimpleState for Game {
             StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::F2) => {
                 let StateData { world, .. } = data;
                 MapPrefabData::reload(world);
+                log::info!("Map reload");
                 Trans::None
             }
             _ => Trans::None,
@@ -56,7 +63,6 @@ impl SimpleState for Game {
     fn shadow_fixed_update(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let StateData { world, .. } = data;
 
-        // display fps
         if self.fps_display.is_none() {
             world.exec(|finder: UiFinder<'_>| {
                 if let Some(entity) = finder.find("fps_text") {
@@ -64,12 +70,36 @@ impl SimpleState for Game {
                 }
             });
         }
+        if self.score_0.is_none() {
+            world.exec(|finder: UiFinder<'_>| {
+                if let Some(entity) = finder.find("score_0") {
+                    self.score_0 = Some(entity);
+                }
+            });
+        }
+        if self.score_1.is_none() {
+            world.exec(|finder: UiFinder<'_>| {
+                if let Some(entity) = finder.find("score_1") {
+                    self.score_1 = Some(entity);
+                }
+            });
+        }
+
         let mut ui_text = world.write_storage::<UiText>();
+
         if let Some(fps_display) = self.fps_display.and_then(|entity| ui_text.get_mut(entity)) {
             if world.read_resource::<Time>().frame_number() % 20 == 0 {
                 let fps = world.read_resource::<FPSCounter>().sampled_fps();
                 fps_display.text = format!("FPS: {:.*}", 2, fps);
             }
+        }
+
+        if let Some(score_0) = self.score_0.and_then(|entity| ui_text.get_mut(entity)) {
+            score_0.text = format!("{}", world.read_resource::<Score>().score[0]);
+        }
+
+        if let Some(score_1) = self.score_1.and_then(|entity| ui_text.get_mut(entity)) {
+            score_1.text = format!("{}", world.read_resource::<Score>().score[1]);
         }
     }
 
@@ -190,6 +220,8 @@ impl SimpleState for Game {
 
         let weapon_list = WeaponList::load("resources/weapon_list.ron");
         world.add_resource(weapon_list);
+
+        world.add_resource(Score { score: vec![0, 0] });
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MapPrefabData>| {
             loader.load("resources/map.ron", RonFormat, (), ())

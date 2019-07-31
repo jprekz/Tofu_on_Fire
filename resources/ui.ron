@@ -34,5 +34,37 @@ Container(
                 image: File("texture/title.png", Png, (channel: Srgb)),
             )
         ),
+        Text(
+            transform: (
+                id: "score_0",
+                anchor: TopLeft,
+                percent: true,
+                x: 0.25,
+                y: -0.125,
+                width: 0.5,
+                height: 0.25,
+            ),
+            text: (
+                text: "100",
+                font_size: 100.0,
+                color: (0.0, 0.0, 1.0, 1.0),
+            ),
+        ),
+        Text(
+            transform: (
+                id: "score_1",
+                anchor: TopRight,
+                percent: true,
+                x: -0.25,
+                y: -0.125,
+                width: 0.5,
+                height: 0.25,
+            ),
+            text: (
+                text: "100",
+                font_size: 100.0,
+                color: (1.0, 0.0, 0.0, 1.0),
+            ),
+        ),
     ],
 )

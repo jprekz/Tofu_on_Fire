@@ -418,5 +418,24 @@
                 spawn_point: None,
             )),
         ),
+        (
+            parent: None,
+            data: Some((
+                transform: Some((
+                    translation: (320, 240, 0),
+                    rotation: (1, 0, 0, 0),
+                    scale: (5, 5, 1),
+                )),
+                collider: Some((
+                    tag: "Area",
+                    width: 128,
+                    height: 128,
+                )),
+                sprite: Some((
+                    sprite_number: 16,
+                )),
+                area: Some(()),
+            )),
+        ),
     ],
 )
