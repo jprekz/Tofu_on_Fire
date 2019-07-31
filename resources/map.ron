@@ -424,12 +424,12 @@
                 transform: Some((
                     translation: (320, 240, 0),
                     rotation: (1, 0, 0, 0),
-                    scale: (5, 5, 1),
+                    scale: (3, 3, 1),
                 )),
                 collider: Some((
                     tag: "Area",
-                    width: 128,
-                    height: 128,
+                    width: 80,
+                    height: 80,
                 )),
                 sprite: Some((
                     sprite_number: 16,
