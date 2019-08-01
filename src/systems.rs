@@ -507,10 +507,8 @@ impl<'s> System<'s> for AreaSystem {
                 score.score[team as usize] += 1;
                 let position = score.score[0] as i32 - score.score[1] as i32;
                 let ratio = position as f32 / 100.0 + 0.5;
-                let position_x = 640.0 * ratio;
-                let position_y = 480.0 * ratio;
+                let position_x = 352.0 * ratio + 176.0;
                 transform.set_x(position_x);
-                transform.set_y(position_y);
             }
         }
     }

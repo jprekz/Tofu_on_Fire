@@ -8,7 +8,7 @@
             parent: None,
             data: Some((
                 transform: Some((
-                    translation: (64, 64, 0),
+                    translation: (64, 208, 0),
                     rotation: (1, 0, 0, 0),
                     scale: (4, 4, 1),
                 )),
@@ -25,26 +25,7 @@
             parent: None,
             data: Some((
                 transform: Some((
-                    translation: (320, 16, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (20, 1, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 640,
-                    height: 32,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (576, 416, 0),
+                    translation: (640, 208, 0),
                     rotation: (1, 0, 0, 0),
                     scale: (4, 4, 1),
                 )),
@@ -61,368 +42,7 @@
             parent: None,
             data: Some((
                 transform: Some((
-                    translation: (16, 240, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (1, 13, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 32,
-                    height: 416,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (624, 240, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (1, 13, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 32,
-                    height: 416,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (368, 112, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (1, 3, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 32,
-                    height: 96,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (192, 112, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (6, 1, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 192,
-                    height: 32,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (496, 112, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (3, 1, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 96,
-                    height: 32,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (112, 240, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (1, 5, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 32,
-                    height: 160,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (464, 160, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (1, 2, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 32,
-                    height: 64,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (176, 192, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (1, 2, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 32,
-                    height: 64,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (320, 176, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (4, 1, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 128,
-                    height: 32,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (528, 240, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (1, 5, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 32,
-                    height: 160,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (208, 240, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (3, 1, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 96,
-                    height: 32,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (432, 240, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (3, 1, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 96,
-                    height: 32,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (464, 288, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (1, 2, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 32,
-                    height: 64,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (176, 320, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (1, 2, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 32,
-                    height: 64,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (320, 304, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (4, 1, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 128,
-                    height: 32,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (272, 368, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (1, 3, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 32,
-                    height: 96,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (144, 368, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (3, 1, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 96,
-                    height: 32,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (448, 368, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (6, 1, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 192,
-                    height: 32,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (320, 464, 0),
-                    rotation: (1, 0, 0, 0),
-                    scale: (20, 1, 1),
-                )),
-                collider: Some((
-                    tag: "Wall",
-                    width: 640,
-                    height: 32,
-                )),
-                sprite: Some((
-                    sprite_number: 0,
-                )),
-                spawn_point: None,
-            )),
-        ),
-        (
-            parent: None,
-            data: Some((
-                transform: Some((
-                    translation: (320, 240, 0),
+                    translation: (352, 208, 0),
                     rotation: (1, 0, 0, 0),
                     scale: (3, 3, 1),
                 )),
@@ -437,5 +57,37 @@
                 area: Some(()),
             )),
         ),
+
+(data: Some((transform: Some((translation: (80, 80, 0),rotation: (1, 0, 0, 0),scale: (5, 1, 1),)),collider: Some((tag: "Wall",width: 160,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (16, 208, 0),rotation: (1, 0, 0, 0),scale: (1, 7, 1),)),collider: Some((tag: "Wall",width: 32,height: 224,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (80, 336, 0),rotation: (1, 0, 0, 0),scale: (5, 1, 1),)),collider: Some((tag: "Wall",width: 160,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (352, 16, 0),rotation: (1, 0, 0, 0),scale: (14, 1, 1),)),collider: Some((tag: "Wall",width: 448,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (144, 48, 0),rotation: (1, 0, 0, 0),scale: (1, 1, 1),)),collider: Some((tag: "Wall",width: 32,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (144, 368, 0),rotation: (1, 0, 0, 0),scale: (1, 1, 1),)),collider: Some((tag: "Wall",width: 32,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (352, 400, 0),rotation: (1, 0, 0, 0),scale: (14, 1, 1),)),collider: Some((tag: "Wall",width: 448,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (560, 48, 0),rotation: (1, 0, 0, 0),scale: (1, 1, 1),)),collider: Some((tag: "Wall",width: 32,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (624, 80, 0),rotation: (1, 0, 0, 0),scale: (5, 1, 1),)),collider: Some((tag: "Wall",width: 160,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (624, 336, 0),rotation: (1, 0, 0, 0),scale: (5, 1, 1),)),collider: Some((tag: "Wall",width: 160,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (560, 368, 0),rotation: (1, 0, 0, 0),scale: (1, 1, 1),)),collider: Some((tag: "Wall",width: 32,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (688, 208, 0),rotation: (1, 0, 0, 0),scale: (1, 7, 1),)),collider: Some((tag: "Wall",width: 32,height: 224,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (128, 144, 0),rotation: (1, 0, 0, 0),scale: (2, 1, 1),)),collider: Some((tag: "Wall",width: 64,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (112, 208, 0),rotation: (1, 0, 0, 0),scale: (1, 1, 1),)),collider: Some((tag: "Wall",width: 32,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (128, 272, 0),rotation: (1, 0, 0, 0),scale: (2, 1, 1),)),collider: Some((tag: "Wall",width: 64,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (256, 80, 0),rotation: (1, 0, 0, 0),scale: (4, 1, 1),)),collider: Some((tag: "Wall",width: 128,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (224, 336, 0),rotation: (1, 0, 0, 0),scale: (2, 1, 1),)),collider: Some((tag: "Wall",width: 64,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (240, 160, 0),rotation: (1, 0, 0, 0),scale: (1, 2, 1),)),collider: Some((tag: "Wall",width: 32,height: 64,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (240, 256, 0),rotation: (1, 0, 0, 0),scale: (1, 2, 1),)),collider: Some((tag: "Wall",width: 32,height: 64,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (352, 144, 0),rotation: (1, 0, 0, 0),scale: (4, 1, 1),)),collider: Some((tag: "Wall",width: 128,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (352, 272, 0),rotation: (1, 0, 0, 0),scale: (4, 1, 1),)),collider: Some((tag: "Wall",width: 128,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (304, 320, 0),rotation: (1, 0, 0, 0),scale: (1, 2, 1),)),collider: Some((tag: "Wall",width: 32,height: 64,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (400, 96, 0),rotation: (1, 0, 0, 0),scale: (1, 2, 1),)),collider: Some((tag: "Wall",width: 32,height: 64,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (448, 336, 0),rotation: (1, 0, 0, 0),scale: (4, 1, 1),)),collider: Some((tag: "Wall",width: 128,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (480, 80, 0),rotation: (1, 0, 0, 0),scale: (2, 1, 1),)),collider: Some((tag: "Wall",width: 64,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (464, 160, 0),rotation: (1, 0, 0, 0),scale: (1, 2, 1),)),collider: Some((tag: "Wall",width: 32,height: 64,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (464, 256, 0),rotation: (1, 0, 0, 0),scale: (1, 2, 1),)),collider: Some((tag: "Wall",width: 32,height: 64,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (576, 144, 0),rotation: (1, 0, 0, 0),scale: (2, 1, 1),)),collider: Some((tag: "Wall",width: 64,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (576, 272, 0),rotation: (1, 0, 0, 0),scale: (2, 1, 1),)),collider: Some((tag: "Wall",width: 64,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+(data: Some((transform: Some((translation: (592, 208, 0),rotation: (1, 0, 0, 0),scale: (1, 1, 1),)),collider: Some((tag: "Wall",width: 32,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
+
     ],
 )
