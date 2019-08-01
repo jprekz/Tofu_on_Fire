@@ -57,8 +57,17 @@ impl<'s> System<'s> for PlayableSystem {
         let move_vec = Vector2::from_polar(move_r.min(1.0), move_theta);
 
         let aim_vec = axis_xy_value("right_x", "right_y").unwrap_or(Vector2::zeros());
+        let mouse_vec = input
+            .mouse_position()
+            .map(|v| Vector2::new(v.0 as f32 - 640.0, v.1 as f32 - 480.0));
         let (aim_r, _) = aim_vec.to_polar();
-        let aim_vec = if aim_r < 0.1 { move_vec } else { aim_vec };
+        let aim_vec = if aim_r > 0.1 {
+            aim_vec
+        } else if let Some(mouse_vec) = mouse_vec {
+            mouse_vec
+        } else {
+            move_vec
+        };
 
         let shot = input.action_is_down("shot").unwrap_or(false);
         let hold = input.action_is_down("hold").unwrap_or(false);
