@@ -33,7 +33,18 @@ macro_rules! skip_fail {
     };
 }
 
-pub struct PlayableSystem;
+pub struct PlayableSystem {
+    before_mouse: Vector2<f32>,
+    use_mouse: bool,
+}
+impl Default for PlayableSystem {
+    fn default() -> Self {
+        PlayableSystem {
+            before_mouse: Vector2::zeros(),
+            use_mouse: false,
+        }
+    }
+}
 impl<'s> System<'s> for PlayableSystem {
     type SystemData = (
         Read<'s, InputHandler<String, String>>,
@@ -57,13 +68,23 @@ impl<'s> System<'s> for PlayableSystem {
         let move_vec = Vector2::from_polar(move_r.min(1.0), move_theta);
 
         let aim_vec = axis_xy_value("right_x", "right_y").unwrap_or(Vector2::zeros());
+        let (aim_r, _) = aim_vec.to_polar();
         let mouse_vec = input
             .mouse_position()
-            .map(|v| Vector2::new(v.0 as f32 - 640.0, v.1 as f32 - 480.0));
-        let (aim_r, _) = aim_vec.to_polar();
+            .map(|v| Vector2::new(v.0 as f32 - 640.0, v.1 as f32 - 480.0))
+            .unwrap_or(Vector2::zeros());
+
+        let move_mouse = self.before_mouse != mouse_vec;
+        if move_mouse {
+            self.use_mouse = true;
+        }
+
+        self.before_mouse = mouse_vec;
+
         let aim_vec = if aim_r > 0.1 {
+            self.use_mouse = false;
             aim_vec
-        } else if let Some(mouse_vec) = mouse_vec {
+        } else if self.use_mouse {
             mouse_vec
         } else {
             move_vec

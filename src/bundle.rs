@@ -33,7 +33,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
             "collision_system",
             &["rigidbody_system"],
         );
-        builder.add(PlayableSystem, "playable_system", &["input_system"]);
+        builder.add(PlayableSystem::default(), "playable_system", &["input_system"]);
         builder.add(AISystem, "ai_system", &[]);
         builder.add(
             PlayerControlSystem,
