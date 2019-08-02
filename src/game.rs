@@ -25,8 +25,6 @@ pub struct Score {
 #[derive(Default)]
 pub struct Game {
     fps_display: Option<Entity>,
-    score_0: Option<Entity>,
-    score_1: Option<Entity>,
     player_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
     ai_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
     enemy_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
@@ -70,20 +68,6 @@ impl SimpleState for Game {
                 }
             });
         }
-        if self.score_0.is_none() {
-            world.exec(|finder: UiFinder<'_>| {
-                if let Some(entity) = finder.find("score_0") {
-                    self.score_0 = Some(entity);
-                }
-            });
-        }
-        if self.score_1.is_none() {
-            world.exec(|finder: UiFinder<'_>| {
-                if let Some(entity) = finder.find("score_1") {
-                    self.score_1 = Some(entity);
-                }
-            });
-        }
 
         let mut ui_text = world.write_storage::<UiText>();
 
@@ -92,14 +76,6 @@ impl SimpleState for Game {
                 let fps = world.read_resource::<FPSCounter>().sampled_fps();
                 fps_display.text = format!("FPS: {:.*}", 2, fps);
             }
-        }
-
-        if let Some(score_0) = self.score_0.and_then(|entity| ui_text.get_mut(entity)) {
-            score_0.text = format!("{}", world.read_resource::<Score>().score[0]);
-        }
-
-        if let Some(score_1) = self.score_1.and_then(|entity| ui_text.get_mut(entity)) {
-            score_1.text = format!("{}", world.read_resource::<Score>().score[1]);
         }
     }
 
