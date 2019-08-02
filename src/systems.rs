@@ -493,22 +493,39 @@ impl<'s> System<'s> for AreaSystem {
         ReadStorage<'s, Area>,
         ReadStorage<'s, ColliderResult>,
         WriteStorage<'s, Transform>,
+        WriteStorage<'s, SpriteRender>,
         WriteExpect<'s, Score>,
     );
 
-    fn run(&mut self, (players, areas, results, mut transforms, mut score): Self::SystemData) {
+    fn run(
+        &mut self,
+        (players, areas, results, mut transforms, mut sprites, mut score): Self::SystemData,
+    ) {
         self.timer += 1;
         if self.timer % 60 != 0 {
             return;
         }
-        for (_, result, transform) in (&areas, &results, &mut transforms).join() {
+        for (_, result, transform, sprite) in
+            (&areas, &results, &mut transforms, &mut sprites).join()
+        {
+            let mut p = 0i32;
             for collided in &result.collided {
                 let team = players.get(collided.entity).unwrap().team;
                 score.score[team as usize] += 1;
-                let position = score.score[0] as i32 - score.score[1] as i32;
-                let ratio = position as f32 / 100.0 + 0.5;
-                let position_x = 352.0 * ratio + 176.0;
-                transform.set_x(position_x);
+                match team {
+                    0 => p += 1,
+                    1 => p -= 1,
+                    _ => (),
+                };
+            }
+            let position = score.score[0] as i32 - score.score[1] as i32;
+            let ratio = position as f32 / 100.0 + 0.5;
+            let position_x = 352.0 * ratio + 176.0;
+            transform.set_x(position_x);
+            sprite.sprite_number = match p.cmp(&0) {
+                std::cmp::Ordering::Equal => 16,
+                std::cmp::Ordering::Less => 18,
+                std::cmp::Ordering::Greater => 17,
             }
         }
     }

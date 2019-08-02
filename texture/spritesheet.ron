@@ -1,127 +1,44 @@
 (
-    spritesheet_width: 144,
+    spritesheet_width: 196,
     spritesheet_height: 64,
     sprites: [
         // wall [0]
-        (
-            x: 0,
-            y: 0,
-            width: 32,
-            height: 32,
-        ),
+        ( x: 0, y: 0, width: 32, height: 32,),
         // reticle [1]
-        (
-            x: 0,
-            y: 32,
-            width: 32,
-            height: 32,
-        ),
+        ( x: 0, y: 32, width: 32, height: 32,),
 
         // player1 [2]
-        (
-            x: 32,
-            y: 0,
-            width: 16,
-            height: 16,
-        ),
-        // player2
-        (
-            x: 32,
-            y: 16,
-            width: 16,
-            height: 16,
-        ),
+        ( x: 32, y: 0, width: 16, height: 16,),
+        // player2 [3]
+        ( x: 32, y: 16, width: 16, height: 16,),
 
         // bullet1 [4]
-        (
-            x: 48,
-            y: 0,
-            width: 16,
-            height: 16,
-        ),
-        (
-            x: 48,
-            y: 16,
-            width: 16,
-            height: 16,
-        ),
+        ( x: 48, y: 0, width: 16, height: 16,),
+        ( x: 48, y: 16, width: 16, height: 16,),
 
         // bullet2 [6]
-        (
-            x: 64,
-            y: 0,
-            width: 16,
-            height: 16,
-        ),
-        (
-            x: 64,
-            y: 16,
-            width: 16,
-            height: 16,
-        ),
+        ( x: 64, y: 0, width: 16, height: 16,),
+        ( x: 64, y: 16, width: 16, height: 16,),
 
         // bullet3 [8]
-        (
-            x: 80,
-            y: 0,
-            width: 16,
-            height: 16,
-        ),
-        (
-            x: 80,
-            y: 16,
-            width: 16,
-            height: 16,
-        ),
+        ( x: 80, y: 0, width: 16, height: 16,),
+        ( x: 80, y: 16, width: 16, height: 16,),
 
         // shield [10]
-        (
-            x: 32,
-            y: 32,
-            width: 16,
-            height: 16,
-        ),
-        (
-            x: 48,
-            y: 32,
-            width: 16,
-            height: 16,
-        ),
-        (
-            x: 64,
-            y: 32,
-            width: 16,
-            height: 16,
-        ),
-        (
-            x: 80,
-            y: 32,
-            width: 16,
-            height: 16,
-        ),
+        ( x: 32, y: 32, width: 16, height: 16,),
+        ( x: 48, y: 32, width: 16, height: 16,),
+        ( x: 64, y: 32, width: 16, height: 16,),
+        ( x: 80, y: 32, width: 16, height: 16,),
 
         // line [14]
-        (
-            x: 32,
-            y: 48,
-            width: 16,
-            height: 16,
-        ),
+        ( x: 32, y: 48, width: 16, height: 16,),
 
         // item [15]
-        (
-            x: 48,
-            y: 48,
-            width: 16,
-            height: 16,
-        ),
+        ( x: 48, y: 48, width: 16, height: 16,),
         
         // area [16]
-        (
-            x: 96,
-            y: 0,
-            width: 32,
-            height: 32,
-        ),
+        ( x: 96, y: 0, width: 32, height: 32,),
+        ( x: 128, y: 0, width: 32, height: 32,),
+        ( x: 160, y: 0, width: 32, height: 32,),
     ],
 )
