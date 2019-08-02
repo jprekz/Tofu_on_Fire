@@ -9,6 +9,8 @@ use crate::audio::MyAudioSystem;
 use crate::prefab::*;
 use crate::systems::*;
 
+use crate::common::pause::Pausable;
+
 #[derive(Default)]
 pub struct GameBundle;
 
@@ -19,7 +21,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
 
         builder.add_barrier();
 
-        builder.add(RigidbodySystem, "rigidbody_system", &[]);
+        builder.add(Pausable::new(RigidbodySystem), "rigidbody_system", &[]);
         builder.add(
             CollisionSystem::default()
                 .collide("Player", "Wall")
@@ -33,10 +35,14 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
             "collision_system",
             &["rigidbody_system"],
         );
-        builder.add(PlayableSystem::default(), "playable_system", &["input_system"]);
+        builder.add(
+            PlayableSystem::default(),
+            "playable_system",
+            &["input_system"],
+        );
         builder.add(AISystem, "ai_system", &[]);
         builder.add(
-            PlayerControlSystem,
+            Pausable::new(PlayerControlSystem),
             "player_control_system",
             &["playable_system", "ai_system"],
         );
@@ -52,7 +58,11 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
         );
         builder.add(ShieldSystem, "shield_system", &["player_control_system"]);
         builder.add(ReticleSystem, "reticle_system", &["player_control_system"]);
-        builder.add(BulletSystem, "bullet_system", &["player_control_system"]);
+        builder.add(
+            Pausable::new(BulletSystem),
+            "bullet_system",
+            &["player_control_system"],
+        );
         builder.add(
             CameraSystem::default(),
             "camera_system",
@@ -61,7 +71,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
 
         builder.add(ParticleSystem, "particle_system", &[]);
         builder.add(ItemSystem, "item_system", &[]);
-        builder.add(AreaSystem::default(), "area_system", &[]);
+        builder.add(Pausable::new(AreaSystem::default()), "area_system", &[]);
 
         builder.add_barrier();
         builder.add(MyAudioSystem, "my_audio_system", &[]);

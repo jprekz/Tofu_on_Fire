@@ -18,6 +18,7 @@ use crate::game::Score;
 
 pub use crate::common::{
     collision2d::{CollisionSystem, RigidbodySystem},
+    pause::Pause,
     vector2ext::Vector2Ext,
 };
 
@@ -551,9 +552,28 @@ impl<'s> System<'s> for CameraSystem {
         WriteStorage<'s, Transform>,
         ReadStorage<'s, Playable>,
         ReadStorage<'s, Player>,
+        ReadStorage<'s, Area>,
+        Read<'s, Pause>,
     );
 
-    fn run(&mut self, (entities, cameras, mut transforms, playables, players): Self::SystemData) {
+    fn run(
+        &mut self,
+        (entities, cameras, mut transforms, playables, players, areas, pause): Self::SystemData,
+    ) {
+        if pause.paused() {
+            if let Some((_, transform)) = (&areas, &transforms).join().next() {
+                let area_x = transform.translation().x;
+                let area_y = transform.translation().y;
+                for (transform, _) in (&mut transforms, &cameras).join() {
+                    let cam_x = transform.translation().x;
+                    let cam_y = transform.translation().y;
+                    transform.set_x((area_x + cam_x * 9.0) / 10.0);
+                    transform.set_y((area_y + cam_y * 9.0) / 10.0);
+                }
+            }
+            return;
+        }
+
         if self.timer > 0 {
             self.timer -= 1;
             if self.timer == 0 {

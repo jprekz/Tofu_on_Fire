@@ -1,5 +1,7 @@
 use amethyst::{
     assets::{AssetStorage, Loader, PrefabLoader, RonFormat},
+
+    core::transform::*,
     core::Time,
     ecs::prelude::*,
     input::is_key_down,
@@ -17,6 +19,8 @@ use crate::prefab::*;
 use crate::respawn::*;
 use crate::weapon::*;
 
+use crate::common::pause::Pause;
+
 pub struct Score {
     pub score: Vec<u32>,
 }
@@ -24,6 +28,7 @@ pub struct Score {
 #[derive(Default)]
 pub struct Game {
     fps_display: Option<Entity>,
+    released: bool,
 }
 
 impl SimpleState for Game {
@@ -81,7 +86,7 @@ impl SimpleState for Game {
             shot || hold
         };
 
-        if pressed_any_key {
+        if pressed_any_key && self.released {
             // hide title
             world.exec(
                 |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
@@ -96,11 +101,71 @@ impl SimpleState for Game {
             return Trans::Push(Box::new(Select::default()));
         }
 
+        if !pressed_any_key {
+            self.released = true;
+        }
+
         Trans::None
     }
 
     fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let StateData { world, .. } = data;
+
+        self.released = false;
+
+        world.write_resource::<Pause>().off();
+
+        macro_rules! skip_fail {
+            ($res:expr) => {
+                match $res {
+                    Ok(val) => val,
+                    Err(e) => {
+                        log::warn!("{} (L{})", e, line!());
+                        continue;
+                    }
+                }
+            };
+        }
+
+        // delete entities
+        world.exec(
+            |(entities, players, hierarchy, bullets, items, particles): (
+                Entities,
+                ReadStorage<'_, Player>,
+                WriteExpect<'_, ParentHierarchy>,
+                ReadStorage<'_, Bullet>,
+                ReadStorage<'_, Item>,
+                ReadStorage<'_, Particle>,
+            )| {
+                for (entity, _) in (&entities, &players).join() {
+                    skip_fail!(entities.delete(entity));
+                    for entity in hierarchy.all_children_iter(entity) {
+                        skip_fail!(entities.delete(entity));
+                    }
+                }
+                for (entity, _) in (&entities, &bullets).join() {
+                    skip_fail!(entities.delete(entity));
+                }
+                for (entity, _) in (&entities, &items).join() {
+                    skip_fail!(entities.delete(entity));
+                }
+                for (entity, _) in (&entities, &particles).join() {
+                    skip_fail!(entities.delete(entity));
+                }
+            },
+        );
+
+        // reset area
+        world.exec(
+            |(areas, mut transforms): (ReadStorage<'_, Area>, WriteStorage<'_, Transform>)| {
+                for (_, transform) in (&areas, &mut transforms).join() {
+                    transform.set_x(352.0);
+                }
+            },
+        );
+
+        // reset score
+        world.add_resource(Score { score: vec![0, 0] });
 
         // show title
         world.exec(
@@ -112,7 +177,6 @@ impl SimpleState for Game {
                 }
             },
         );
-
     }
 
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
@@ -170,6 +234,43 @@ impl SimpleState for Select {
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
         let StateData { world, .. } = data;
 
+        if world.read_resource::<Pause>().paused() {
+            return Trans::Pop;
+        }
+        // hide menu
+        world.exec(
+            |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
+                if let Some(entity) = finder.find("menu1") {
+                    let _ = hidden.insert(entity, HiddenPropagate);
+                }
+                if let Some(entity) = finder.find("menu2") {
+                    let _ = hidden.insert(entity, HiddenPropagate);
+                }
+                if let Some(entity) = finder.find("menu3") {
+                    let _ = hidden.insert(entity, HiddenPropagate);
+                }
+            },
+        );
+
+        // check gameover
+        {
+            let score = world.read_resource::<Score>();
+            let position = score.score[0] as i32 - score.score[1] as i32;
+            let ratio = position as f32 / 100.0 + 0.5;
+            if ratio <= 0.0 {
+                return Trans::Push(Box::new(GameOver {
+                    win: 1,
+                    ..Default::default()
+                }));
+            }
+            if ratio >= 1.0 {
+                return Trans::Push(Box::new(GameOver {
+                    win: 0,
+                    ..Default::default()
+                }));
+            }
+        }
+
         if self.timer > 0 {
             self.timer -= 1;
         }
@@ -215,25 +316,19 @@ impl SimpleState for Select {
 
         world.exec(
             |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
-                if let Some(entity) = finder.find("menu1") {
-                    if self.selecting == 0 {
+                if self.selecting == 0 {
+                    if let Some(entity) = finder.find("menu1") {
                         hidden.remove(entity);
-                    } else {
-                        let _ = hidden.insert(entity, HiddenPropagate);
                     }
                 }
-                if let Some(entity) = finder.find("menu2") {
-                    if self.selecting == 1 {
+                if self.selecting == 1 {
+                    if let Some(entity) = finder.find("menu2") {
                         hidden.remove(entity);
-                    } else {
-                        let _ = hidden.insert(entity, HiddenPropagate);
                     }
                 }
-                if let Some(entity) = finder.find("menu3") {
-                    if self.selecting == 2 {
+                if self.selecting == 2 {
+                    if let Some(entity) = finder.find("menu3") {
                         hidden.remove(entity);
-                    } else {
-                        let _ = hidden.insert(entity, HiddenPropagate);
                     }
                 }
             },
@@ -294,6 +389,7 @@ impl SimpleState for Playing {
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
         let StateData { world, .. } = data;
 
+        // check gameover
         let score = world.read_resource::<Score>();
         let position = score.score[0] as i32 - score.score[1] as i32;
         let ratio = position as f32 / 100.0 + 0.5;
@@ -329,6 +425,7 @@ impl SimpleState for Playing {
 pub struct GameOver {
     win: usize,
     released: bool,
+    timer: u64,
 }
 
 impl SimpleState for GameOver {
@@ -346,6 +443,8 @@ impl SimpleState for GameOver {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let StateData { world, .. } = data;
 
+        world.write_resource::<Pause>().on();
+
         world.exec(
             |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
                 let tag = if self.win == 0 { "bluewin" } else { "redwin" };
@@ -358,6 +457,8 @@ impl SimpleState for GameOver {
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
         let StateData { world, .. } = data;
+
+        self.timer += 1;
 
         let pressed_any_key = {
             let input = world.read_resource::<InputHandler<String, String>>();
