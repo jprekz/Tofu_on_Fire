@@ -93,15 +93,26 @@ impl SimpleState for Game {
                 },
             );
 
-            // spawn player
-            let mut rh = world.read_resource::<RespawnHandler>().clone();
-            rh.respawn_player(world);
-            *world.write_resource::<RespawnHandler>() = rh;
-
-            return Trans::Push(Box::new(Playing::default()));
+            return Trans::Push(Box::new(Select::default()));
         }
 
         Trans::None
+    }
+
+    fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
+        let StateData { world, .. } = data;
+
+        // show title
+        world.exec(
+            |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
+                if let Some(entity) = finder.find("title") {
+                    if hidden.remove(entity).is_none() {
+                        log::warn!("Failed to remove HiddenPropagate component");
+                    }
+                }
+            },
+        );
+
     }
 
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
@@ -138,6 +149,132 @@ impl SimpleState for Game {
 }
 
 #[derive(Default)]
+pub struct Select {
+    selecting: u32,
+    released: bool,
+    timer: i32,
+}
+
+impl SimpleState for Select {
+    fn handle_event(
+        &mut self,
+        _data: StateData<'_, GameData<'_, '_>>,
+        event: StateEvent,
+    ) -> SimpleTrans {
+        match &event {
+            StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::Escape) => Trans::Quit,
+            _ => Trans::None,
+        }
+    }
+
+    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        let StateData { world, .. } = data;
+
+        if self.timer > 0 {
+            self.timer -= 1;
+        }
+        if self.timer < 0 {
+            self.timer += 1;
+        }
+
+        let (up, down, shot, mouse_vec) = {
+            let input = world.read_resource::<InputHandler<String, String>>();
+
+            let move_y = input.axis_value("move_y").unwrap_or(0.0);
+            let dpad_y = input.axis_value("dpad_y").unwrap_or(0.0);
+            let left_y = input.axis_value("left_y").unwrap_or(0.0);
+            let y = move_y + dpad_y + left_y;
+            let up = y < -0.1;
+            let down = y > 0.1;
+            let shot = input.action_is_down("shot").unwrap_or(false);
+            let mouse_vec = input.mouse_position();
+            (up, down, shot, mouse_vec)
+        };
+
+        if up && self.timer >= 0 {
+            self.selecting = (self.selecting + 2) % 3;
+            self.timer = -10;
+        }
+        if down && self.timer <= 0 {
+            self.selecting = (self.selecting + 1) % 3;
+            self.timer = 10;
+        }
+        if let Some((x, y)) = mouse_vec {
+            if x >= 50.0 && x < 520.0 {
+                if y >= 510.0 && y < 620.0 {
+                    self.selecting = 0;
+                }
+                if y >= 630.0 && y < 740.0 {
+                    self.selecting = 1;
+                }
+                if y >= 750.0 && y < 860.0 {
+                    self.selecting = 2;
+                }
+            }
+        }
+
+        world.exec(
+            |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
+                if let Some(entity) = finder.find("menu1") {
+                    if self.selecting == 0 {
+                        hidden.remove(entity);
+                    } else {
+                        let _ = hidden.insert(entity, HiddenPropagate);
+                    }
+                }
+                if let Some(entity) = finder.find("menu2") {
+                    if self.selecting == 1 {
+                        hidden.remove(entity);
+                    } else {
+                        let _ = hidden.insert(entity, HiddenPropagate);
+                    }
+                }
+                if let Some(entity) = finder.find("menu3") {
+                    if self.selecting == 2 {
+                        hidden.remove(entity);
+                    } else {
+                        let _ = hidden.insert(entity, HiddenPropagate);
+                    }
+                }
+            },
+        );
+
+        if shot && self.released {
+            // spawn player
+            let mut rh = world.read_resource::<RespawnHandler>().clone();
+            rh.respawn_player(world, self.selecting as usize);
+            *world.write_resource::<RespawnHandler>() = rh;
+
+            // hide menu
+            world.exec(
+                |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
+                    if let Some(entity) = finder.find("menu1") {
+                        let _ = hidden.insert(entity, HiddenPropagate);
+                    }
+                    if let Some(entity) = finder.find("menu2") {
+                        let _ = hidden.insert(entity, HiddenPropagate);
+                    }
+                    if let Some(entity) = finder.find("menu3") {
+                        let _ = hidden.insert(entity, HiddenPropagate);
+                    }
+                },
+            );
+
+            return Trans::Push(Box::new(Playing::default()));
+        }
+        if !shot {
+            self.released = true;
+        }
+
+        Trans::None
+    }
+
+    fn on_resume(&mut self, _data: StateData<'_, GameData<'_, '_>>) {
+        self.released = false;
+    }
+}
+
+#[derive(Default)]
 pub struct Playing {
     timer: Option<i32>,
 }
@@ -158,23 +295,11 @@ impl SimpleState for Playing {
         let StateData { world, .. } = data;
 
         if self.timer.is_none() && world.read_storage::<Playable>().join().next().is_none() {
-            self.timer = Some(90);
+            self.timer = Some(60);
         }
 
         if let Some(ref mut timer) = self.timer {
             *timer -= 1;
-            if *timer == 30 {
-                // show title
-                world.exec(
-                    |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
-                        if let Some(entity) = finder.find("title") {
-                            if hidden.remove(entity).is_none() {
-                                log::warn!("Failed to remove HiddenPropagate component");
-                            }
-                        }
-                    },
-                );
-            }
             if *timer < 0 {
                 return Trans::Pop;
             }

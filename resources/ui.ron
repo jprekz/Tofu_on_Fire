@@ -34,5 +34,41 @@ Container(
                 image: File("texture/title.png", Png, (channel: Srgb)),
             )
         ),
+        Image(
+            transform: (
+                id: "menu1",
+                percent: true,
+                width: 1.0,
+                height: 1.0,
+                hidden: true,
+            ),
+            image: (
+                image: File("texture/menu1.png", Png, (channel: Srgb)),
+            )
+        ),
+        Image(
+            transform: (
+                id: "menu2",
+                percent: true,
+                width: 1.0,
+                height: 1.0,
+                hidden: true,
+            ),
+            image: (
+                image: File("texture/menu2.png", Png, (channel: Srgb)),
+            )
+        ),
+        Image(
+            transform: (
+                id: "menu3",
+                percent: true,
+                width: 1.0,
+                height: 1.0,
+                hidden: true,
+            ),
+            image: (
+                image: File("texture/menu3.png", Png, (channel: Srgb)),
+            )
+        ),
     ],
 )

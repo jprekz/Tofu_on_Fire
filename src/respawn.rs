@@ -13,7 +13,6 @@ pub struct RespawnHandler {
     player_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
     ai_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
     enemy_prefab_handle: Option<Handle<Prefab<MyPrefabData>>>,
-    player_weapon: usize,
     ai_weapon: usize,
     enemy_weapon: usize,
 }
@@ -30,7 +29,6 @@ impl RespawnHandler {
             enemy_prefab_handle: world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
                 Some(loader.load("resources/enemy.ron", RonFormat, (), ()))
             }),
-            player_weapon: 0,
             ai_weapon: 0,
             enemy_weapon: 0,
         }
@@ -89,7 +87,7 @@ impl RespawnHandler {
         }
     }
 
-    pub fn respawn_player(&mut self, world: &mut World) {
+    pub fn respawn_player(&mut self, world: &mut World, weapon: usize) {
         if world.read_storage::<Playable>().join().next().is_none() {
             if let Some(point) = get_spawn_point(world, 0) {
                 let mut transform = Transform::default();
@@ -103,11 +101,10 @@ impl RespawnHandler {
                     )
                     .with(transform)
                     .with(Player {
-                        weapon: self.player_weapon,
+                        weapon: weapon,
                         ..Default::default()
                     })
                     .build();
-                self.player_weapon = (self.player_weapon + 1) % 3;
             }
         }
     }
