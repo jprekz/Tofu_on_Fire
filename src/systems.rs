@@ -508,7 +508,10 @@ impl<'s> System<'s> for AreaSystem {
         {
             let mut p = 0i32;
             for collided in &result.collided {
-                let team = players.get(collided.entity).unwrap().team;
+                let player = skip_fail!(players
+                    .get(collided.entity)
+                    .ok_or("Failed to get player component"));
+                let team = player.team;
                 score.score[team as usize] += 1;
                 match team {
                     0 => p += 1,
