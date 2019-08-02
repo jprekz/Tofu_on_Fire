@@ -29,7 +29,10 @@ fn main() -> amethyst::Result<()> {
 
     let render_bundle = {
         let path = format!("{}/resources/display_config.ron", app_root);
-        let config = DisplayConfig::load(&path);
+        let mut config = DisplayConfig::load(&path);
+        let dimensions = config.dimensions;
+        config.min_dimensions = dimensions;
+        config.max_dimensions = dimensions;
         let pipe = Pipeline::build().with_stage(
             Stage::with_backbuffer()
                 .clear_target([0.0, 0.0, 0.0, 1.0], 1.0)

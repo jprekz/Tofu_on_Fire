@@ -280,6 +280,7 @@ impl SimpleState for Select {
 
         let (up, down, shot, mouse_vec) = {
             let input = world.read_resource::<InputHandler<String, String>>();
+            let screen = world.read_resource::<ScreenDimensions>();
 
             let move_y = input.axis_value("move_y").unwrap_or(0.0);
             let dpad_y = input.axis_value("dpad_y").unwrap_or(0.0);
@@ -288,7 +289,12 @@ impl SimpleState for Select {
             let up = y < -0.1;
             let down = y > 0.1;
             let shot = input.action_is_down("shot").unwrap_or(false);
-            let mouse_vec = input.mouse_position();
+            let mouse_vec = input.mouse_position().map(|v| {
+                (
+                    v.0 as f32 / screen.width() * 1280.0,
+                    v.1 as f32 / screen.height() * 960.0,
+                )
+            });
             (up, down, shot, mouse_vec)
         };
 

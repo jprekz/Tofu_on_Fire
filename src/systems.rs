@@ -4,7 +4,7 @@ use amethyst::{
     core::Transform,
     ecs::prelude::*,
     input::InputHandler,
-    renderer::{Camera, Hidden, SpriteRender},
+    renderer::{Camera, Hidden, ScreenDimensions, SpriteRender},
 };
 use rand::{distributions::*, prelude::*};
 
@@ -49,11 +49,12 @@ impl Default for PlayableSystem {
 impl<'s> System<'s> for PlayableSystem {
     type SystemData = (
         Read<'s, InputHandler<String, String>>,
+        ReadExpect<'s, ScreenDimensions>,
         WriteStorage<'s, Playable>,
         WriteStorage<'s, Player>,
     );
 
-    fn run(&mut self, (input, mut playables, mut players): Self::SystemData) {
+    fn run(&mut self, (input, screen, mut playables, mut players): Self::SystemData) {
         let axis_xy_value = |x: &str, y: &str| {
             Some(Vector2::new(
                 input.axis_value(x)? as f32,
@@ -72,7 +73,12 @@ impl<'s> System<'s> for PlayableSystem {
         let (aim_r, _) = aim_vec.to_polar();
         let mouse_vec = input
             .mouse_position()
-            .map(|v| Vector2::new(v.0 as f32 - 640.0, v.1 as f32 - 480.0))
+            .map(|v| {
+                Vector2::new(
+                    v.0 as f32 - (screen.width() / 2.0),
+                    v.1 as f32 - (screen.height() / 2.0),
+                )
+            })
             .unwrap_or(Vector2::zeros());
 
         let move_mouse = self.before_mouse != mouse_vec;
