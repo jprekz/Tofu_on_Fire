@@ -157,9 +157,10 @@ impl<'s> System<'s> for AISystem {
                         continue;
                     };
                     let dist = target_pos - my_pos;
+                    let aim_vec = -normalize(dist);
                     let move_vec = Rotation2::new(Real::frac_pi_2()) * normalize(dist);
 
-                    (move_vec, move_vec, true)
+                    (move_vec, aim_vec, true)
                 }
                 AIState::Left(target) => {
                     let target_pos = if let Some(t) = transforms.get(target) {
@@ -169,9 +170,10 @@ impl<'s> System<'s> for AISystem {
                         continue;
                     };
                     let dist = target_pos - my_pos;
+                    let aim_vec = -normalize(dist);
                     let move_vec = Rotation2::new(Real::frac_pi_2()).inverse() * normalize(dist);
 
-                    (move_vec, move_vec, true)
+                    (move_vec, aim_vec, true)
                 }
                 _ => (Vector2::zeros(), Vector2::zeros(), false),
             };
