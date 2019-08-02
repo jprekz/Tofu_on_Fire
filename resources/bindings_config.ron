@@ -13,7 +13,5 @@
   actions: {
     "shot": [[Mouse(Left)], [Controller(0, A)], [Controller(0, Y)], [Controller(0, RightShoulder)]],
     "hold": [[Controller(0, B)], [Controller(0, X)], [Controller(0, LeftShoulder)]],
-
-    "change": [[Key(Tab)], [Controller(0, Back)]],
   },
 )

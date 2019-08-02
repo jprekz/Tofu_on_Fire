@@ -92,9 +92,8 @@ impl<'s> System<'s> for PlayableSystem {
 
         let shot = input.action_is_down("shot").unwrap_or(false);
         let hold = input.action_is_down("hold").unwrap_or(false);
-        let change = input.action_is_down("change").unwrap_or(false);
 
-        for (playable, player) in (&mut playables, &mut players).join() {
+        for (_, player) in (&mut playables, &mut players).join() {
             player.input_move = move_vec;
             if !hold {
                 let (aim_r, aim_theta) = aim_vec.to_polar();
@@ -103,8 +102,6 @@ impl<'s> System<'s> for PlayableSystem {
                 };
             }
             player.input_shot = shot;
-            player.input_change = change && !playable.input_change_hold;
-            playable.input_change_hold = change;
         }
     }
 }
@@ -134,16 +131,8 @@ impl<'s> System<'s> for PlayerControlSystem {
             let move_vec = player.input_move;
             let aim_vec = player.input_aim;
             let shot = player.input_shot;
-            let change = player.input_change;
 
             rigidbody.acceleration = move_vec * weapon.move_speed;
-
-            if change {
-                player.weapon += 1;
-                if player.weapon >= weapon_list.len() {
-                    player.weapon = 0;
-                }
-            }
 
             if player.trigger_timer > 0 {
                 player.trigger_timer -= 1;

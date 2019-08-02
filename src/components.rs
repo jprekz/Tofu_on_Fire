@@ -22,8 +22,6 @@ pub struct Player {
     pub input_aim: Vector2<f32>,
     #[serde(skip)]
     pub input_shot: bool,
-    #[serde(skip)]
-    pub input_change: bool,
     #[serde(skip, default = "zero")]
     pub trigger_timer: u32,
 }
@@ -36,18 +34,15 @@ impl Default for Player {
             input_move: Vector2::zeros(),
             input_aim: Vector2::zeros(),
             input_shot: false,
-            input_change: false,
             trigger_timer: 0,
         }
     }
 }
 
-#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[derive(Component, PrefabData, Deserialize, Serialize, Default, Clone, Debug)]
+#[storage(NullStorage)]
 #[prefab(Component)]
-pub struct Playable {
-    #[serde(skip)]
-    pub input_change_hold: bool,
-}
+pub struct Playable;
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Default, Clone, Debug)]
 #[storage(NullStorage)]
