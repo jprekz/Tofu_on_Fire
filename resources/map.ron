@@ -57,6 +57,38 @@
                 area: Some(()),
             )),
         ),
+        (
+            parent: None,
+            data: Some((
+                transform: Some((
+                    translation: (176, 208, 0),
+                    rotation: (1, 0, 0, 0),
+                    scale: (3, 3, 1),
+                )),
+                sprite: Some((
+                    sprite_number: 19,
+                )),
+                area_target: Some((
+                    team: 0,
+                )),
+            )),
+        ),
+        (
+            parent: None,
+            data: Some((
+                transform: Some((
+                    translation: (528, 208, 0),
+                    rotation: (1, 0, 0, 0),
+                    scale: (3, 3, 1),
+                )),
+                sprite: Some((
+                    sprite_number: 19,
+                )),
+                area_target: Some((
+                    team: 1,
+                )),
+            )),
+        ),
 
 (data: Some((transform: Some((translation: (80, 80, 0),rotation: (1, 0, 0, 0),scale: (5, 1, 1),)),collider: Some((tag: "Wall",width: 160,height: 32,)),sprite: Some((sprite_number: 0,)),)),),
 (data: Some((transform: Some((translation: (16, 208, 0),rotation: (1, 0, 0, 0),scale: (1, 7, 1),)),collider: Some((tag: "Wall",width: 32,height: 224,)),sprite: Some((sprite_number: 0,)),)),),

@@ -491,6 +491,7 @@ impl<'s> System<'s> for AreaSystem {
     type SystemData = (
         ReadStorage<'s, Player>,
         ReadStorage<'s, Area>,
+        ReadStorage<'s, AreaTarget>,
         ReadStorage<'s, ColliderResult>,
         WriteStorage<'s, Transform>,
         WriteStorage<'s, SpriteRender>,
@@ -499,12 +500,20 @@ impl<'s> System<'s> for AreaSystem {
 
     fn run(
         &mut self,
-        (players, areas, results, mut transforms, mut sprites, mut score): Self::SystemData,
+        (players, areas, targets, results, mut transforms, mut sprites, mut score): Self::SystemData,
     ) {
         self.timer += 1;
+
+        if self.timer % 2 == 0 {
+            for (_, transform) in (&targets, &mut transforms).join() {
+                transform.roll_local(f32::frac_pi_2());
+            }
+        }
+
         if self.timer % 60 != 0 {
             return;
         }
+
         for (_, result, transform, sprite) in
             (&areas, &results, &mut transforms, &mut sprites).join()
         {

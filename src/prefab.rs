@@ -62,6 +62,7 @@ pub struct MapPrefabData {
     pub sprite: Option<SpriteRenderPrefab>,
     pub spawn_point: Option<SpawnPoint>,
     pub area: Option<Area>,
+    pub area_target: Option<AreaTarget>,
     #[serde(skip)]
     pub map: Map,
 }
@@ -81,9 +82,19 @@ impl MapPrefabData {
                 ReadStorage<'_, SpriteRender>,
                 ReadStorage<'_, SpawnPoint>,
                 ReadStorage<'_, Area>,
+                ReadStorage<'_, AreaTarget>,
                 ReadStorage<'_, Map>,
             )| {
-                let (entities, transforms, colliders, sprites, spawnpoints, areas, maps) = data;
+                let (
+                    entities,
+                    transforms,
+                    colliders,
+                    sprites,
+                    spawnpoints,
+                    areas,
+                    areatargets,
+                    maps,
+                ) = data;
                 for (entity, _) in (&entities, &maps).join() {
                     prefab.add(
                         None,
@@ -95,6 +106,7 @@ impl MapPrefabData {
                             }),
                             spawn_point: spawnpoints.get(entity).cloned(),
                             area: areas.get(entity).cloned(),
+                            area_target: areatargets.get(entity).cloned(),
                             map: Map,
                         }),
                     );

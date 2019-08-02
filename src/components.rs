@@ -77,6 +77,12 @@ pub struct Area;
 
 #[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
 #[prefab(Component)]
+pub struct AreaTarget {
+    pub team: u32,
+}
+
+#[derive(Component, PrefabData, Deserialize, Serialize, Clone, Debug)]
+#[prefab(Component)]
 pub struct Bullet {
     pub team: u32,
     pub damage: f32,
