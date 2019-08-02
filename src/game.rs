@@ -1,8 +1,6 @@
 use amethyst::{
-    assets::{AssetStorage, Handle, Loader, Prefab, PrefabLoader, RonFormat},
-    core::nalgebra::*,
+    assets::{AssetStorage, Loader, PrefabLoader, RonFormat},
     core::Time,
-    core::Transform,
     ecs::prelude::*,
     input::is_key_down,
     input::InputHandler,
