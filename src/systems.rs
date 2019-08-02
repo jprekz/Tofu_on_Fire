@@ -518,6 +518,13 @@ impl<'s> System<'s> for AreaSystem {
             }
             let position = score.score[0] as i32 - score.score[1] as i32;
             let ratio = position as f32 / 100.0 + 0.5;
+            let ratio = if ratio < 0.0 {
+                0.0
+            } else if ratio > 1.0 {
+                1.0
+            } else {
+                ratio
+            };
             let position_x = 352.0 * ratio + 176.0;
             transform.set_x(position_x);
             sprite.sprite_number = match p.cmp(&0) {

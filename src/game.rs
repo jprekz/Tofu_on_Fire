@@ -294,6 +294,22 @@ impl SimpleState for Playing {
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
         let StateData { world, .. } = data;
 
+        let score = world.read_resource::<Score>();
+        let position = score.score[0] as i32 - score.score[1] as i32;
+        let ratio = position as f32 / 100.0 + 0.5;
+        if ratio <= 0.0 {
+            return Trans::Switch(Box::new(GameOver {
+                win: 1,
+                ..Default::default()
+            }));
+        }
+        if ratio >= 1.0 {
+            return Trans::Switch(Box::new(GameOver {
+                win: 0,
+                ..Default::default()
+            }));
+        }
+
         if self.timer.is_none() && world.read_storage::<Playable>().join().next().is_none() {
             self.timer = Some(60);
         }
@@ -303,6 +319,76 @@ impl SimpleState for Playing {
             if *timer < 0 {
                 return Trans::Pop;
             }
+        }
+
+        Trans::None
+    }
+}
+
+#[derive(Default)]
+pub struct GameOver {
+    win: usize,
+    released: bool,
+}
+
+impl SimpleState for GameOver {
+    fn handle_event(
+        &mut self,
+        _data: StateData<'_, GameData<'_, '_>>,
+        event: StateEvent,
+    ) -> SimpleTrans {
+        match &event {
+            StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::Escape) => Trans::Quit,
+            _ => Trans::None,
+        }
+    }
+
+    fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
+        let StateData { world, .. } = data;
+
+        world.exec(
+            |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
+                let tag = if self.win == 0 { "bluewin" } else { "redwin" };
+                if let Some(entity) = finder.find(tag) {
+                    hidden.remove(entity);
+                }
+            },
+        );
+    }
+
+    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        let StateData { world, .. } = data;
+
+        let pressed_any_key = {
+            let input = world.read_resource::<InputHandler<String, String>>();
+
+            let shot = input.action_is_down("shot").unwrap_or(false);
+            let hold = input.action_is_down("hold").unwrap_or(false);
+            shot || hold
+        };
+
+        if pressed_any_key && self.released {
+            // hide gameover
+            world.exec(
+                |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
+                    if let Some(entity) = finder.find("bluewin") {
+                        if hidden.insert(entity, HiddenPropagate).is_err() {
+                            log::warn!("Failed to insert HiddenPropagate component");
+                        }
+                    }
+                    if let Some(entity) = finder.find("redwin") {
+                        if hidden.insert(entity, HiddenPropagate).is_err() {
+                            log::warn!("Failed to insert HiddenPropagate component");
+                        }
+                    }
+                },
+            );
+
+            return Trans::Pop;
+        }
+
+        if !pressed_any_key {
+            self.released = true;
         }
 
         Trans::None

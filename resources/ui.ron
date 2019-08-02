@@ -70,5 +70,29 @@ Container(
                 image: File("texture/menu3.png", Png, (channel: Srgb)),
             )
         ),
+        Image(
+            transform: (
+                id: "bluewin",
+                percent: true,
+                width: 1.0,
+                height: 1.0,
+                hidden: true,
+            ),
+            image: (
+                image: File("texture/bluewin.png", Png, (channel: Srgb)),
+            )
+        ),
+        Image(
+            transform: (
+                id: "redwin",
+                percent: true,
+                width: 1.0,
+                height: 1.0,
+                hidden: true,
+            ),
+            image: (
+                image: File("texture/redwin.png", Png, (channel: Srgb)),
+            )
+        ),
     ],
 )
