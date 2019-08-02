@@ -36,24 +36,11 @@ pub struct Game {
 impl SimpleState for Game {
     fn handle_event(
         &mut self,
-        data: StateData<'_, GameData<'_, '_>>,
+        _data: StateData<'_, GameData<'_, '_>>,
         event: StateEvent,
     ) -> SimpleTrans {
         match &event {
             StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::Escape) => Trans::Quit,
-            StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::F1) => {
-                let StateData { world, .. } = data;
-                if let Err(e) = MapPrefabData::save(world) {
-                    log::warn!("Failed to save map: {}", e);
-                }
-                Trans::None
-            }
-            StateEvent::Window(event) if is_key_down(&event, VirtualKeyCode::F2) => {
-                let StateData { world, .. } = data;
-                MapPrefabData::reload(world);
-                log::info!("Map reload");
-                Trans::None
-            }
             _ => Trans::None,
         }
     }
