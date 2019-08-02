@@ -15,6 +15,7 @@ mod common;
 mod components;
 mod game;
 mod prefab;
+mod respawn;
 mod systems;
 mod weapon;
 
