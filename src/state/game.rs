@@ -1,6 +1,5 @@
 use amethyst::{
     assets::{AssetStorage, Loader, PrefabLoader, RonFormat},
-
     core::transform::*,
     core::Time,
     ecs::prelude::*,
@@ -185,7 +184,7 @@ impl SimpleState for Game {
 
         #[cfg(feature = "include_resources")]
         let weapon_list =
-            WeaponList::load_bytes(include_bytes!("../resources/weapon_list.ron")).unwrap();
+            WeaponList::load_bytes(include_bytes!("../../resources/weapon_list.ron")).unwrap();
         #[cfg(not(feature = "include_resources"))]
         let weapon_list = WeaponList::load("resources/weapon_list.ron");
         world.add_resource(weapon_list);
@@ -195,7 +194,7 @@ impl SimpleState for Game {
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MapPrefabData>| {
             #[cfg(feature = "include_resources")]
             return loader.load_from_data(
-                Config::load_bytes(include_bytes!("../resources/map.ron")).unwrap(),
+                Config::load_bytes(include_bytes!("../../resources/map.ron")).unwrap(),
                 (),
             );
             #[cfg(not(feature = "include_resources"))]
@@ -206,7 +205,7 @@ impl SimpleState for Game {
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
             #[cfg(feature = "include_resources")]
             return loader.load_from_data(
-                Config::load_bytes(include_bytes!("../resources/camera.ron")).unwrap(),
+                Config::load_bytes(include_bytes!("../../resources/camera.ron")).unwrap(),
                 (),
             );
             #[cfg(not(feature = "include_resources"))]
@@ -221,7 +220,7 @@ impl SimpleState for Game {
                 use amethyst::assets::SimpleFormat;
                 loader.load_from_data(
                     UiFormat::<NoCustomUi>::default()
-                        .import(include_bytes!("../resources/ui.ron").to_vec(), ())
+                        .import(include_bytes!("../../resources/ui.ron").to_vec(), ())
                         .unwrap(),
                     (),
                     &storage,
