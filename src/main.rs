@@ -13,11 +13,11 @@ mod audio;
 mod bundle;
 mod common;
 mod components;
-mod game;
 mod prefab;
+mod resource;
 mod respawn;
+mod state;
 mod systems;
-mod weapon;
 
 fn main() -> amethyst::Result<()> {
     amethyst::Logger::from_config(Default::default())
@@ -64,7 +64,7 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(render_bundle)?
         .with_bundle(UiBundle::<String, String>::new())?;
 
-    let mut game = Application::new("./", game::Game::default(), game_data)?;
+    let mut game = Application::new("./", state::Game::default(), game_data)?;
 
     game.run();
 
