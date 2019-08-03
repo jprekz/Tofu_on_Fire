@@ -28,11 +28,22 @@ fn main() -> amethyst::Result<()> {
     let app_root = application_root_dir();
 
     let render_bundle = {
-        let path = format!("{}/resources/display_config.ron", app_root);
-        let mut config = DisplayConfig::load(&path);
-        let dimensions = config.dimensions;
+        #[cfg(not(feature = "include_resources"))]
+        let mut config = DisplayConfig::load(format!("{}/resources/display_config.ron", app_root));
+
+        #[cfg(feature = "include_resources")]
+        let mut config =
+            DisplayConfig::load_bytes(include_bytes!("../resources/display_config.ron"))?;
+
+        let default_dimensions = (1280, 960);
+        let dimensions = Some(
+            std::fs::File::open("./config.txt")
+                .map(|f| ron::de::from_reader(f).unwrap_or(default_dimensions))
+                .unwrap_or(default_dimensions),
+        );
         config.min_dimensions = dimensions;
         config.max_dimensions = dimensions;
+
         let pipe = Pipeline::build().with_stage(
             Stage::with_backbuffer()
                 .clear_target([0.0, 0.0, 0.0, 1.0], 1.0)
@@ -49,8 +60,16 @@ fn main() -> amethyst::Result<()> {
     };
 
     let input_bundle = {
-        let path = format!("{}/resources/bindings_config.ron", app_root);
-        InputBundle::<String, String>::new().with_bindings_from_file(path)?
+        #[cfg(not(feature = "include_resources"))]
+        let bundle = InputBundle::<String, String>::new()
+            .with_bindings_from_file(format!("{}/resources/bindings_config.ron", app_root))?;
+
+        #[cfg(feature = "include_resources")]
+        let bundle = InputBundle::<String, String>::new().with_bindings(Config::load_bytes(
+            include_bytes!("../resources/bindings_config.ron"),
+        )?);
+
+        bundle
     };
 
     let game_data = GameDataBuilder::default()
