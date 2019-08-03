@@ -1,9 +1,7 @@
-use amethyst::{
-    assets::{Handle, Prefab, PrefabLoader, RonFormat},
-    core::nalgebra::*,
-    core::Transform,
-    ecs::prelude::*,
-};
+use amethyst::{assets::*, core::nalgebra::*, core::Transform, ecs::prelude::*};
+
+#[cfg(feature = "include_resources")]
+use amethyst::prelude::Config;
 
 use crate::components::*;
 use crate::prefab::*;
@@ -21,13 +19,31 @@ impl RespawnHandler {
     pub fn initialize(world: &mut World) -> Self {
         RespawnHandler {
             player_prefab_handle: world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-                Some(loader.load("resources/player.ron", RonFormat, (), ()))
+                #[cfg(feature = "include_resources")]
+                return Some(loader.load_from_data(
+                    Config::load_bytes(include_bytes!("../resources/player.ron")).unwrap(),
+                    (),
+                ));
+                #[cfg(not(feature = "include_resources"))]
+                return Some(loader.load("resources/player.ron", RonFormat, (), ()));
             }),
             ai_prefab_handle: world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-                Some(loader.load("resources/ai.ron", RonFormat, (), ()))
+                #[cfg(feature = "include_resources")]
+                return Some(loader.load_from_data(
+                    Config::load_bytes(include_bytes!("../resources/ai.ron")).unwrap(),
+                    (),
+                ));
+                #[cfg(not(feature = "include_resources"))]
+                return Some(loader.load("resources/ai.ron", RonFormat, (), ()));
             }),
             enemy_prefab_handle: world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-                Some(loader.load("resources/enemy.ron", RonFormat, (), ()))
+                #[cfg(feature = "include_resources")]
+                return Some(loader.load_from_data(
+                    Config::load_bytes(include_bytes!("../resources/enemy.ron")).unwrap(),
+                    (),
+                ));
+                #[cfg(not(feature = "include_resources"))]
+                return Some(loader.load("resources/enemy.ron", RonFormat, (), ()));
             }),
             ai_weapon: 0,
             enemy_weapon: 0,

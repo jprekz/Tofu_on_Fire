@@ -185,25 +185,54 @@ impl SimpleState for Game {
         let sprite_sheet_handle = load_sprite_sheet(world);
         world.add_resource(sprite_sheet_handle);
 
+        #[cfg(feature = "include_resources")]
+        let weapon_list =
+            WeaponList::load_bytes(include_bytes!("../resources/weapon_list.ron")).unwrap();
+        #[cfg(not(feature = "include_resources"))]
         let weapon_list = WeaponList::load("resources/weapon_list.ron");
         world.add_resource(weapon_list);
 
         world.add_resource(Score { score: vec![0, 0] });
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MapPrefabData>| {
-            loader.load("resources/map.ron", RonFormat, (), ())
+            #[cfg(feature = "include_resources")]
+            return loader.load_from_data(
+                Config::load_bytes(include_bytes!("../resources/map.ron")).unwrap(),
+                (),
+            );
+            #[cfg(not(feature = "include_resources"))]
+            return loader.load("resources/map.ron", RonFormat, (), ());
         });
         world.create_entity().with(prefab_handle).build();
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-            loader.load("resources/camera.ron", RonFormat, (), ())
+            #[cfg(feature = "include_resources")]
+            return loader.load_from_data(
+                Config::load_bytes(include_bytes!("../resources/camera.ron")).unwrap(),
+                (),
+            );
+            #[cfg(not(feature = "include_resources"))]
+            return loader.load("resources/camera.ron", RonFormat, (), ());
         });
         world.create_entity().with(prefab_handle).build();
 
 
-        world.exec(|mut creator: UiCreator<'_>| {
-            creator.create("resources/ui.ron", ());
-        });
+        #[cfg(feature = "include_resources")]
+        let ui_handle = world.exec(
+            |(loader, storage): (ReadExpect<'_, Loader>, Read<'_, AssetStorage<UiPrefab>>)| {
+                use amethyst::assets::SimpleFormat;
+                loader.load_from_data(
+                    UiFormat::<NoCustomUi>::default()
+                        .import(include_bytes!("../resources/ui.ron").to_vec(), ())
+                        .unwrap(),
+                    (),
+                    &storage,
+                )
+            },
+        );
+        #[cfg(not(feature = "include_resources"))]
+        let ui_handle = world.exec(|loader: UiLoader<'_>| loader.load("resources/ui.ron", ()));
+        world.create_entity().with(ui_handle).build();
 
         let respawn_handler = RespawnHandler::initialize(world);
         world.add_resource(respawn_handler);

@@ -14,3 +14,7 @@ serde_derive = "1.0"
 rand = "0.6"
 ron = "0.4"
 log = "0.4.6"
+
+[features]
+default = []
+include_resources = []
