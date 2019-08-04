@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Tofu on Fire 取扱説明書</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Yu Gothic, sans-serif;
+      font-weight: 500;
+      font-size: 12pt;
+    }
+
+    article {
+      max-width: 720px;
+      margin: auto;
+      border: 16px solid #aaaaaa;
+      padding: 1em;
+    }
+
+    h3 {
+      margin-block-start: 2em;
+    }
+
+    h4 {
+      text-align: center;
+    }
+
+    p {
+      padding: 0 1em 0;
+    }
+
+    ul {
+      padding-right: 1em;
+
+    }
+
+    .rekz {
+      font-size: 1.1em;
+      margin-right: 0.5em;
+    }
+
+    img {
+      max-width: 100%;
+      max-height: 360px;
+      display: block;
+      margin: 1em auto;
+    }
+
+    .split {
+      display: flex;
+      justify-content: center;
+    }
+
+    .box {
+      flex-grow: 1;
+      border: 8px solid #ffffffaa;
+      margin: 1em;
+    }
+
+    .box h4:first-child {
+      position: absolute;
+      background-color: black;
+      transform: translate(1em, -40px);
+      padding: 0 1em;
+    }
+
+    .movemenu {
+      display: flex;
+      align-items: center;
+    }
+
+    .movemenu img {
+      max-width: 50%;
+      margin: 1em;
+      transform: translateX(-100px);
+      transition: all 0.4s;
+      clear: both;
+    }
+
+    .movemenu img:hover {
+      transform: translateX(-10px);
+    }
+
+    .dot {
+      width: 192px;
+      height: 192px;
+      margin: 0;
+    }
+
+    .area {
+      width: 384px;
+      height: 192px;
+      background: url("img/area1.png") no-repeat;
+      transition: transform 0.02s;
+    }
+
+    .area:hover {
+      background: url("img/area2.png") no-repeat;
+      transform: translateX(260px);
+      transition: transform 3.0s;
+    }
+
+    .shibareru {
+      animation: shibareru .1s infinite;
+    }
+
+    @keyframes shibareru {
+      0% {
+        transform: translate(0px, 0px) rotateZ(0deg)
+      }
+
+      25% {
+        transform: translate(2px, 2px) rotateZ(1deg)
+      }
+
+      50% {
+        transform: translate(0px, 2px) rotateZ(0deg)
+      }
+
+      75% {
+        transform: translate(2px, 0px) rotateZ(-1deg)
+      }
+
+      100% {
+        transform: translate(0px, 0px) rotateZ(0deg)
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <article>
+    <img src="img/title.png" alt="Tofu on Fire" class="shibareru">
+
+    <h4>
+      わちゃわちゃ系全方位シューティングゲーム　Tofu on Fire
+    </h4>
+
+    <br>
+    <img src="img/screenshot.png" alt="スクリーンショット">
+    <br>
+
+    <h3>ゲーム概要</h3>
+    <p>
+      青チームと赤チームに分かれて撃ち合いをします。プレイヤーは青チームです。 <br>
+      豆腐（自機）を選び、敵を撃ちながらマップ中央付近にある豆腐エリアを目指します。<br>
+      豆腐エリアに入ると相手側へ進むので、そのまま相手側の点線エリアまで進ませると勝利です。
+    </p>
+
+    <h3>操作方法</h3>
+    <div class="split">
+      <div class="box">
+        <h4> XInput対応コントローラー </h4>
+        <ul>
+          <li> 左スティック: 移動 </li>
+          <li> 右スティック: 照準 </li>
+          <li> Rボタン: 発射 </li>
+        </ul>
+      </div>
+      <div class="box">
+        <h4> マウス＆キーボード </h4>
+        <ul>
+          <li> WASDキー: 移動 </li>
+          <li> マウス移動: 照準 </li>
+          <li> クリック: 発射 </li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>ゲーム説明</h3>
+    <p>ゲームを起動したときから戦いは始まっています。</p>
+    <p>
+      ゲームを起動して何かボタンを押すと、豆腐選択画面になります。<br>
+      豆腐によって撃てるショットが異なります。以下の3種類の豆腐から選択してください。
+    </p>
+
+    <br>
+
+    <div class="movemenu">
+      <img src="img/menu1.png" alt="MOMEN">
+      MOMEN（木綿ミサイル）<br>2回跳ね返る高火力・長射程ミサイル
+    </div>
+    <div class="movemenu">
+      <img src="img/menu2.png" alt="KINU">
+      KINU（絹ごしレーザー）<br>威力は低いが狙いやすいピコピコレーザー
+    </div>
+    <div class="movemenu">
+      <img src="img/menu3.png" alt="ABURAGE">
+      ABURAGE（油揚げバーナー）<br>近距離の豆腐を焼き尽くす理不尽火炎放射
+    </div>
+
+    <br>
+
+    <p>
+      選択すると突然ゲームが始まります。<br>
+      AI操作の豆腐とともに，赤い敵弾を避け、赤い豆腐（？）をショットで倒しましょう。
+    </p>
+    <p>
+      敵弾を食らうと体力が減っていきます。<br>
+      体力がゼロになると、豆腐のかけらを撒き散らしながら爆発四散してしまいます。<br>
+      豆腐のかけらを取ると体力を回復することができます。
+    </p>
+
+    <img src="img/damage.png" alt="体力の衰え">
+
+    <p>
+      倒されてしまっても、豆腐選択画面になって再び出撃することができます。<br>
+      復活する回数に制限はありません。
+    </p>
+
+    <p>
+      また、マップの中央付近には半透明の四角い「豆腐エリア」があります。<br>
+      豆腐エリアに豆腐が入ると色が変わり、相手側の点線エリアに向かって動き出します。<br>
+      豆腐エリアを進め、相手の点線エリアへ持っていくことができると勝利となります。
+    </p>
+
+    <br>
+
+    <div class="split">
+      <span class="area"></span>
+      <img src="img/dot.gif" alt="点線エリア" class="dot">
+    </div>
+
+    <br>
+
+    <p>
+      相手側の点線エリア付近ではなかなか豆腐エリアを進めることができませんが、
+      なるべく倒されないようにしながら続けて敵を倒すことで、
+      豆腐の侵攻を一気に進められるようになります。
+    </p>
+
+    <h3>動作環境</h3>
+    <p>
+      Windows 10 64-bit で動作を確認しております。<br>
+      32-bit環境では動作しませんのでご了承ください。
+    </p>
+    <p>
+      ウィンドウの大きさは標準では1280x960となっていますが、
+      これはconfig.txtの中身を弄ることで変更可能です。
+    </p>
+
+    <h3>その他</h3>
+    <ul>
+      <li>
+        XInputコン操作では、右スティックとRボタンを使う代わりに、
+        Aボタンで発射・Bボタンで射撃方向固定という操作方法もあります。が…（微妙）
+      </li>
+      <li>KINU豆腐のみ移動が若干速いです。</li>
+      <li>油揚げは豆腐ではない、それはそう</li>
+      <li>豆腐エリアとは結局何なのだろうか</li>
+      <li>そもそもなぜ豆腐なのか、それは誰にもわからない</li>
+      <li> 📛 </li>
+    </ul>
+
+    <h3>作者</h3>
+    <p> <span class="rekz">rekz</span> <small> - Program, Graphic, Sound, etc. </small> </p>
+    <ul>
+      <li>
+        <a href="https://twitter.com/jprekz">Twitter（@jprekz）</a>
+      </li>
+      <li>
+        <a href="https://jprekz.xyz">Website - jprekz.xyz</a>
+      </li>
+    </ul>
+  </article>
+</body>
+
+</html>
