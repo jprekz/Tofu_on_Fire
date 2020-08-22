@@ -6,7 +6,7 @@ use amethyst::{
 };
 
 use crate::components::*;
-use crate::resource::*;
+use crate::resources::*;
 use crate::state::*;
 
 #[derive(Default)]

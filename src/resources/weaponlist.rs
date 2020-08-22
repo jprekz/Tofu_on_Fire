@@ -1,10 +1,6 @@
 use serde_derive::{Deserialize, Serialize};
 use std::ops::Deref;
 
-pub struct Score {
-    pub score: Vec<u32>,
-}
-
 #[derive(Deserialize, Serialize, Default)]
 pub struct WeaponList {
     pub list: Vec<Weapon>,

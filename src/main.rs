@@ -21,8 +21,7 @@ mod bundle;
 mod common;
 mod components;
 mod prefab;
-mod resource;
-mod respawn;
+mod resources;
 mod state;
 mod systems;
 

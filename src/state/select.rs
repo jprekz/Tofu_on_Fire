@@ -8,8 +8,7 @@ use amethyst::{
     winit::VirtualKeyCode,
 };
 
-use crate::resource::*;
-use crate::respawn::*;
+use crate::resources::*;
 use crate::state::*;
 
 use crate::common::pause::Pause;

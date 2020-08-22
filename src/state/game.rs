@@ -14,8 +14,7 @@ use amethyst::{
 use crate::audio::*;
 use crate::components::*;
 use crate::prefab::*;
-use crate::resource::*;
-use crate::respawn::*;
+use crate::resources::*;
 use crate::state::*;
 
 use crate::common::pause::Pause;

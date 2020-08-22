@@ -14,7 +14,7 @@ use crate::audio::*;
 use crate::common::prefab::*;
 use crate::components::*;
 use crate::prefab::*;
-use crate::resource::*;
+use crate::resources::{WeaponList, Score};
 
 pub use crate::common::{
     collision2d::{CollisionSystem, RigidbodySystem},
