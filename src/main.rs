@@ -25,6 +25,19 @@ mod resources;
 mod state;
 mod systems;
 
+#[macro_export]
+macro_rules! skip_fail {
+    ($res:expr) => {
+        match $res {
+            Ok(val) => val,
+            Err(e) => {
+                log::warn!("{} (L{})", e, line!());
+                continue;
+            }
+        }
+    };
+}
+
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
 
