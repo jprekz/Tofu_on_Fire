@@ -5,14 +5,14 @@ Prefab (
         (
             data: (
                 transform: (translation: (0.0, 0.0, 100.0)),
-                camera: Orthographic((
+                camera: Orthographic(
                     left: -160.0,
                     right: 160.0,
                     bottom: 120.0, // Y axis reversed
                     top: -120.0,
                     znear: 0.1,
                     zfar: 2000.0,
-                )),
+                ),
             ),
         ),
     ],

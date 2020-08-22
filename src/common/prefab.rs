@@ -1,9 +1,8 @@
 use amethyst::{
     assets::{Handle, Prefab, PrefabData, PrefabLoader},
-    ecs::prelude::{Entities, Read, Resources, System, SystemData, WriteStorage},
+    ecs::prelude::*,
     shrev::{EventChannel, ReaderId},
 };
-use shred_derive::SystemData;
 
 #[derive(SystemData)]
 pub struct RuntimePrefabLoader<'a, T>
@@ -51,9 +50,9 @@ where
 {
     type SystemData = (Entities<'a>, Read<'a, EventChannel<T>>, T::SystemData);
 
-    fn setup(&mut self, res: &mut Resources) {
-        Self::SystemData::setup(res);
-        self.reader = Some(res.fetch_mut::<EventChannel<T>>().register_reader());
+    fn setup(&mut self, world: &mut World) {
+        Self::SystemData::setup(world);
+        self.reader = Some(world.fetch_mut::<EventChannel<T>>().register_reader());
     }
 
     fn run(&mut self, (entities, channel, mut prefab_system_data): Self::SystemData) {
@@ -61,7 +60,7 @@ where
         for prefab_data in channel.read(reader) {
             let entity = entities.create();
             prefab_data
-                .add_to_entity(entity, &mut prefab_system_data, &[entity])
+                .add_to_entity(entity, &mut prefab_system_data, &[entity], &[])
                 .expect("Unable to add prefab system data to entity");
         }
     }

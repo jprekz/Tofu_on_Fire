@@ -1,5 +1,9 @@
 use amethyst::{
-    ecs::prelude::*, input::is_key_down, input::InputHandler, prelude::*, renderer::*, ui::*,
+    core::HiddenPropagate,
+    ecs::prelude::*,
+    input::{is_key_down, InputHandler, StringBindings},
+    prelude::*,
+    ui::*,
     winit::VirtualKeyCode,
 };
 
@@ -45,7 +49,7 @@ impl SimpleState for GameOver {
         self.timer += 1;
 
         let pressed_any_key = {
-            let input = world.read_resource::<InputHandler<String, String>>();
+            let input = world.read_resource::<InputHandler<StringBindings>>();
 
             let shot = input.action_is_down("shot").unwrap_or(false);
             let hold = input.action_is_down("hold").unwrap_or(false);
@@ -57,12 +61,12 @@ impl SimpleState for GameOver {
             world.exec(
                 |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
                     if let Some(entity) = finder.find("bluewin") {
-                        if hidden.insert(entity, HiddenPropagate).is_err() {
+                        if hidden.insert(entity, HiddenPropagate::new()).is_err() {
                             log::warn!("Failed to insert HiddenPropagate component");
                         }
                     }
                     if let Some(entity) = finder.find("redwin") {
-                        if hidden.insert(entity, HiddenPropagate).is_err() {
+                        if hidden.insert(entity, HiddenPropagate::new()).is_err() {
                             log::warn!("Failed to insert HiddenPropagate component");
                         }
                     }

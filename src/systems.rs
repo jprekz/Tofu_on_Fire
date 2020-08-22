@@ -1,10 +1,12 @@
 use amethyst::{
-    core::nalgebra::*,
+    core::math::*,
     core::transform::*,
+    core::Hidden,
     core::Transform,
     ecs::prelude::*,
-    input::InputHandler,
-    renderer::{Camera, Hidden, ScreenDimensions, SpriteRender},
+    input::{InputHandler, StringBindings},
+    renderer::{Camera, SpriteRender},
+    window::ScreenDimensions,
 };
 use rand::{distributions::*, prelude::*};
 
@@ -46,7 +48,7 @@ impl Default for PlayableSystem {
 }
 impl<'s> System<'s> for PlayableSystem {
     type SystemData = (
-        Read<'s, InputHandler<String, String>>,
+        Read<'s, InputHandler<StringBindings>>,
         ReadExpect<'s, ScreenDimensions>,
         WriteStorage<'s, Playable>,
         WriteStorage<'s, Player>,
@@ -116,7 +118,7 @@ impl<'s> System<'s> for PlayerControlSystem {
     type SystemData = (
         RuntimePrefabLoader<'s, MyPrefabData>,
         AudioPlayer<'s>,
-        Read<'s, WeaponList>,
+        ReadExpect<'s, WeaponList>,
         (
             Entities<'s>,
             WriteStorage<'s, Player>,
@@ -152,7 +154,7 @@ impl<'s> System<'s> for PlayerControlSystem {
                 };
 
                 let mut bullet_transform = transform.clone();
-                bullet_transform.set_z(-1.0);
+                bullet_transform.set_translation_z(-1.0);
 
                 prefab_loader.load_main(MyPrefabData {
                     transform: Some(bullet_transform),
@@ -284,7 +286,7 @@ impl<'s> System<'s> for PlayerDeathSystem {
                 });
             }
             let mut transform = transform.clone();
-            transform.set_scale(0.5, 0.2, 1.0);
+            transform.set_scale(Vector3::new(0.5, 0.2, 1.0));
             for _ in 0..12 {
                 prefab_loader.load_main(MyPrefabData {
                     transform: Some(transform.clone()),
@@ -388,8 +390,8 @@ impl<'s> System<'s> for ReticleSystem {
                 .get(parent.entity)
                 .ok_or("Failed to get player component"));
             let aim_vec = player.input_aim * 100.0;
-            transform.set_x(aim_vec.x);
-            transform.set_y(aim_vec.y);
+            transform.set_translation_x(aim_vec.x);
+            transform.set_translation_y(aim_vec.y);
         }
         for (_, parent, transform) in (&lines, &parents, &mut transforms).join() {
             let player = skip_fail!(players
@@ -398,7 +400,7 @@ impl<'s> System<'s> for ReticleSystem {
             let aim_vec = player.input_aim * 100.0;
             let (l, rad) = aim_vec.to_polar();
             transform.set_rotation_euler(0.0, 0.0, rad);
-            transform.set_scale(l / 100.0, 1.0, 1.0);
+            transform.set_scale(Vector3::new(l / 100.0, 1.0, 1.0));
         }
     }
 }
@@ -500,7 +502,7 @@ impl<'s> System<'s> for AreaSystem {
 
         if self.timer % 2 == 0 {
             for (_, transform) in (&targets, &mut transforms).join() {
-                transform.roll_local(f32::frac_pi_2());
+                transform.append_rotation_z_axis(f32::pi());
             }
         }
 
@@ -534,7 +536,7 @@ impl<'s> System<'s> for AreaSystem {
                 ratio
             };
             let position_x = 352.0 * ratio + 176.0;
-            transform.set_x(position_x);
+            transform.set_translation_x(position_x);
             sprite.sprite_number = match p.cmp(&0) {
                 std::cmp::Ordering::Equal => 16,
                 std::cmp::Ordering::Less => 18,
@@ -571,8 +573,8 @@ impl<'s> System<'s> for CameraSystem {
                 for (transform, _) in (&mut transforms, &cameras).join() {
                     let cam_x = transform.translation().x;
                     let cam_y = transform.translation().y;
-                    transform.set_x((area_x + cam_x * 9.0) / 10.0);
-                    transform.set_y((area_y + cam_y * 9.0) / 10.0);
+                    transform.set_translation_x((area_x + cam_x * 9.0) / 10.0);
+                    transform.set_translation_y((area_y + cam_y * 9.0) / 10.0);
                 }
             }
             return;
@@ -612,8 +614,8 @@ impl<'s> System<'s> for CameraSystem {
         };
 
         for (transform, _) in (&mut transforms, &cameras).join() {
-            transform.set_x(target_pos.x);
-            transform.set_y(target_pos.y);
+            transform.set_translation_x(target_pos.x);
+            transform.set_translation_y(target_pos.y);
         }
     }
 }

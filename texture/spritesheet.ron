@@ -1,6 +1,6 @@
-(
-    spritesheet_width: 196,
-    spritesheet_height: 64,
+List((
+    texture_width: 196,
+    texture_height: 64,
     sprites: [
         // wall [0]
         ( x: 0, y: 0, width: 32, height: 32,),
@@ -44,4 +44,4 @@
         // area target [19]
         ( x: 96, y: 32, width: 32, height: 32,),
     ],
-)
+))

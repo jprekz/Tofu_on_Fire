@@ -5,7 +5,6 @@ use amethyst::{
     ecs::prelude::*,
     renderer::Camera,
 };
-use shred_derive::SystemData;
 use specs_derive::Component;
 
 use std::iter::{repeat, Repeat};
@@ -30,13 +29,13 @@ pub fn initialise_audio(world: &mut World) {
     };
     let music = repeat(load("audio/bgm.wav", world));
     let music = Music { music };
-    world.add_resource(sounds);
-    world.add_resource(music);
-    world.add_resource(());
+    world.insert(sounds);
+    world.insert(music);
+    world.insert(());
 }
 fn load(name: &str, world: &mut World) -> SourceHandle {
     let loader = world.read_resource::<Loader>();
-    loader.load(name, WavFormat, (), (), &world.read_resource())
+    loader.load(name, WavFormat, (), &world.read_resource())
 }
 
 #[derive(Component, Clone, Debug)]

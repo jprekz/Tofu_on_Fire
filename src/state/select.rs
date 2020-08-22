@@ -1,10 +1,10 @@
 use amethyst::{
+    core::HiddenPropagate,
     ecs::prelude::*,
-    input::is_key_down,
-    input::InputHandler,
+    input::{is_key_down, InputHandler, StringBindings},
     prelude::*,
-    renderer::*,
     ui::*,
+    window::ScreenDimensions,
     winit::VirtualKeyCode,
 };
 
@@ -43,13 +43,13 @@ impl SimpleState for Select {
         world.exec(
             |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
                 if let Some(entity) = finder.find("menu1") {
-                    let _ = hidden.insert(entity, HiddenPropagate);
+                    let _ = hidden.insert(entity, HiddenPropagate::new());
                 }
                 if let Some(entity) = finder.find("menu2") {
-                    let _ = hidden.insert(entity, HiddenPropagate);
+                    let _ = hidden.insert(entity, HiddenPropagate::new());
                 }
                 if let Some(entity) = finder.find("menu3") {
-                    let _ = hidden.insert(entity, HiddenPropagate);
+                    let _ = hidden.insert(entity, HiddenPropagate::new());
                 }
             },
         );
@@ -81,7 +81,7 @@ impl SimpleState for Select {
         }
 
         let (up, down, shot, mouse_vec) = {
-            let input = world.read_resource::<InputHandler<String, String>>();
+            let input = world.read_resource::<InputHandler<StringBindings>>();
             let screen = world.read_resource::<ScreenDimensions>();
 
             let move_y = input.axis_value("move_y").unwrap_or(0.0);
@@ -144,21 +144,20 @@ impl SimpleState for Select {
 
         if shot && self.released {
             // spawn player
-            let mut rh = world.read_resource::<RespawnHandler>().clone();
+            let mut rh = (*world.read_resource::<RespawnHandler>()).clone();
             rh.respawn_player(world, self.selecting as usize);
-            *world.write_resource::<RespawnHandler>() = rh;
 
             // hide menu
             world.exec(
                 |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
                     if let Some(entity) = finder.find("menu1") {
-                        let _ = hidden.insert(entity, HiddenPropagate);
+                        let _ = hidden.insert(entity, HiddenPropagate::new());
                     }
                     if let Some(entity) = finder.find("menu2") {
-                        let _ = hidden.insert(entity, HiddenPropagate);
+                        let _ = hidden.insert(entity, HiddenPropagate::new());
                     }
                     if let Some(entity) = finder.find("menu3") {
-                        let _ = hidden.insert(entity, HiddenPropagate);
+                        let _ = hidden.insert(entity, HiddenPropagate::new());
                     }
                 },
             );

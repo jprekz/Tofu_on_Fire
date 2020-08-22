@@ -1,4 +1,4 @@
-use amethyst::{assets::*, core::nalgebra::*, core::Transform, ecs::prelude::*};
+use amethyst::{assets::*, core::math::*, core::Transform, ecs::prelude::*};
 
 #[cfg(feature = "include_resources")]
 use amethyst::prelude::Config;
@@ -25,7 +25,7 @@ impl RespawnHandler {
                     (),
                 ));
                 #[cfg(not(feature = "include_resources"))]
-                return Some(loader.load("resources/player.ron", RonFormat, (), ()));
+                return Some(loader.load("resources/player.ron", RonFormat, ()));
             }),
             ai_prefab_handle: world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
                 #[cfg(feature = "include_resources")]
@@ -34,7 +34,7 @@ impl RespawnHandler {
                     (),
                 ));
                 #[cfg(not(feature = "include_resources"))]
-                return Some(loader.load("resources/ai.ron", RonFormat, (), ()));
+                return Some(loader.load("resources/ai.ron", RonFormat, ()));
             }),
             enemy_prefab_handle: world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
                 #[cfg(feature = "include_resources")]
@@ -43,7 +43,7 @@ impl RespawnHandler {
                     (),
                 ));
                 #[cfg(not(feature = "include_resources"))]
-                return Some(loader.load("resources/enemy.ron", RonFormat, (), ()));
+                return Some(loader.load("resources/enemy.ron", RonFormat, ()));
             }),
             ai_weapon: 0,
             enemy_weapon: 0,
@@ -63,7 +63,7 @@ impl RespawnHandler {
         if army_count < 10 {
             if let Some(point) = get_spawn_point(world, 0) {
                 let mut transform = Transform::default();
-                transform.set_xyz(point.x, point.y, 0.0);
+                transform.set_translation_xyz(point.x, point.y, 0.0);
                 world
                     .create_entity()
                     .with(
@@ -83,7 +83,7 @@ impl RespawnHandler {
         if enemy_count < 10 {
             if let Some(point) = get_spawn_point(world, 1) {
                 let mut transform = Transform::default();
-                transform.set_xyz(point.x, point.y, 0.0);
+                transform.set_translation_xyz(point.x, point.y, 0.0);
                 world
                     .create_entity()
                     .with(
@@ -107,7 +107,7 @@ impl RespawnHandler {
         if world.read_storage::<Playable>().join().next().is_none() {
             if let Some(point) = get_spawn_point(world, 0) {
                 let mut transform = Transform::default();
-                transform.set_xyz(point.x, point.y, 0.0);
+                transform.set_translation_xyz(point.x, point.y, 0.0);
                 world
                     .create_entity()
                     .with(

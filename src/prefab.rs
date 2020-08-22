@@ -1,9 +1,10 @@
 use amethyst::{
-    assets::{PrefabData, PrefabError, ProgressCounter},
+    assets::{Handle, PrefabData, ProgressCounter},
     core::Transform,
     derive::PrefabData,
     ecs::prelude::*,
-    renderer::{CameraPrefab, SpriteRender, SpriteSheetHandle, Transparent},
+    renderer::{camera::CameraPrefab, SpriteRender, SpriteSheet, Transparent},
+    Error,
 };
 use serde_derive::{Deserialize, Serialize};
 
@@ -34,7 +35,7 @@ pub struct SpriteRenderPrefab {
 }
 impl<'a> PrefabData<'a> for SpriteRenderPrefab {
     type SystemData = (
-        ReadExpect<'a, SpriteSheetHandle>,
+        ReadExpect<'a, Handle<SpriteSheet>>,
         WriteStorage<'a, SpriteRender>,
         WriteStorage<'a, Transparent>,
     );
@@ -45,13 +46,15 @@ impl<'a> PrefabData<'a> for SpriteRenderPrefab {
         entity: Entity,
         (sheet, renders, transparents): &mut Self::SystemData,
         _: &[Entity],
-    ) -> Result<(), PrefabError> {
+        _: &[Entity],
+    ) -> Result<(), Error> {
         transparents.insert(entity, Transparent)?;
         let sprite_render = SpriteRender {
             sprite_sheet: sheet.clone(),
             sprite_number: self.sprite_number,
         };
-        renders.insert(entity, sprite_render).map(|_| ())
+        renders.insert(entity, sprite_render)?;
+        Ok(())
     }
 }
 

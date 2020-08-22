@@ -1,26 +1,24 @@
 use amethyst::{
-    assets::{AssetStorage, Loader, PrefabLoader, RonFormat},
+    assets::{AssetStorage, Handle, Loader, PrefabLoader, RonFormat},
     core::transform::*,
-    core::Time,
+    core::{HiddenPropagate, Time},
     ecs::prelude::*,
-    input::is_key_down,
-    input::InputHandler,
+    input::{is_key_down, InputHandler, StringBindings},
     prelude::*,
     renderer::*,
     ui::*,
-    utils::fps_counter::FPSCounter,
+    utils::fps_counter::FpsCounter,
     winit::VirtualKeyCode,
 };
 
 use crate::audio::*;
 use crate::components::*;
 use crate::prefab::*;
-use crate::respawn::*;
 use crate::resource::*;
+use crate::respawn::*;
 use crate::state::*;
 
 use crate::common::pause::Pause;
-
 
 #[derive(Default)]
 pub struct Game {
@@ -55,7 +53,7 @@ impl SimpleState for Game {
 
         if let Some(fps_display) = self.fps_display.and_then(|entity| ui_text.get_mut(entity)) {
             if world.read_resource::<Time>().frame_number() % 20 == 0 {
-                let fps = world.read_resource::<FPSCounter>().sampled_fps();
+                let fps = world.read_resource::<FpsCounter>().sampled_fps();
                 fps_display.text = format!("FPS: {:.*}", 2, fps);
             }
         }
@@ -66,9 +64,8 @@ impl SimpleState for Game {
 
         // spawn npc
         if world.read_resource::<Time>().frame_number() % 128 == 0 {
-            let mut rh = world.read_resource::<RespawnHandler>().clone();
+            let mut rh = (*world.read_resource::<RespawnHandler>()).clone();
             rh.respawn_npc(world);
-            *world.write_resource::<RespawnHandler>() = rh;
         }
     }
 
@@ -76,7 +73,7 @@ impl SimpleState for Game {
         let StateData { world, .. } = data;
 
         let pressed_any_key = {
-            let input = world.read_resource::<InputHandler<String, String>>();
+            let input = world.read_resource::<InputHandler<StringBindings>>();
 
             let shot = input.action_is_down("shot").unwrap_or(false);
             let hold = input.action_is_down("hold").unwrap_or(false);
@@ -88,7 +85,7 @@ impl SimpleState for Game {
             world.exec(
                 |(finder, mut hidden): (UiFinder<'_>, WriteStorage<'_, HiddenPropagate>)| {
                     if let Some(entity) = finder.find("title") {
-                        if hidden.insert(entity, HiddenPropagate).is_err() {
+                        if hidden.insert(entity, HiddenPropagate::new()).is_err() {
                             log::warn!("Failed to insert HiddenPropagate component");
                         }
                     }
@@ -156,13 +153,13 @@ impl SimpleState for Game {
         world.exec(
             |(areas, mut transforms): (ReadStorage<'_, Area>, WriteStorage<'_, Transform>)| {
                 for (_, transform) in (&areas, &mut transforms).join() {
-                    transform.set_x(352.0);
+                    transform.set_translation_x(352.0);
                 }
             },
         );
 
         // reset score
-        world.add_resource(Score { score: vec![0, 0] });
+        world.insert(Score { score: vec![0, 0] });
 
         // show title
         world.exec(
@@ -180,16 +177,16 @@ impl SimpleState for Game {
         let StateData { world, .. } = data;
 
         let sprite_sheet_handle = load_sprite_sheet(world);
-        world.add_resource(sprite_sheet_handle);
+        world.insert(sprite_sheet_handle);
 
         #[cfg(feature = "include_resources")]
         let weapon_list =
             WeaponList::load_bytes(include_bytes!("../../resources/weapon_list.ron")).unwrap();
         #[cfg(not(feature = "include_resources"))]
-        let weapon_list = WeaponList::load("resources/weapon_list.ron");
-        world.add_resource(weapon_list);
+        let weapon_list = WeaponList::load("resources/weapon_list.ron").unwrap();
+        world.insert(weapon_list);
 
-        world.add_resource(Score { score: vec![0, 0] });
+        world.insert(Score { score: vec![0, 0] });
 
         let prefab_handle = world.exec(|loader: PrefabLoader<'_, MapPrefabData>| {
             #[cfg(feature = "include_resources")]
@@ -198,7 +195,7 @@ impl SimpleState for Game {
                 (),
             );
             #[cfg(not(feature = "include_resources"))]
-            return loader.load("resources/map.ron", RonFormat, (), ());
+            return loader.load("resources/map.ron", RonFormat, ());
         });
         world.create_entity().with(prefab_handle).build();
 
@@ -209,18 +206,17 @@ impl SimpleState for Game {
                 (),
             );
             #[cfg(not(feature = "include_resources"))]
-            return loader.load("resources/camera.ron", RonFormat, (), ());
+            return loader.load("resources/camera.ron", RonFormat, ());
         });
         world.create_entity().with(prefab_handle).build();
-
 
         #[cfg(feature = "include_resources")]
         let ui_handle = world.exec(
             |(loader, storage): (ReadExpect<'_, Loader>, Read<'_, AssetStorage<UiPrefab>>)| {
-                use amethyst::assets::SimpleFormat;
+                use amethyst::assets::Format;
                 loader.load_from_data(
                     UiFormat::<NoCustomUi>::default()
-                        .import(include_bytes!("../../resources/ui.ron").to_vec(), ())
+                        .import_simple(include_bytes!("../../resources/ui.ron").to_vec())
                         .unwrap(),
                     (),
                     &storage,
@@ -232,20 +228,19 @@ impl SimpleState for Game {
         world.create_entity().with(ui_handle).build();
 
         let respawn_handler = RespawnHandler::initialize(world);
-        world.add_resource(respawn_handler);
+        world.insert(respawn_handler);
 
         initialise_audio(world);
     }
 }
 
-fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
+fn load_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
     let texture_handle = {
         let loader = world.read_resource::<Loader>();
         let texture_storage = world.read_resource::<AssetStorage<Texture>>();
         loader.load(
             "texture/spritesheet.png",
-            PngFormat,
-            TextureMetadata::srgb_scale(),
+            ImageFormat::default(),
             (),
             &texture_storage,
         )
@@ -254,8 +249,7 @@ fn load_sprite_sheet(world: &mut World) -> SpriteSheetHandle {
     let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
     loader.load(
         "texture/spritesheet.ron",
-        SpriteSheetFormat,
-        texture_handle,
+        SpriteSheetFormat(texture_handle),
         (),
         &sprite_sheet_store,
     )

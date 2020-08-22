@@ -1,7 +1,6 @@
 use amethyst::{
-    assets::PrefabLoaderSystem,
-    core::bundle::{Result, SystemBundle},
-    ecs::prelude::DispatcherBuilder,
+    assets::PrefabLoaderSystemDesc, core::bundle::SystemBundle, core::SystemDesc,
+    ecs::prelude::DispatcherBuilder, Error,
 };
 
 use crate::ai::AISystem;
@@ -15,9 +14,21 @@ use crate::common::pause::Pausable;
 pub struct GameBundle;
 
 impl<'a, 'b> SystemBundle<'a, 'b> for GameBundle {
-    fn build(self, builder: &mut DispatcherBuilder<'a, 'b>) -> Result<()> {
-        builder.add(PrefabLoaderSystem::<MapPrefabData>::default(), "", &[]);
-        builder.add(PrefabLoaderSystem::<MyPrefabData>::default(), "", &[]);
+    fn build(
+        self,
+        world: &mut shred::World,
+        builder: &mut DispatcherBuilder<'a, 'b>,
+    ) -> Result<(), Error> {
+        builder.add(
+            PrefabLoaderSystemDesc::<MapPrefabData>::default().build(world),
+            "",
+            &[],
+        );
+        builder.add(
+            PrefabLoaderSystemDesc::<MyPrefabData>::default().build(world),
+            "",
+            &[],
+        );
 
         builder.add_barrier();
 

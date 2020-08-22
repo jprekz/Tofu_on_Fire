@@ -1,13 +1,18 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use amethyst::{
-    audio::AudioBundle,
+    audio::{AudioBundle, DjSystemDesc},
     core::transform::TransformBundle,
-    input::InputBundle,
+    input::{InputBundle, StringBindings},
     prelude::*,
-    renderer::*,
-    ui::{DrawUi, UiBundle},
-    utils::{application_root_dir, fps_counter::FPSCounterBundle},
+    renderer::{
+        plugins::{RenderFlat2D, RenderToWindow},
+        types::DefaultBackend,
+        RenderingBundle,
+    },
+    ui::{RenderUi, UiBundle},
+    utils::{application_root_dir, fps_counter::FpsCounterBundle},
+    window::DisplayConfig,
 };
 
 mod ai;
@@ -22,16 +27,13 @@ mod state;
 mod systems;
 
 fn main() -> amethyst::Result<()> {
-    amethyst::Logger::from_config(Default::default())
-        .level_for("gfx_device_gl", amethyst::LogLevelFilter::Warn)
-        .level_for("amethyst_assets", amethyst::LogLevelFilter::Info)
-        .start();
+    amethyst::start_logger(Default::default());
 
-    let app_root = application_root_dir();
+    let app_root = application_root_dir()?;
 
     let render_bundle = {
         #[cfg(not(feature = "include_resources"))]
-        let mut config = DisplayConfig::load(format!("{}/resources/display_config.ron", app_root));
+        let mut config = DisplayConfig::load(app_root.join("resources/display_config.ron"))?;
 
         #[cfg(feature = "include_resources")]
         let mut config =
@@ -46,28 +48,19 @@ fn main() -> amethyst::Result<()> {
         config.min_dimensions = dimensions;
         config.max_dimensions = dimensions;
 
-        let pipe = Pipeline::build().with_stage(
-            Stage::with_backbuffer()
-                .clear_target([0.0, 0.0, 0.0, 1.0], 1.0)
-                .with_pass(DrawFlat2D::new().with_transparency(
-                    ColorMask::all(),
-                    ALPHA,
-                    Some(DepthMode::LessEqualWrite),
-                ))
-                .with_pass(DrawUi::new()),
-        );
-        RenderBundle::new(pipe, Some(config))
-            .with_sprite_sheet_processor()
-            .with_sprite_visibility_sorting(&[])
+        RenderingBundle::<DefaultBackend>::new()
+            .with_plugin(RenderToWindow::from_config(config).with_clear([0.0, 0.0, 0.0, 1.0]))
+            .with_plugin(RenderFlat2D::default())
+            .with_plugin(RenderUi::default())
     };
 
     let input_bundle = {
         #[cfg(not(feature = "include_resources"))]
-        let bundle = InputBundle::<String, String>::new()
-            .with_bindings_from_file(format!("{}/resources/bindings_config.ron", app_root))?;
+        let bundle = InputBundle::<StringBindings>::new()
+            .with_bindings_from_file(app_root.join("resources/bindings_config.ron"))?;
 
         #[cfg(feature = "include_resources")]
-        let bundle = InputBundle::<String, String>::new().with_bindings(Config::load_bytes(
+        let bundle = InputBundle::<StringBindings>::new().with_bindings(Config::load_bytes(
             include_bytes!("../resources/bindings_config.ron"),
         )?);
 
@@ -75,15 +68,18 @@ fn main() -> amethyst::Result<()> {
     };
 
     let game_data = GameDataBuilder::default()
-        .with_bundle(AudioBundle::new(|music: &mut audio::Music| {
-            music.music.next()
-        }))?
-        .with_bundle(FPSCounterBundle)?
+        .with_bundle(AudioBundle::default())?
+        .with_system_desc(
+            DjSystemDesc::new(|music: &mut audio::Music| music.music.next()),
+            "dj_system",
+            &[],
+        )
+        .with_bundle(FpsCounterBundle)?
         .with_bundle(input_bundle)?
         .with_bundle(bundle::GameBundle::default())?
         .with_bundle(TransformBundle::new())?
         .with_bundle(render_bundle)?
-        .with_bundle(UiBundle::<String, String>::new())?;
+        .with_bundle(UiBundle::<StringBindings>::new())?;
 
     let mut game = Application::new("./", state::Game::default(), game_data)?;
 

@@ -7,7 +7,7 @@ Container(
         height: 1.0,
     ),
     children: [
-        Text(
+        Label(
             transform: (
                 id: "fps_text",
                 anchor: TopLeft,
@@ -30,9 +30,7 @@ Container(
                 width: 1.0,
                 height: 1.0,
             ),
-            image: (
-                image: File("texture/title.png", Png, (channel: Srgb)),
-            )
+            image: Texture(File("texture/title.png", ("IMAGE", ()))),
         ),
         Image(
             transform: (
@@ -42,9 +40,7 @@ Container(
                 height: 1.0,
                 hidden: true,
             ),
-            image: (
-                image: File("texture/menu1.png", Png, (channel: Srgb)),
-            )
+            image: Texture(File("texture/menu1.png", ("IMAGE", ()))),
         ),
         Image(
             transform: (
@@ -54,9 +50,7 @@ Container(
                 height: 1.0,
                 hidden: true,
             ),
-            image: (
-                image: File("texture/menu2.png", Png, (channel: Srgb)),
-            )
+            image: Texture(File("texture/menu2.png", ("IMAGE", ()))),
         ),
         Image(
             transform: (
@@ -66,9 +60,7 @@ Container(
                 height: 1.0,
                 hidden: true,
             ),
-            image: (
-                image: File("texture/menu3.png", Png, (channel: Srgb)),
-            )
+            image: Texture(File("texture/menu3.png", ("IMAGE", ()))),
         ),
         Image(
             transform: (
@@ -78,9 +70,7 @@ Container(
                 height: 1.0,
                 hidden: true,
             ),
-            image: (
-                image: File("texture/bluewin.png", Png, (channel: Srgb)),
-            )
+            image: Texture(File("texture/bluewin.png", ("IMAGE", ()))),
         ),
         Image(
             transform: (
@@ -90,9 +80,7 @@ Container(
                 height: 1.0,
                 hidden: true,
             ),
-            image: (
-                image: File("texture/redwin.png", Png, (channel: Srgb)),
-            )
+            image: Texture(File("texture/redwin.png", ("IMAGE", ()))),
         ),
     ],
 )

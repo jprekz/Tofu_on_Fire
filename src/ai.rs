@@ -1,11 +1,7 @@
 use crate::common::vector2ext::Vector2Ext;
 use crate::components::*;
 use amethyst::{
-    assets::{PrefabData, PrefabError},
-    core::nalgebra::*,
-    core::Transform,
-    derive::PrefabData,
-    ecs::prelude::*,
+    assets::PrefabData, core::math::*, core::Transform, derive::PrefabData, ecs::prelude::*, Error,
 };
 use rand::prelude::*;
 use serde_derive::{Deserialize, Serialize};
@@ -158,7 +154,7 @@ impl<'s> System<'s> for AISystem {
                     };
                     let dist = target_pos - my_pos;
                     let aim_vec = normalize(dist);
-                    let move_vec = Rotation2::new(Real::frac_pi_2()) * normalize(dist);
+                    let move_vec = Rotation2::new(RealField::frac_pi_2()) * normalize(dist);
 
                     (move_vec, aim_vec, true)
                 }
@@ -171,7 +167,8 @@ impl<'s> System<'s> for AISystem {
                     };
                     let dist = target_pos - my_pos;
                     let aim_vec = normalize(dist);
-                    let move_vec = Rotation2::new(Real::frac_pi_2()).inverse() * normalize(dist);
+                    let move_vec =
+                        Rotation2::new(RealField::frac_pi_2()).inverse() * normalize(dist);
 
                     (move_vec, aim_vec, true)
                 }
