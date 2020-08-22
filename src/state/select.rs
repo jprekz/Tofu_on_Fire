@@ -145,6 +145,7 @@ impl SimpleState for Select {
             // spawn player
             let mut rh = (*world.read_resource::<RespawnHandler>()).clone();
             rh.respawn_player(world, self.selecting as usize);
+            *world.write_resource::<RespawnHandler>() = rh;
 
             // hide menu
             world.exec(

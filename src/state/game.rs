@@ -65,6 +65,7 @@ impl SimpleState for Game {
         if world.read_resource::<Time>().frame_number() % 128 == 0 {
             let mut rh = (*world.read_resource::<RespawnHandler>()).clone();
             rh.respawn_npc(world);
+            *world.write_resource::<RespawnHandler>() = rh;
         }
     }
 
